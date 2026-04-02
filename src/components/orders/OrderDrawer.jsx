@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getOrderById, cancelOrder, deleteOrderById } from "../../api/order";
-import { cancelDespatchFulfilment, retrieveDespatch } from "../../api/despath";
+import { cancelDespatchFulfilment, retrieveDespatch } from "../../api/despatch";
 import { Icon } from "./icons";
 import { StatusBadge } from "./ui";
 import { UpdateModal } from "./UpdateModal";

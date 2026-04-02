@@ -17,12 +17,10 @@ order_api.interceptors.response.use(
 );
 
 const despatch_api = axios.create({
-	baseURL: 'https://devex.cloud.tcore.network/api',
+	baseURL: 'https://proxy.corsfix.com/?https://y1j7xv2ua6.execute-api.us-east-1.amazonaws.com/v1',
 	headers: {
-		'Content-Type': 'application/json',
-		"Api-Key": "9cfa8204f71f09d4bc45001e1cf14417f02be7718d142231e8e880add4492b70",
-	},
-	withCredentials: true
+      "Content-Type": "application/json",
+    }
 });
 
 despatch_api.interceptors.response.use(
@@ -34,7 +32,7 @@ despatch_api.interceptors.response.use(
 );
 
 const invoice_api = axios.create({
-	baseURL: 'https://lbhwkjgtm8.execute-api.us-east-1.amazonaws.com',
+	baseURL: 'https://lbhwkjgtm8.execute-api.us-east-1.amazonaws.com/',
 	headers: {
 		'Content-Type': 'application/json',
 		"X-API-KEY": "6a818c652b098f5b854ea5b08d88ffc403ebcd67a14b8754b70ec642744d5fcb",

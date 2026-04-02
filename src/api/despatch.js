@@ -2,8 +2,8 @@ import { despatch_api } from "./axios";
 
 async function createDespatch(orderXml) {
     try {
-        const response = await despatch_api.post("/v1/despatch/create", orderXml, {
-            headers: { "Content-Type": "application/xml" },
+        const response = await despatch_api.post("/api/despatch/despatch-advice", orderXml, {
+            headers: { "Content-Type": "application/json" },
         });
         return response.data;
     } catch (error) {

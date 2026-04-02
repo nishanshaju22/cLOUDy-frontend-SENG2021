@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Icon } from "./icons";
 import { StatusBadge } from "./ui";
-import { createDespatch } from "../../api/despath";
+import { createDespatch } from "../../api/despatch";
 import { getOrderById } from "../../api/order";
 
 export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated }) {
