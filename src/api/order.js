@@ -1,4 +1,4 @@
-import order_api from "./axios";
+import { order_api } from "./axios";
 
 async function createBuyer(buyerData) {
     try {
