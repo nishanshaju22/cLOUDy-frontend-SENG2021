@@ -1,15 +1,14 @@
 import axios from 'axios'
 
-const api = axios.create({
+const order_api = axios.create({
 	baseURL: 'http://localhost:5001/api',
 	headers: {
 		'Content-Type': 'application/json',
-		"api-key": process.env.NEXT_PUBLIC_API_KEY,
+		"api-key": process.env.NEXT_PUBLIC_ORDER_API_KEY,
 	},
-	withCredentials: true
 })
 
-api.interceptors.response.use(
+order_api.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		console.error("API Error:", error.response || error.message);
@@ -17,4 +16,4 @@ api.interceptors.response.use(
 	}
 );
 
-export default api
+export default order_api
