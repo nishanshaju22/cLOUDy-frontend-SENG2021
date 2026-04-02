@@ -8,11 +8,11 @@ import { StatusBadge } from "./ui";
 import { UpdateModal } from "./UpdateModal";
 
 export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
-    const [detail,       setDetail]       = useState(null);
-    const [loading,      setLoading]      = useState(true);
-    const [showUpdate,   setShowUpdate]   = useState(false);
+    const [detail, setDetail] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [showUpdate, setShowUpdate] = useState(false);
     const [actionLoading, setActionLoading] = useState(null);
-    const [adviceId,     setAdviceId]     = useState(null);
+    const [adviceId, setAdviceId] = useState(null);
 
     useEffect(() => {
         (async () => {
@@ -26,9 +26,7 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                         if (despatch?.["advice-id"]) {
                             setAdviceId(despatch["advice-id"]);
                         }
-                    } catch {
-                        
-                    }
+                    } catch {}
                 }
             } catch (err) {
                 onToast(err?.error || "Could not load order", "error");
@@ -43,6 +41,7 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
         try {
             await cancelOrder(buyerId, order.orderId);
 
+            // Cancel despatch if exists
             if (adviceId) {
                 try {
                     await cancelDespatchFulfilment(adviceId, "Order cancelled by buyer");
@@ -77,7 +76,8 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
     };
 
     const totalAmount = detail?.items?.reduce(
-        (sum, it) => sum + parseFloat(it.totalPrice || 0), 0
+        (sum, it) => sum + parseFloat(it.totalPrice || 0),
+        0
     );
 
     const canCancel = !["CANCELED", "PROCESSED", "FINALISED"].includes(order.status);
@@ -87,35 +87,57 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
             <div
                 onClick={onClose}
                 style={{
-                    position: "fixed", inset: 0, background: "rgba(15,23,42,0.35)",
-                    zIndex: 400, backdropFilter: "blur(1px)",
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(15,23,42,0.35)",
+                    zIndex: 400,
+                    backdropFilter: "blur(1px)"
                 }}
             />
 
-            <div style={{
-                position: "fixed", top: 0, right: 0, bottom: 0,
-                width: "min(480px, 100vw)",
-                background: "#fff", zIndex: 401,
-                boxShadow: "-8px 0 40px rgba(0,0,0,0.1)",
-                display: "flex", flexDirection: "column",
-                animation: "slideIn 0.22s ease",
-            }}>
+            <div
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "min(480px, 100vw)",
+                    background: "#fff",
+                    zIndex: 401,
+                    boxShadow: "-8px 0 40px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    flexDirection: "column",
+                    animation: "slideIn 0.22s ease"
+                }}
+            >
                 {/* Header */}
-                <div style={{
-                    padding: "22px 24px", borderBottom: "1px solid #f1f5f9",
-                    display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-                }}>
+                <div
+                    style={{
+                        padding: "22px 24px",
+                        borderBottom: "1px solid #f1f5f9",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between"
+                    }}
+                >
                     <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                             <Icon.Package />
                             <StatusBadge status={order.status} />
                             {adviceId && (
-                                <span style={{
-                                    fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
-                                    textTransform: "uppercase", color: "#0369a1",
-                                    background: "#f0f9ff", border: "1px solid #bae6fd",
-                                    borderRadius: 20, padding: "2px 8px",
-                                }}>
+                                <span
+                                    style={{
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        letterSpacing: "0.06em",
+                                        textTransform: "uppercase",
+                                        color: "#0369a1",
+                                        background: "#f0f9ff",
+                                        border: "1px solid #bae6fd",
+                                        borderRadius: 20,
+                                        padding: "2px 8px"
+                                    }}
+                                >
                                     Despatched
                                 </span>
                             )}
@@ -140,14 +162,24 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                         </div>
                     ) : detail ? (
                         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-                            {/* Despatch advice ID if found */}
                             {adviceId && (
-                                <div style={{
-                                    background: "#f0f9ff", border: "1px solid #bae6fd",
-                                    borderRadius: 10, padding: "12px 14px",
-                                }}>
-                                    <div style={{ fontSize: 11, fontWeight: 700, color: "#0369a1", letterSpacing: "0.06em", marginBottom: 4 }}>
+                                <div
+                                    style={{
+                                        background: "#f0f9ff",
+                                        border: "1px solid #bae6fd",
+                                        borderRadius: 10,
+                                        padding: "12px 14px"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            color: "#0369a1",
+                                            letterSpacing: "0.06em",
+                                            marginBottom: 4
+                                        }}
+                                    >
                                         DESPATCH ADVICE
                                     </div>
                                     <div style={{ fontSize: 12, color: "#0369a1", fontFamily: "monospace" }}>
@@ -158,19 +190,31 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
 
                             {/* Items */}
                             <div>
-                                <div style={{
-                                    fontSize: 11, fontWeight: 700, color: "#94a3b8",
-                                    letterSpacing: "0.08em", marginBottom: 12,
-                                }}>
+                                <div
+                                    style={{
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        color: "#94a3b8",
+                                        letterSpacing: "0.08em",
+                                        marginBottom: 12
+                                    }}
+                                >
                                     ITEMS
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                     {detail.items?.map((it, i) => (
-                                        <div key={i} style={{
-                                            display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-                                            padding: "12px 14px", background: "#f8fafc",
-                                            borderRadius: 10, border: "1px solid #f1f5f9",
-                                        }}>
+                                        <div
+                                            key={i}
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "flex-start",
+                                                padding: "12px 14px",
+                                                background: "#f8fafc",
+                                                borderRadius: 10,
+                                                border: "1px solid #f1f5f9"
+                                            }}
+                                        >
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 600, color: "#1e293b", fontSize: 14 }}>
                                                     {it.productName}
@@ -191,11 +235,15 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                                     ))}
                                 </div>
 
-                                <div style={{
-                                    display: "flex", justifyContent: "space-between",
-                                    padding: "12px 14px", marginTop: 8,
-                                    borderTop: "2px solid #0f172a",
-                                }}>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        padding: "12px 14px",
+                                        marginTop: 8,
+                                        borderTop: "2px solid #0f172a"
+                                    }}
+                                >
                                     <span style={{ fontWeight: 700, fontSize: 14, color: "#0f172a" }}>Total</span>
                                     <span style={{ fontWeight: 800, fontSize: 16, color: "#0f172a" }}>
                                         ${totalAmount?.toFixed(2)}
@@ -206,18 +254,32 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                             {/* XML */}
                             {detail.xml && (
                                 <div>
-                                    <div style={{
-                                        fontSize: 11, fontWeight: 700, color: "#94a3b8",
-                                        letterSpacing: "0.08em", marginBottom: 10,
-                                    }}>
+                                    <div
+                                        style={{
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            color: "#94a3b8",
+                                            letterSpacing: "0.08em",
+                                            marginBottom: 10
+                                        }}
+                                    >
                                         UBL XML
                                     </div>
-                                    <pre style={{
-                                        background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8,
-                                        padding: 14, fontSize: 11, overflowX: "auto", lineHeight: 1.5,
-                                        color: "#475569", maxHeight: 240, overflowY: "auto",
-                                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                                    }}>
+                                    <pre
+                                        style={{
+                                            background: "#f8fafc",
+                                            border: "1px solid #e2e8f0",
+                                            borderRadius: 8,
+                                            padding: 14,
+                                            fontSize: 11,
+                                            overflowX: "auto",
+                                            lineHeight: 1.5,
+                                            color: "#475569",
+                                            maxHeight: 240,
+                                            overflowY: "auto",
+                                            fontFamily: "'JetBrains Mono', 'Fira Code', monospace"
+                                        }}
+                                    >
                                         {detail.xml}
                                     </pre>
                                 </div>
@@ -231,16 +293,30 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                 </div>
 
                 {/* Action bar */}
-                <div style={{
-                    padding: "16px 24px", borderTop: "1px solid #f1f5f9",
-                    display: "flex", gap: 8,
-                }}>
+                <div
+                    style={{
+                        padding: "16px 24px",
+                        borderTop: "1px solid #f1f5f9",
+                        display: "flex",
+                        gap: 8
+                    }}
+                >
                     <button
                         onClick={() => setShowUpdate(true)}
                         style={{
-                            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                            padding: "9px 0", borderRadius: 8, border: "1px solid #e2e8f0",
-                            background: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#475569",
+                            flex: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            padding: "9px 0",
+                            borderRadius: 8,
+                            border: "1px solid #e2e8f0",
+                            background: "#fff",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            color: "#475569"
                         }}
                     >
                         <Icon.Edit /> Edit
@@ -251,13 +327,27 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                             onClick={handleCancel}
                             disabled={actionLoading === "cancel"}
                             style={{
-                                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                padding: "9px 0", borderRadius: 8, border: "1px solid #fecdd3",
-                                background: "#fff1f2", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#be123c",
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 6,
+                                padding: "9px 0",
+                                borderRadius: 8,
+                                border: "1px solid #fecdd3",
+                                background: "#fff1f2",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                color: "#be123c"
                             }}
                         >
                             <Icon.Ban />
-                            {actionLoading === "cancel" ? "Cancelling…" : adviceId ? "Cancel Order & Despatch" : "Cancel"}
+                            {actionLoading === "cancel"
+                                ? "Cancelling…"
+                                : adviceId
+                                ? "Cancel Order & Despatch"
+                                : "Cancel"}
                         </button>
                     )}
 
@@ -266,9 +356,19 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                             onClick={handleDelete}
                             disabled={actionLoading === "delete"}
                             style={{
-                                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                                padding: "9px 0", borderRadius: 8, border: "1px solid #fecdd3",
-                                background: "#fff1f2", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#be123c",
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 6,
+                                padding: "9px 0",
+                                borderRadius: 8,
+                                border: "1px solid #fecdd3",
+                                background: "#fff1f2",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                color: "#be123c"
                             }}
                         >
                             <Icon.Trash />
@@ -284,7 +384,10 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                     buyerId={buyerId}
                     onClose={() => setShowUpdate(false)}
                     onToast={onToast}
-                    onRefresh={() => { onRefresh(); onClose(); }}
+                    onRefresh={() => {
+                        onRefresh();
+                        onClose();
+                    }}
                 />
             )}
         </>
