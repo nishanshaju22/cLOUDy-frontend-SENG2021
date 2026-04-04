@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { Icon } from "./icons";
 
 const statusStyles = {
-    CREATED:   { bg: "#f0f9ff", color: "#0369a1", border: "#bae6fd" },
-    PROCESSED: { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
-    FINALISED: { bg: "#faf5ff", color: "#7c3aed", border: "#ddd6fe" },
-    CANCELED:  { bg: "#fff1f2", color: "#be123c", border: "#fecdd3" },
+    CREATED:   { bg: "#A5EFFD", color: "#33731A", border: "#33731A" },
+    PROCESSED: { bg: "#A5EFFD", color: "#15803d", border: "#bbf7d0" },
+    FINALISED: { bg: "#A5EFFD", color: "#7c3aed", border: "#ddd6fe" },
+    CANCELED:  { bg: "#A5EFFD", color: "#DD1D13", border: "#DD1D13" },
 };
 
 export function StatusBadge({ status }) {

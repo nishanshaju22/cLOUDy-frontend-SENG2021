@@ -72,5 +72,14 @@ async function deleteCancelledOrders(buyerId) {
     }
 }
 
+async function getBuyers() {
+    try {
+        const response = await order_api.get(`/v1/buyers`);
+        return response.data.buyers;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
 
-export { createOrder, updateOrder, getOrderById, cancelOrder, deleteOrderById, getOrdersForBuyer, deleteCancelledOrders, createBuyer }
+
+export { createOrder, updateOrder, getOrderById, cancelOrder, deleteOrderById, getOrdersForBuyer, deleteCancelledOrders, createBuyer, getBuyers }

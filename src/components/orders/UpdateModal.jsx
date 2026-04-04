@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "./icons";
-import { Field, Input, SectionLabel } from "./ui";
+import { Icon } from "../ui/icons";
+import { Field, Input, SectionLabel } from "../ui/ui";
 import { updateOrder } from "../../api/order";
 
 export function UpdateModal({ order, buyerId, onClose, onToast, onRefresh }) {

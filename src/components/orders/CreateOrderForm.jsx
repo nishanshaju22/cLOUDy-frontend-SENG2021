@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { createOrder } from "../../api/order";
-import { Icon } from "./icons";
-import { Field, Input, SectionLabel } from "./ui";
+import { Icon } from "../ui/icons";
+import { Field, Input, SectionLabel } from "../ui/ui";
 
 const emptyItem = () => ({
     item_name: "",

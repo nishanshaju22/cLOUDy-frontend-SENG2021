@@ -5,9 +5,9 @@ import { Icon } from "../ui/icons";
 import { cancelDespatchFulfilment } from "../../api/despatch";
 
 export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
-    const [cancelling,    setCancelling]    = useState(false);
+    const [cancelling, setCancelling] = useState(false);
     const [showReasonBox, setShowReasonBox] = useState(false);
-    const [reason,        setReason]        = useState("");
+    const [reason, setReason] = useState("");
 
     const adviceId = despatch["advice-id"];
     const d = despatch["despatch-advice"];
@@ -107,9 +107,9 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                                     fontWeight: 700,
                                     letterSpacing: "0.06em",
                                     textTransform: "uppercase",
-                                    color:      isCancelled ? "#b91c1c" : "#15803d",
+                                    color: isCancelled ? "#b91c1c" : "#15803d",
                                     background: isCancelled ? "#fee2e2" : "#f0fdf4",
-                                    border:     `1px solid ${isCancelled ? "#fecaca" : "#bbf7d0"}`,
+                                    border: `1px solid ${isCancelled ? "#fecaca" : "#bbf7d0"}`,
                                     borderRadius: 20,
                                     padding: "2px 10px",
                                 }}

@@ -2,17 +2,70 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getOrdersForBuyer, deleteCancelledOrders } from "../../api/order";
-import { Icon } from "./icons";
-import { Input, inputStyle } from "./ui";
+import { Icon } from "../ui/icons";
 import { OrderCard } from "./OrderCard";
 import { OrderDrawer } from "./OrderDrawer";
+import { GlassCard } from "../ui/GlassCard";
+import { RippleButton } from "../ui/RippleButton";
+
+const glassInputStyle = {
+    padding: "9px 12px",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: 10,
+    fontSize: 13,
+    color: "#A5EFFD",
+    background: "rgba(255,255,255,0.07)",
+    backdropFilter: "blur(8px)",
+    outline: "none",
+    fontFamily: "inherit",
+    transition: "border-color 0.15s",
+    width: "100%",
+    boxSizing: "border-box",
+};
+
+const labelStyle = {
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "#A5EFFD",
+    marginBottom: 6,
+    display: "block",
+};
+
+function GlassInput({ style, ...props }) {
+    return (
+        <input
+            style={{ ...glassInputStyle, ...style }}
+            onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.35)"}
+            onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
+            {...props}
+        />
+    );
+}
+
+function GlassSelect({ style, children, ...props }) {
+    return (
+        <select
+            style={{
+                ...glassInputStyle,
+                cursor: "pointer",
+                appearance: "auto",
+                ...style,
+            }}
+            {...props}
+        >
+            {children}
+        </select>
+    );
+}
 
 export function OrdersList({ buyerId, onToast }) {
-    const [orders, setOrders]           = useState([]);
-    const [loading, setLoading]         = useState(false);
-    const [selected, setSelected]       = useState(null);
+    const [orders,      setOrders]      = useState([]);
+    const [loading,     setLoading]     = useState(false);
+    const [selected,    setSelected]    = useState(null);
     const [deletingAll, setDeletingAll] = useState(false);
-    const [filters, setFilters]         = useState({
+    const [filters,     setFilters]     = useState({
         status: "", fromDate: "", toDate: "", limit: 10, offset: 0,
     });
     const [total, setTotal] = useState(0);
@@ -59,16 +112,6 @@ export function OrdersList({ buyerId, onToast }) {
     const page         = Math.floor(filters.offset / filters.limit) + 1;
     const totalPages   = Math.ceil(total / filters.limit) || 1;
 
-    const labelStyle = {
-        fontSize: 11,
-        fontWeight: 600,
-        color: "#64748b",
-        letterSpacing: "0.04em",
-        textTransform: "uppercase",
-        marginBottom: 5,
-        display: "block",
-    };
-
     return (
         <div>
             {/* Filters */}
@@ -77,23 +120,23 @@ export function OrdersList({ buyerId, onToast }) {
                 {/* Left group */}
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 12, flexWrap: "wrap", flex: 1 }}>
 
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: 56 }}>
+                    <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>Status</label>
-                        <select
+                        <GlassSelect
                             value={filters.status}
                             onChange={e => setFilters(f => ({ ...f, status: e.target.value, offset: 0 }))}
-                            style={{ ...inputStyle, width: 140, height: 38, cursor: "pointer" }}
+                            style={{ width: 140, height: 38 }}
                         >
                             <option value="">All</option>
                             {["CREATED", "PROCESSED", "FINALISED", "CANCELED"].map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
-                        </select>
+                        </GlassSelect>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: 56 }}>
+                    <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>From</label>
-                        <Input
+                        <GlassInput
                             type="date"
                             value={filters.fromDate}
                             style={{ width: 150 }}
@@ -101,9 +144,9 @@ export function OrdersList({ buyerId, onToast }) {
                         />
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: 56 }}>
+                    <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>To</label>
-                        <Input
+                        <GlassInput
                             type="date"
                             value={filters.toDate}
                             style={{ width: 150 }}
@@ -111,70 +154,82 @@ export function OrdersList({ buyerId, onToast }) {
                         />
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: 56 }}>
+                    <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>Per Page</label>
-                        <select
+                        <GlassSelect
                             value={filters.limit}
                             onChange={e => setFilters(f => ({ ...f, limit: parseInt(e.target.value), offset: 0 }))}
-                            style={{ ...inputStyle, width: 90, height: 38, cursor: "pointer" }}
+                            style={{ width: 90, height: 38 }}
                         >
                             {[5, 10, 25, 50].map(n => (
                                 <option key={n} value={n}>{n}</option>
                             ))}
-                        </select>
+                        </GlassSelect>
                     </div>
 
                     {hasCancelled && (
-                        <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: 56 }}>
-                            <button
+                        <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "flex-end" }}>
+                            <RippleButton
                                 onClick={handleDeleteCancelled}
                                 disabled={deletingAll}
+                                rippleColor="rgba(239,68,68,0.3)"
                                 style={{
                                     display: "flex", alignItems: "center", gap: 6,
-                                    padding: "9px 16px", borderRadius: 8,
-                                    border: "1px solid #fecdd3", background: "#fff1f2",
+                                    padding: "9px 14px", borderRadius: 10,
+                                    border: "1px solid rgba(239,68,68,0.3)",
+                                    background: "rgba(239,68,68,0.1)",
                                     fontSize: 13, fontWeight: 600,
-                                    cursor: deletingAll ? "not-allowed" : "pointer",
-                                    color: "#be123c",
+                                    color: "#f87171",
                                 }}
                             >
                                 <Icon.Trash />
                                 {deletingAll ? "Deleting…" : "Delete All Cancelled"}
-                            </button>
+                            </RippleButton>
                         </div>
                     )}
                 </div>
 
                 {/* Refresh */}
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", alignSelf: "flex-start", marginLeft: "auto" }}>
-                    <button
+                <div style={{ alignSelf: "flex-start" }}>
+                    <RippleButton
                         onClick={fetchOrders}
+                        rippleColor="rgba(255,255,255,0.3)"
                         style={{
-                            padding: "10px 50px", borderRadius: 100, border: "none",
-                            background: "#30C1FF", color: "#fff",
-                            fontSize: 13, fontWeight: 600, cursor: "pointer",
-                            transition: "background 0.30s",
+                            padding: "10px 28px",
+                            borderRadius: 100,
+                            border: "1px solid rgba(48,193,255,0.4)",
+                            background: "rgba(48,193,255,0.15)",
+                            backdropFilter: "blur(8px)",
+                            color: "#30C1FF",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            transition: "all 0.2s",
                         }}
-                        onMouseEnter={e => {e.currentTarget.style.background = "#00425F"}}
-                        onMouseLeave={e => e.currentTarget.style.background = "#30C1FF"}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = "rgba(48,193,255,0.28)";
+                            e.currentTarget.style.color = "#fff";
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = "rgba(48,193,255,0.15)";
+                            e.currentTarget.style.color = "#30C1FF";
+                        }}
                     >
                         Refresh
-                    </button>
+                    </RippleButton>
                 </div>
-
             </div>
 
             {/* List */}
             {loading ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
                     Loading orders…
                 </div>
             ) : !buyerId ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
                     Enter a Buyer ID above to load orders
                 </div>
             ) : orders.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
                     No orders found
                 </div>
             ) : (
@@ -185,6 +240,7 @@ export function OrdersList({ buyerId, onToast }) {
                             order={order}
                             buyerId={buyerId}
                             onClick={() => setSelected(order)}
+                            onToast={onToast}
                         />
                     ))}
                 </div>
@@ -193,36 +249,40 @@ export function OrdersList({ buyerId, onToast }) {
             {/* Pagination */}
             {orders.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
-                    <span style={{ fontSize: 13, color: "#94a3b8" }}>
+                    <span style={{ fontSize: 13, color: "#A5EFFD" }}>
                         Page {page} of {totalPages} · {total} order{total !== 1 ? "s" : ""}
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
-                        <button
+                        <RippleButton
                             disabled={filters.offset === 0}
                             onClick={() => setFilters(f => ({ ...f, offset: Math.max(0, f.offset - f.limit) }))}
+                            rippleColor="rgba(255,255,255,0.2)"
                             style={{
-                                padding: "7px 14px", borderRadius: 7, border: "1px solid #e2e8f0",
-                                background: "#fff", fontSize: 13, fontWeight: 600,
-                                cursor: filters.offset === 0 ? "not-allowed" : "pointer",
-                                color: filters.offset === 0 ? "#cbd5e1" : "#475569",
+                                padding: "7px 14px", borderRadius: 8,
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                background: "rgba(255,255,255,0.06)",
+                                fontSize: 13, fontWeight: 600,
+                                color: filters.offset === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
                                 display: "flex", alignItems: "center", gap: 4,
                             }}
                         >
                             <Icon.ChevronLeft /> Prev
-                        </button>
-                        <button
+                        </RippleButton>
+                        <RippleButton
                             disabled={filters.offset + filters.limit >= total}
                             onClick={() => setFilters(f => ({ ...f, offset: f.offset + f.limit }))}
+                            rippleColor="rgba(255,255,255,0.2)"
                             style={{
-                                padding: "7px 14px", borderRadius: 7, border: "1px solid #e2e8f0",
-                                background: "#fff", fontSize: 13, fontWeight: 600,
-                                cursor: filters.offset + filters.limit >= total ? "not-allowed" : "pointer",
-                                color: filters.offset + filters.limit >= total ? "#cbd5e1" : "#475569",
+                                padding: "7px 14px", borderRadius: 8,
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                background: "rgba(255,255,255,0.06)",
+                                fontSize: 13, fontWeight: 600,
+                                color: filters.offset + filters.limit >= total ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.6)",
                                 display: "flex", alignItems: "center", gap: 4,
                             }}
                         >
                             Next <Icon.ChevronRight />
-                        </button>
+                        </RippleButton>
                     </div>
                 </div>
             )}
