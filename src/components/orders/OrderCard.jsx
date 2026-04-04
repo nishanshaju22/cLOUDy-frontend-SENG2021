@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Icon } from "./icons";
-import { StatusBadge } from "./ui";
+import { useState, useRef } from "react";
+import { Icon } from "../ui/icons";
+import { StatusBadge } from "../ui/ui";
 import { createDespatch } from "../../api/despatch";
 import { getOrderById } from "../../api/order";
 
 export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated }) {
     const [despatching, setDespatching] = useState(false);
+    const [ripples, setRipples] = useState([]);
+    const cardRef = useRef(null);
+
+    const statusColor = order.status === "CANCELED" ? "#ef4444" : "#22c55e";
 
     const handleDespatch = async (e) => {
         e.stopPropagation();
-
         try {
             const d = await getOrderById(buyerId, order.orderId);
 
@@ -19,106 +22,163 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
                 onToast?.("No XML available for this order", "error");
                 return;
             }
-            
+
             setDespatching(true);
-            
-            try {
-                const result = await createDespatch(d.xml);
-                onToast?.(`Despatch created — ID: ${result.adviceIds?.[0]}`, "success");
-                onDespatchCreated?.();
-            } catch (err) {
-                onToast?.(err?.error || "Failed to create despatch", "error");
-            } finally {
-                setDespatching(false);
-            }
+
+            const result = await createDespatch(d.xml);
+            onToast?.(`Despatch created — ID: ${result.adviceIds?.[0]}`, "success");
+            onDespatchCreated?.();
+
         } catch (err) {
             onToast?.(err?.error || "Could not load order", "error");
+        } finally {
+            setDespatching(false);
         }
+    };
 
+    const handleCardClick = (e) => {
+        const card = cardRef.current;
+        const rect = card.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 2;
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        const key = Date.now();
+
+        setRipples(prev => [...prev, { key, x, y, size }]);
+        setTimeout(() => setRipples(prev => prev.filter(r => r.key !== key)), 600);
+
+        onClick?.();
     };
 
     return (
         <div
-            onClick={onClick}
+            ref={cardRef}
+            onClick={handleCardClick}
             style={{
-                background: "#fff", border: "1px solid #e2e8f0",
-                borderRadius: 12, padding: "16px 20px",
-                cursor: "pointer", transition: "all 0.15s",
-                display: "flex", alignItems: "center", gap: 16,
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                padding: "16px 20px",
+                borderRadius: 14,
+                background: "rgba(145, 229, 246, 0.4)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                overflow: "hidden",
             }}
             onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "#94a3b8";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)";
+                e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.25)";
             }}
             onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "#e2e8f0";
-                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
             }}
         >
+            {/* Ripple effect */}
+            {ripples.map(r => (
+                <span
+                    key={r.key}
+                    style={{
+                        position: "absolute",
+                        left: r.x,
+                        top: r.y,
+                        width: r.size,
+                        height: r.size,
+                        background: "rgba(255,255,255,0.35)",
+                        borderRadius: "50%",
+                        transform: "scale(0)",
+                        animation: "rippleEffect 0.6s ease-out forwards",
+                        pointerEvents: "none",
+                    }}
+                />
+            ))}
+
             <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: "#f8fafc", border: "1px solid #f1f5f9",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.4)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
             }}>
                 <Icon.Package />
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <StatusBadge status={order.status} />
-                    <span style={{ fontSize: 11, color: "#94a3b8", fontFamily: "monospace" }}>
+                    <StatusBadge status={order.status} style={{ color: statusColor }} />
+                    <span style={{ fontSize: 11, color: "#000", fontFamily: "monospace", opacity: 0.6 }}>
                         {order.orderId?.slice(0, 8)}…
                     </span>
                 </div>
+
                 <div style={{ display: "flex", gap: 16 }}>
-                    <span style={{ fontSize: 12, color: "#64748b" }}>
+                    <span style={{ fontSize: 12, color: "#000", opacity: 0.7 }}>
                         {order.itemCount} item{order.itemCount !== 1 ? "s" : ""}
                     </span>
-                    <span style={{ fontSize: 12, color: "#64748b" }}>
+                    <span style={{ fontSize: 12, color: "#000", opacity: 0.7 }}>
                         {order.currencyCode} {parseFloat(order.totalAmount || 0).toFixed(2)}
                     </span>
                     {order.orderDate && (
-                        <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                        <span style={{ fontSize: 12, color: "#000", opacity: 0.5 }}>
                             {new Date(order.orderDate).toLocaleDateString("en-AU", {
-                                day: "numeric", month: "short", year: "numeric",
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
                             })}
                         </span>
                     )}
                 </div>
             </div>
 
-            {/* despatch button */}
+            {/* Despatch button right-aligned */}
             <button
                 onClick={handleDespatch}
                 disabled={despatching}
                 title="Create Despatch"
                 style={{
-                    width: 34, height: 34, borderRadius: 8, flexShrink: 0,
-                    border: "1px solid #e2e8f0", background: despatching ? "#f1f5f9" : "#fff",
-                    color: despatching ? "#94a3b8" : "#475569",
-                    display: "flex", alignItems: "center", justifyContent: "center",
+                    marginLeft: "auto",
+                    width: 34,
+                    height: 34,
+                    borderRadius: 10,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: despatching ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.3)",
+                    color: "#000",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     cursor: despatching ? "not-allowed" : "pointer",
-                    transition: "all 0.15s",
+                    transition: "all 0.3s ease",
+                    backdropFilter: "blur(8px)",
                 }}
                 onMouseEnter={e => {
                     if (!despatching) {
-                        e.currentTarget.style.background = "#0f172a";
-                        e.currentTarget.style.color = "#fff";
-                        e.currentTarget.style.borderColor = "#0f172a";
+                        e.currentTarget.style.background = "#22d3ee";
+                        e.currentTarget.style.color = "#000";
+                        e.currentTarget.style.borderColor = "#22d3ee";
                     }
                 }}
                 onMouseLeave={e => {
                     if (!despatching) {
-                        e.currentTarget.style.background = "#fff";
-                        e.currentTarget.style.color = "#475569";
-                        e.currentTarget.style.borderColor = "#e2e8f0";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.3)";
+                        e.currentTarget.style.color = "#000";
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
                     }
                 }}
             >
                 <Icon.Truck />
             </button>
 
-            <Icon.ChevronRight />
+            <Icon.ChevronRight style={{ color: "#000", opacity: 0.4 }} />
+
+            <style>{`
+                @keyframes rippleEffect {
+                    0% { transform: scale(0); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0; }
+                }
+            `}</style>
         </div>
     );
 }

@@ -1,9 +1,16 @@
-import { despatch_api } from "./axios";
+import { despatch_api, order_api } from "./axios";
 
 async function createDespatch(orderXml) {
     try {
-        const response = await despatch_api.post("/api/despatch/despatch-advice", orderXml, {
-            headers: { "Content-Type": "application/json" },
+        const response = await order_api.post("/v1/proxy", {
+            url: "https://devex.cloud.tcore.network/api/v1/despatch/create",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/xml",
+                "Accept": "application/json",
+                "Api-Key": process.env.NEXT_PUBLIC_DESPATCH_API_KEY
+            },
+            body: orderXml
         });
         return response.data;
     } catch (error) {
@@ -11,21 +18,43 @@ async function createDespatch(orderXml) {
     }
 }
 
-async function listDespatches() {
+async function retrieveDespatch(orderXml) {
     try {
-        const response = await despatch_api.get("/v1/despatch/list");
-        return response.data;
+        const response = await order_api.post("/v1/proxy", {
+            url: "https://devex.cloud.tcore.network/api/v1/despatch/retrieve",
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "Api-Key": process.env.NEXT_PUBLIC_DESPATCH_API_KEY
+            },
+            params: {
+                "search-type": "order",
+                query: orderXml
+            }
+        });
+
+        if (response.status_code == 404) {
+            return jsonify({
+                "despatch": None,
+                "message": "No despatch found"
+            }), 200
+        }
+
+        return response.data
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
     }
 }
 
-async function retrieveDespatch(searchType, query) {
+async function listDespatch() {
     try {
-        const response = await despatch_api.get("/v1/despatch/retrieve", {
-            params: {
-                "search-type": searchType,
-                "query": query,
+        const response = await order_api.post("/v1/proxy", {
+            url: "https://devex.cloud.tcore.network/api/v1/despatch/list",
+            method: "GET",
+            headers: {
+                "Content-Type": "application/xml",
+                "Accept": "application/json",
+                "Api-Key": process.env.NEXT_PUBLIC_DESPATCH_API_KEY
             },
         });
         return response.data;
@@ -48,9 +77,18 @@ async function cancelDespatchOrder(adviceId, orderCancellationDocument) {
 
 async function cancelDespatchFulfilment(adviceId, reason) {
     try {
-        const response = await despatch_api.post("/v1/despatch/cancel/fulfilment", {
-            "advice-id": adviceId,
-            "fulfilment-cancellation-reason": reason,
+        const response = await order_api.post("/v1/proxy", {
+            url: "https://devex.cloud.tcore.network/api/v1/despatch/cancel/fulfilment",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Api-Key": process.env.NEXT_PUBLIC_DESPATCH_API_KEY,
+            },
+            body: {
+                "advice-id": adviceId,
+                "fulfilment-cancellation-reason": reason,
+            },
         });
         return response.data;
     } catch (error) {
@@ -58,5 +96,4 @@ async function cancelDespatchFulfilment(adviceId, reason) {
     }
 }
 
-
-export { createDespatch, listDespatches, retrieveDespatch, cancelDespatchOrder, cancelDespatchFulfilment };
+export { createDespatch, listDespatch, retrieveDespatch, cancelDespatchOrder, cancelDespatchFulfilment };
