@@ -42,7 +42,14 @@ export default function OrdersPage() {
                     onCreateOrder={() => setShowCreate(true)}
                 />
 
-                <main className="flex-1 px-10 py-9">
+                <main 
+                    className="flex-1 px-10 py-9"
+                    style={{
+                        position: "relative",
+                        zIndex: 1,
+                        marginLeft: "-1px",
+                    }}
+                >
                     <BuyerIdBar
                         buyerId={buyerId}
                         onChange={setBuyerId}
@@ -77,7 +84,6 @@ export default function OrdersPage() {
                             dark:border-white/10
                         "
                     >
-                        {/* subtle inner glow */}
                         <div className="pointer-events-none absolute inset-0 rounded-3xl bg-white/10 opacity-40 blur-2xl" />
 
                         <div className="relative">
