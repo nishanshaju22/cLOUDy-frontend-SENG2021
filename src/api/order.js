@@ -74,7 +74,25 @@ async function deleteCancelledOrders(buyerId) {
 
 async function getBuyers() {
     try {
-        const response = await order_api.get(`/v1/buyers`);
+        const response = await order_api.get("/v1/buyers");
+        return response.data.buyers;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function createSeller(data) {
+    try {
+        const response = await order_api.post("/v1/seller", data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getSellers() {
+    try {
+        const response = await order_api.get(`/v1/sellers`);
         return response.data.buyers;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
@@ -82,4 +100,4 @@ async function getBuyers() {
 }
 
 
-export { createOrder, updateOrder, getOrderById, cancelOrder, deleteOrderById, getOrdersForBuyer, deleteCancelledOrders, createBuyer, getBuyers }
+export { createOrder, updateOrder, getOrderById, cancelOrder, deleteOrderById, getOrdersForBuyer, deleteCancelledOrders, createBuyer, getBuyers, getSellers, createSeller }
