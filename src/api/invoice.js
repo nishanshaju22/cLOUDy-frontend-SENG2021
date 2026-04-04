@@ -1,4 +1,4 @@
-import { invoice_api, order_api } from "./axios";
+import { order_api } from "./axios";
 
 async function createInvoice(orderXml, orderId) {
     try {
@@ -24,4 +24,4 @@ async function createInvoice(orderXml, orderId) {
 }
 
 
-export { createInvoice, getInvoice }
+export { createInvoice }

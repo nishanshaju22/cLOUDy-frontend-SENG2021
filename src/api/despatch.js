@@ -1,4 +1,4 @@
-import { despatch_api, order_api } from "./axios";
+import { order_api } from "./axios";
 
 async function createDespatch(orderXml) {
     try {
