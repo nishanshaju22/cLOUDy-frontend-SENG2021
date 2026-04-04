@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { listDespatches } from "../../src/api/despatch";
-import { Icon } from "../orders/icons";
+import { Icon } from "../ui/icons";
 import { DespatchDrawer } from "./DespatchDrawer";
+import { listDespatch } from "../../api/despatch";
 
 export function DespatchList({ onToast }) {
     const [despatches, setDespatches] = useState([]);
@@ -13,7 +13,7 @@ export function DespatchList({ onToast }) {
     const fetchDespatches = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await listDespatches();
+            const data = await listDespatch();
             setDespatches(data.results || []);
         } catch (err) {
             onToast(err?.error || "Failed to load despatches", "error");
@@ -87,6 +87,20 @@ export function DespatchList({ onToast }) {
 
 function DespatchCard({ despatch, onClick }) {
     const adviceId = despatch["advice-id"];
+    const status = despatch["despatch-advice"]?.status || "active";
+    const badgeText = status.toLowerCase() === "cancelled" ? "Cancelled" : "Active";
+
+    const badgeStyle = {
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        color: status.toLowerCase() === "cancelled" ? "#b91c1c" : "#15803d",
+        background: status.toLowerCase() === "cancelled" ? "#fee2e2" : "#f0fdf4",
+        border: `1px solid ${status.toLowerCase() === "cancelled" ? "#fecaca" : "#bbf7d0"}`,
+        borderRadius: 20,
+        padding: "2px 10px",
+    };
 
     return (
         <div
@@ -132,21 +146,7 @@ function DespatchCard({ despatch, onClick }) {
             {/* Details */}
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <span
-                        style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            letterSpacing: "0.06em",
-                            textTransform: "uppercase",
-                            color: "#15803d",
-                            background: "#f0fdf4",
-                            border: "1px solid #bbf7d0",
-                            borderRadius: 20,
-                            padding: "2px 10px",
-                        }}
-                    >
-                        Active
-                    </span>
+                    <span style={badgeStyle}>{badgeText}</span>
                 </div>
                 <div style={{ fontSize: 11, color: "#94a3b8", fontFamily: "monospace" }}>
                     {adviceId}

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { cancelDespatchFulfilment } from "../../src/api/despatch";
-import { Icon } from "../orders/icons";
+import { Icon } from "../ui/icons";
+import { cancelDespatchFulfilment } from "../../api/despatch";
 
 export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
-    const [cancelling, setCancelling] = useState(false);
+    const [cancelling,    setCancelling]    = useState(false);
     const [showReasonBox, setShowReasonBox] = useState(false);
-    const [reason, setReason] = useState("");
+    const [reason,        setReason]        = useState("");
 
     const adviceId = despatch["advice-id"];
-    const xmlContent = despatch["despatch-advice"];
+    const d = despatch["despatch-advice"];
+    const despatchXml = d?.despatchXml || null;
+
+    const isCancelled = d?.status?.toLowerCase() === "cancelled";
 
     const handleCancelFulfilment = async () => {
         if (!reason.trim()) {
@@ -30,9 +33,35 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
         }
     };
 
+    const sectionLabel = {
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        color: "#94a3b8",
+        marginBottom: 6,
+        display: "block",
+    };
+
+    const fieldBox = {
+        background: "#f8fafc",
+        border: "1px solid #e2e8f0",
+        borderRadius: 8,
+        padding: "10px 14px",
+        fontSize: 13,
+        color: "#1e293b",
+        wordBreak: "break-all",
+    };
+
+    const monoBox = {
+        ...fieldBox,
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+        fontSize: 11,
+        color: "#475569",
+    };
+
     return (
         <>
-            {/* Overlay */}
             <div
                 onClick={onClose}
                 style={{
@@ -44,7 +73,6 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                 }}
             />
 
-            {/* Drawer */}
             <div
                 style={{
                     position: "fixed",
@@ -79,14 +107,14 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                                     fontWeight: 700,
                                     letterSpacing: "0.06em",
                                     textTransform: "uppercase",
-                                    color: "#15803d",
-                                    background: "#f0fdf4",
-                                    border: "1px solid #bbf7d0",
+                                    color:      isCancelled ? "#b91c1c" : "#15803d",
+                                    background: isCancelled ? "#fee2e2" : "#f0fdf4",
+                                    border:     `1px solid ${isCancelled ? "#fecaca" : "#bbf7d0"}`,
                                     borderRadius: 20,
                                     padding: "2px 10px",
                                 }}
                             >
-                                Active
+                                {isCancelled ? "Cancelled" : "Active"}
                             </span>
                         </div>
                         <div style={{ fontSize: 11, color: "#94a3b8", fontFamily: "monospace" }}>
@@ -103,81 +131,119 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
 
                 {/* Body */}
                 <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                        {/* Advice ID */}
-                        <div>
-                            <div
-                                style={{
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    color: "#94a3b8",
-                                    letterSpacing: "0.08em",
-                                    marginBottom: 10,
-                                }}
-                            >
-                                ADVICE ID
-                            </div>
-                            <div
-                                style={{
-                                    background: "#f8fafc",
-                                    border: "1px solid #e2e8f0",
-                                    borderRadius: 8,
-                                    padding: "10px 14px",
-                                    fontSize: 12,
-                                    fontFamily: "monospace",
-                                    color: "#334155",
-                                }}
-                            >
-                                {adviceId}
-                            </div>
-                        </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
                         {/* Despatch XML */}
-                        {xmlContent && (
+                        {despatchXml && (
                             <div>
                                 <div
                                     style={{
                                         fontSize: 11,
                                         fontWeight: 700,
                                         color: "#94a3b8",
-                                        letterSpacing: "0.08em",
-                                        marginBottom: 10,
+                                        marginBottom: 4,
                                     }}
                                 >
-                                    DESPATCH ADVICE XML
+                                    Despatch XML
                                 </div>
                                 <pre
                                     style={{
-                                        background: "#f8fafc",
-                                        border: "1px solid #e2e8f0",
+                                        background: "#f0f9ff",
+                                        border: "1px solid #bae6fd",
                                         borderRadius: 8,
                                         padding: 14,
                                         fontSize: 11,
                                         overflowX: "auto",
                                         lineHeight: 1.5,
-                                        color: "#475569",
+                                        color: "#0369a1",
                                         maxHeight: 340,
                                         overflowY: "auto",
                                         fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                                     }}
                                 >
-                                    {xmlContent}
+                                    {despatchXml}
                                 </pre>
                             </div>
                         )}
 
-                        {/* Cancellation Reason */}
-                        {showReasonBox && (
-                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                <label
+                        {/* Fulfilment cancellation XML */}
+                        {d?.fulfilmentCancellationXml && (
+                            <div>
+                                <span style={{ ...sectionLabel, color: "#0369a1" }}>Fulfilment Cancellation XML</span>
+                                <pre
                                     style={{
+                                        background: "#f0f9ff",
+                                        border: "1px solid #bae6fd",
+                                        borderRadius: 8,
+                                        padding: 14,
                                         fontSize: 11,
-                                        fontWeight: 700,
-                                        color: "#94a3b8",
-                                        letterSpacing: "0.08em",
-                                        textTransform: "uppercase",
+                                        overflowX: "auto",
+                                        lineHeight: 1.5,
+                                        color: "#0369a1",
+                                        maxHeight: 260,
+                                        overflowY: "auto",
+                                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                                        margin: 0,
                                     }}
                                 >
+                                    {d.fulfilmentCancellationXml}
+                                </pre>
+                            </div>
+                        )}
+
+                        {/* IDs */}
+                        <div>
+                            <span style={sectionLabel}>Advice ID</span>
+                            <div style={monoBox}>{adviceId}</div>
+                        </div>
+
+                        <div>
+                            <span style={sectionLabel}>Original Order ID</span>
+                            <div style={monoBox}>{d?.originalOrderId || "—"}</div>
+                        </div>
+
+                        {/* Dates */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                            <div>
+                                <span style={sectionLabel}>Created At</span>
+                                <div style={fieldBox}>
+                                    {d?.createdAt
+                                        ? new Date(d.createdAt).toLocaleString("en-AU")
+                                        : "—"}
+                                </div>
+                            </div>
+                            <div>
+                                <span style={sectionLabel}>Cancelled At</span>
+                                <div style={{ ...fieldBox, color: isCancelled ? "#b91c1c" : "#94a3b8" }}>
+                                    {d?.cancelledAt
+                                        ? new Date(d.cancelledAt).toLocaleString("en-AU")
+                                        : "—"}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cancellation reason */}
+                        {d?.cancellationReason && (
+                            <div>
+                                <span style={sectionLabel}>Cancellation Reason</span>
+                                <div style={{ ...fieldBox, color: "#b91c1c", background: "#fff1f2", border: "1px solid #fecdd3" }}>
+                                    {d.cancellationReason}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Fulfilment cancellation ID */}
+                        {d?.fulfilmentCancellationId && (
+                            <div>
+                                <span style={sectionLabel}>Fulfilment Cancellation ID</span>
+                                <div style={monoBox}>{d.fulfilmentCancellationId}</div>
+                            </div>
+                        )}
+
+                        {/* Cancellation reason input */}
+                        {showReasonBox && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <label style={{ ...sectionLabel, color: "#be123c" }}>
                                     Cancellation Reason
                                 </label>
                                 <textarea
@@ -199,20 +265,11 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                                 />
                                 <div style={{ display: "flex", gap: 8 }}>
                                     <button
-                                        onClick={() => {
-                                            setShowReasonBox(false);
-                                            setReason("");
-                                        }}
+                                        onClick={() => { setShowReasonBox(false); setReason(""); }}
                                         style={{
-                                            flex: 1,
-                                            padding: "8px 0",
-                                            borderRadius: 8,
-                                            border: "1px solid #e2e8f0",
-                                            background: "#fff",
-                                            fontSize: 13,
-                                            fontWeight: 600,
-                                            cursor: "pointer",
-                                            color: "#475569",
+                                            flex: 1, padding: "8px 0", borderRadius: 8,
+                                            border: "1px solid #e2e8f0", background: "#fff",
+                                            fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#475569",
                                         }}
                                     >
                                         Back
@@ -221,14 +278,9 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                                         onClick={handleCancelFulfilment}
                                         disabled={cancelling}
                                         style={{
-                                            flex: 1,
-                                            padding: "8px 0",
-                                            borderRadius: 8,
-                                            border: "none",
+                                            flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
                                             background: cancelling ? "#94a3b8" : "#be123c",
-                                            color: "#fff",
-                                            fontSize: 13,
-                                            fontWeight: 700,
+                                            color: "#fff", fontSize: 13, fontWeight: 700,
                                             cursor: cancelling ? "not-allowed" : "pointer",
                                         }}
                                     >
@@ -240,8 +292,8 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                     </div>
                 </div>
 
-                {/* Action bar */}
-                {!showReasonBox && (
+                {/* Action bar — hidden if cancelled or showing reason box */}
+                {!isCancelled && !showReasonBox && (
                     <div
                         style={{
                             padding: "16px 24px",
