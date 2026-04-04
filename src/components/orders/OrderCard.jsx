@@ -1,17 +1,46 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Icon } from "../ui/icons";
 import { StatusBadge } from "../ui/ui";
-import { createDespatch } from "../../api/despatch";
+import { createDespatch, retrieveDespatch } from "../../api/despatch";
 import { getOrderById } from "../../api/order";
 
 export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated }) {
     const [despatching, setDespatching] = useState(false);
+    const [despatchData, setDespatchData] = useState(null);
     const [ripples, setRipples] = useState([]);
     const cardRef = useRef(null);
 
     const statusColor = order.status === "CANCELED" ? "#ef4444" : "#22c55e";
+
+    useEffect(() => {
+        if (!buyerId || !order?.orderId) return;
+
+        let cancelled = false;
+
+        const fetchDespatch = async () => {
+            try {
+                const d = await getOrderById(buyerId, order.orderId);
+                const despatch = await retrieveDespatch(d.xml);
+
+                if (!cancelled) {
+                    setDespatchData(despatch);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    onToast?.(err?.error || "Could not load order", "error");
+                    setDespatchData(null);
+                }
+            }
+        };
+
+        fetchDespatch();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [buyerId]);
 
     const handleDespatch = async (e) => {
         e.stopPropagation();
@@ -49,6 +78,8 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
 
         onClick?.();
     };
+
+    const isDespatchDisabled = despatching || !!despatchData || order.status === "CANCELED";
 
     return (
         <div
@@ -108,7 +139,7 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
 
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <StatusBadge status={order.status} style={{ color: statusColor }} />
+                    <StatusBadge status={order.status} adviceStatus={despatchData?.["advice-id"]} style={{ color: statusColor }} />
                     <span style={{ fontSize: 11, color: "#000", fontFamily: "monospace", opacity: 0.6 }}>
                         {order.orderId?.slice(0, 8)}…
                     </span>
@@ -136,32 +167,33 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
             {/* Despatch button right-aligned */}
             <button
                 onClick={handleDespatch}
-                disabled={despatching}
-                title="Create Despatch"
+                disabled={isDespatchDisabled}
+                title={despatchData ? "Despatch already created" : "Create Despatch"}
                 style={{
                     marginLeft: "auto",
                     width: 34,
                     height: 34,
                     borderRadius: 10,
                     border: "1px solid rgba(255,255,255,0.2)",
-                    background: despatching ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.3)",
-                    color: "#000",
+                    background: isDespatchDisabled ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.3)",
+                    color: isDespatchDisabled ? "rgba(0,0,0,0.3)" : "#000",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    cursor: despatching ? "not-allowed" : "pointer",
+                    cursor: isDespatchDisabled ? "not-allowed" : "pointer",
                     transition: "all 0.3s ease",
                     backdropFilter: "blur(8px)",
+                    opacity: isDespatchDisabled ? 0.5 : 1,
                 }}
                 onMouseEnter={e => {
-                    if (!despatching) {
+                    if (!isDespatchDisabled) {
                         e.currentTarget.style.background = "#22d3ee";
                         e.currentTarget.style.color = "#000";
                         e.currentTarget.style.borderColor = "#22d3ee";
                     }
                 }}
                 onMouseLeave={e => {
-                    if (!despatching) {
+                    if (!isDespatchDisabled) {
                         e.currentTarget.style.background = "rgba(255,255,255,0.3)";
                         e.currentTarget.style.color = "#000";
                         e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
