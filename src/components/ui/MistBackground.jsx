@@ -22,6 +22,7 @@ export function MistBackground() {
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform vec2 u_mouse;
+      uniform float u_seed;
 
       float hash(vec2 p) {
         p = fract(p * vec2(123.34, 456.21));
@@ -60,24 +61,57 @@ export function MistBackground() {
         float dist = distance(uv, mPos);
 
         vec2 q = vec2(0.0);
-        q.x = fbm(uv + 0.07 * u_time);
+        q.x = fbm(uv + 0.03 * u_time);
         q.y = fbm(uv + vec2(1.0, 1.0));
 
         vec2 r = vec2(0.0);
         r.x = fbm(uv + 1.0 * q + vec2(1.7, 9.2) + 0.15 * u_time);
         r.y = fbm(uv + 1.0 * q + vec2(8.3, 2.8) + 0.126 * u_time);
 
-        float f = fbm(uv + r);
+        // Animate UV space smoothly across entire screen
+        vec2 flow = uv + vec2(u_time * 0.05, u_time * 0.03);
 
-        vec3 baseColor   = vec3(0.03, 0.03, 0.05);
-        vec3 mistColor   = vec3(0.18, 0.20, 0.25);
-        vec3 accentColor = vec3(0.30, 0.35, 0.45);
+        // Add seed offset (different every load)
+        flow += vec2(u_seed * 0.1, u_seed * 0.07);
 
-        vec3 color = mix(baseColor, mistColor, f);
-        color = mix(color, accentColor, dot(q, r) * 0.5);
+        // Subtle warp to break repetition
+        vec2 warp = vec2(
+          fbm(flow + u_seed),
+          fbm(flow - u_seed)
+        );
+        flow += warp * 0.15;
 
-        float mouseGlow = smoothstep(0.35, 0.0, dist);
-        color += mouseGlow * 0.05 * vec3(0.6, 0.7, 1.0);
+        // Slight random scale variation
+        float scale = 1.2 + fract(u_seed) * 0.5;
+g
+        // Layered FBM for cloud structure
+        float f1 = fbm(flow * scale);
+        float f2 = fbm(flow * (scale * 1.7) + 10.0);
+
+        // Combine for richer clouds
+        float f = mix(f1, f2, 0.5);
+
+        // Shape into clouds
+        f = smoothstep(0.5, 0.8, f);        // narrower smoothstep => sharper edges
+        f = pow(f, 1.4);
+
+        // Softer morning sky
+        // vec3 skyColor = vec3(0.271, 0.694, 0.910); // 2nd last
+        vec3 skyColor = vec3(0.294, 0.573, 0.859); // 4th last
+        vec3 cloudColor = vec3(0.97, 0.94, 0.88); // softer, slightly warm cream
+
+        // Vertical gradient for sunrise effect
+        // vec3 sunrise = mix(vec3(1.0, 0.6, 0.5), skyColor, uv.y);
+
+        // Blend clouds more subtly
+        vec3 color = mix(skyColor, cloudColor, f * 0.6); // f * x = reduces x to reduce cloud brightness
+
+        // Soft lighting
+        color += 0.1 * f * vec3(1.0, 0.85, 0.7); // subtle glow
+
+        // Mouse glow
+        float mouseGlow = pow(smoothstep(0.1, 0.0, dist), 3.0);
+        color += mouseGlow * 0.02 * vec3(0.6, 0.7, 1.0);
 
         color = pow(color, vec3(1.1)) * 1.4;
         gl_FragColor = vec4(color, 1.0);
@@ -106,9 +140,11 @@ export function MistBackground() {
     gl.enableVertexAttribArray(posAttrib);
     gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
 
-    const timeLoc  = gl.getUniformLocation(program, "u_time");
-    const resLoc   = gl.getUniformLocation(program, "u_resolution");
+    const timeLoc = gl.getUniformLocation(program, "u_time");
+    const resLoc = gl.getUniformLocation(program, "u_resolution");
     const mouseLoc = gl.getUniformLocation(program, "u_mouse");
+    const seedLoc = gl.getUniformLocation(program, "u_seed");
+    const seed = Math.random() * 1000;
 
     let mouse = { x: 0, y: 0 };
 
@@ -130,8 +166,9 @@ export function MistBackground() {
         gl.viewport(0, 0, canvas.width, canvas.height);
       }
 
-      gl.uniform1f(timeLoc,  time * 0.001);
-      gl.uniform2f(resLoc,   canvas.width, canvas.height);
+      gl.uniform1f(timeLoc, time * 0.001);
+      gl.uniform1f(seedLoc, seed);
+      gl.uniform2f(resLoc, canvas.width, canvas.height);
       gl.uniform2f(mouseLoc, mouse.x, mouse.y);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
