@@ -5,12 +5,18 @@ import { Icon } from "./icons";
 
 const statusStyles = {
     CREATED:   { bg: "#A5EFFD", color: "#33731A", border: "#33731A" },
-    PROCESSED: { bg: "#A5EFFD", color: "#15803d", border: "#bbf7d0" },
+    PROCESSED: { bg: "#A5EFFD", color: "#15803d", border: "#15803d" },
     FINALISED: { bg: "#A5EFFD", color: "#7c3aed", border: "#ddd6fe" },
     CANCELED:  { bg: "#A5EFFD", color: "#DD1D13", border: "#DD1D13" },
 };
 
-export function StatusBadge({ status }) {
+export function StatusBadge({ status, adviceStatus }) {
+    console.log(adviceStatus)
+
+    if (status == 'CREATED' && adviceStatus != undefined) {
+        status = 'PROCESSED'
+    }
+
     const s = statusStyles[status] || { bg: "#f8fafc", color: "#475569", border: "#e2e8f0" };
     return (
         <span style={{

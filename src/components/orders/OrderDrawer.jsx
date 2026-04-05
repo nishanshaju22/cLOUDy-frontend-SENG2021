@@ -141,7 +141,7 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                     <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                             <Icon.Package />
-                            <StatusBadge status={order.status} />
+                            <StatusBadge status={order.status} adviceStatus={adviceId} />
                             {adviceId && (
                                 <span style={{
                                     fontSize: 10, fontWeight: 700,

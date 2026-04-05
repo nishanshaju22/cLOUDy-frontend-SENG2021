@@ -15,7 +15,7 @@ const glassInputStyle = {
     fontSize: 13,
     color: "#A5EFFD",
     background: "rgba(255,255,255,0.07)",
-    backdropFilter: "blur(8px)",
+    backdropFilter: "blur(12px)",
     outline: "none",
     fontFamily: "inherit",
     transition: "border-color 0.15s",

@@ -74,17 +74,18 @@ export default function OrdersPage() {
                             rounded-3xl
                             p-8
 
-                            backdrop-blur-[18px]
-                            bg-gradient-to-br from-white/40 to-white/10
-                            border border-white/20
+                            backdrop-blur-[60px]
+                            bg-gradient-to-br from-white/60 to-white/20
+                            border border-white/30
 
-                            shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+                            shadow-[0_12px_50px_rgba(0,0,0,0.15)]
 
                             dark:from-white/10 dark:to-white/5
                             dark:border-white/10
                         "
                     >
-                        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-white/10 opacity-40 blur-2xl" />
+                        {/* Frosted overlay for extra “mist” effect */}
+                        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-white/20 opacity-50 blur-3xl" />
 
                         <div className="relative">
                             <OrdersList
