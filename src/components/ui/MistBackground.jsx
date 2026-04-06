@@ -82,8 +82,8 @@ export function MistBackground() {
         flow += warp * 0.15;
 
         // Slight random scale variation
-        float scale = 1.2 + fract(u_seed) * 0.5;
-g
+        float scale = 1.9 + fract(u_seed) * 0.7;
+        
         // Layered FBM for cloud structure
         float f1 = fbm(flow * scale);
         float f2 = fbm(flow * (scale * 1.7) + 10.0);
@@ -92,13 +92,12 @@ g
         float f = mix(f1, f2, 0.5);
 
         // Shape into clouds
-        f = smoothstep(0.5, 0.8, f);        // narrower smoothstep => sharper edges
+        f = smoothstep(0.5, 0.8, f);
         f = pow(f, 1.4);
 
         // Softer morning sky
-        // vec3 skyColor = vec3(0.271, 0.694, 0.910); // 2nd last
         vec3 skyColor = vec3(0.294, 0.573, 0.859); // 4th last
-        vec3 cloudColor = vec3(0.97, 0.94, 0.88); // softer, slightly warm cream
+        vec3 cloudColor = vec3(0.97, 0.94, 0.88);  // subtle cream for clouds
 
         // Vertical gradient for sunrise effect
         // vec3 sunrise = mix(vec3(1.0, 0.6, 0.5), skyColor, uv.y);
