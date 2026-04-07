@@ -80,15 +80,11 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
-                    background: "#fff",
-                    border: `1px solid ${open ? "#6366f1" : "#e2e8f0"}`,
+                    background: "#FAFFFD",
                     borderRadius: open ? "10px 10px 0 0" : 10,
                     padding: "10px 16px",
                     cursor: "pointer",
-                    transition: "border-color 0.15s",
-                    boxShadow: open
-                        ? "0 0 0 3px rgba(99,102,241,0.08)"
-                        : "none",
+                    transition: "border-color 0.15s"
                 }}
                 onClick={handleOpen}
             >
@@ -121,7 +117,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                                 style={{
                                     fontSize: 13,
                                     fontWeight: 600,
-                                    color: "#1e293b",
+                                    color: "#342E37",
                                 }}
                             >
                                 {selectedBuyer.party_name ||
@@ -228,8 +224,8 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                         top: "100%",
                         left: 0,
                         right: 0,
-                        background: "#fff",
-                        border: "1px solid #6366f1",
+                        background: "#FAFFFD",
+                        border: "1px solid #FAFFFD",
                         borderTop: "1px solid #e2e8f0",
                         borderRadius: "0 0 10px 10px",
                         boxShadow:
@@ -280,7 +276,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                                     background: "none",
                                     outline: "none",
                                     fontSize: 13,
-                                    color: "#1e293b",
+                                    color: "#342E37",
                                     flex: 1,
                                     minWidth: 0,
                                 }}
@@ -335,8 +331,8 @@ function BuyerRow({ buyer, selected, onSelect }) {
                     ? "#f8fafc"
                     : "transparent",
                 borderLeft: selected
-                    ? "3px solid #6366f1"
-                    : "3px solid transparent",
+                    ? "5px solid #3C91E6"
+                    : "5px solid transparent",
                 transition: "background 0.1s",
             }}
         >
@@ -361,7 +357,7 @@ function BuyerRow({ buyer, selected, onSelect }) {
                             fontWeight: 600,
                             color: selected
                                 ? "#4338ca"
-                                : "#1e293b",
+                                : "#342E37",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -375,7 +371,7 @@ function BuyerRow({ buyer, selected, onSelect }) {
                             style={{
                                 fontSize: 11,
                                 color: selected
-                                    ? "#6366f1"
+                                    ? "#3C91E6"
                                     : "#64748b",
                                 background: selected
                                     ? "#e0e7ff"
@@ -460,7 +456,7 @@ function BuyerRow({ buyer, selected, onSelect }) {
                     height="15"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#6366f1"
+                    stroke="#3C91E6"
                     strokeWidth="2.5"
                 >
                     <path d="M20 6L9 17l-5-5" />
@@ -487,14 +483,14 @@ function Avatar({ name, size = 28, selected }) {
                 height: size,
                 borderRadius: "50%",
                 background: selected
-                    ? "linear-gradient(135deg, #6366f1, #818cf8)"
+                    ? "linear-gradient(135deg, #3C91E6, #818cf8)"
                     : "linear-gradient(135deg, #e2e8f0, #cbd5e1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: size * 0.36,
                 fontWeight: 700,
-                color: selected ? "#fff" : "#64748b",
+                color: selected ? "#FAFFFD" : "#342E37",
                 flexShrink: 0,
                 letterSpacing: "0.02em",
             }}
@@ -530,7 +526,7 @@ function Spinner() {
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#6366f1"
+            stroke="#3C91E6"
             strokeWidth="2.5"
             style={{ animation: "spin 0.75s linear infinite" }}
         >

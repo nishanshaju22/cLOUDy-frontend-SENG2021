@@ -123,7 +123,7 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                 style={{
                     position: "fixed", top: 0, right: 0, bottom: 0,
                     width: "min(480px, 100vw)",
-                    background: "#fff", zIndex: 401,
+                    background: "#FAFFFD", zIndex: 401,
                     boxShadow: "-8px 0 40px rgba(0,0,0,0.1)",
                     display: "flex", flexDirection: "column",
                     animation: "slideIn 0.22s ease",
@@ -395,7 +395,7 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                                 flex: 1, display: "flex", alignItems: "center",
                                 justifyContent: "center", gap: 6, padding: "9px 0",
                                 borderRadius: 8, border: "1px solid #e2e8f0",
-                                background: "#fff", fontSize: 13, fontWeight: 600,
+                                background: "#FAFFFD", fontSize: 13, fontWeight: 600,
                                 cursor: "pointer", color: "#475569"
                             }}
                         >

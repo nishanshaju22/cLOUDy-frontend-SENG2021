@@ -554,7 +554,7 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
                 const data = await getSellers();
                 setSellers(data || []);
             } catch {
-                // Silently fail — user can still add a new seller
+                
             } finally {
                 setSellersLoading(false);
             }

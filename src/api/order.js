@@ -93,7 +93,7 @@ async function createSeller(data) {
 async function getSellers() {
     try {
         const response = await order_api.get(`/v1/sellers`);
-        return response.data.buyers;
+        return response.data.sellers;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
     }
