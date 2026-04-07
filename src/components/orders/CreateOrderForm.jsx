@@ -359,7 +359,7 @@ function SellerDropdown({ sellerId, onChange, sellers, loading, onAddClick }) {
     });
 
     function handleSelect(seller) {
-        onChange(seller.sellerId || seller.customer_assigned_account_id);
+        onChange(seller.seller_id ?? seller.customer_assigned_account_id);
         setOpen(false);
         setSearch("");
     }
@@ -572,14 +572,15 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
     const removeItem = (i) => setForm(f => ({ ...f, items: f.items.filter((_, idx) => idx !== i) }));
 
     const handleSellerCreated = (result) => {
-        // Add new seller to list and auto-select it
         const newSeller = {
-            customer_assigned_account_id: result.sellerId || result.id || result.customer_assigned_account_id,
-            party_name:   result.party_name   || "New Seller",
-            contact_name:  result.contact_name  || "",
+            sellerId: result.sellerId || result.id || result.customer_assigned_account_id,
+            customer_assigned_account_id: result.customer_assigned_account_id || result.sellerId || result.id,
+            party_name: result.party_name || "New Seller",
+            contact_name: result.contact_name || "",
             contact_email: result.contact_email || "",
         };
         setSellers(prev => [...prev, newSeller]);
+        setForm(f => ({ ...f, seller_id: newSeller.sellerId }));
         setForm(f => ({ ...f, seller_id: newSeller.customer_assigned_account_id }));
         setShowSellerForm(false);
     };
@@ -610,7 +611,6 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
         }
     };
 
-    // ── XML success view ──────────────────────────────────────────────────────
     if (xmlResult) {
         return (
             <div>
@@ -672,7 +672,6 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
         );
     }
 
-    // ── Main order form ───────────────────────────────────────────────────────
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
 

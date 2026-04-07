@@ -5,7 +5,6 @@ import { getOrdersForBuyer, deleteCancelledOrders } from "../../api/order";
 import { Icon } from "../ui/icons";
 import { OrderCard } from "./OrderCard";
 import { OrderDrawer } from "./OrderDrawer";
-import { GlassCard } from "../ui/GlassCard";
 import { RippleButton } from "../ui/RippleButton";
 
 const glassInputStyle = {
@@ -198,21 +197,24 @@ export function OrdersList({ buyerId, onToast }) {
                         style={{
                             padding: "10px 28px",
                             borderRadius: 100,
+                            borderColor: "#242124",
                             border: "1px solid rgba(255,255,255,0.6)",
-                            background: "rgba(48,193,255,0.15)",
+                            background: "#41EAD4",
                             backdropFilter: "blur(8px)",
-                            color: "#342E37",
+                            color: "#242124",
                             fontSize: 13,
                             fontWeight: 600,
                             transition: "all 0.2s",
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.background = "rgba(48,193,255,0.28)";
-                            e.currentTarget.style.color = "#fff";
+                            e.currentTarget.style.background = "#242124";
+                            e.currentTarget.style.color = "#41EAD4";
+                            e.currentTarget.style.borderColor = "#41EAD4";
                         }}
                         onMouseLeave={e => {
-                            e.currentTarget.style.background = "rgba(48,193,255,0.15)";
-                            e.currentTarget.style.color = "#342E37";
+                            e.currentTarget.style.background = "#41EAD4";
+                            e.currentTarget.style.color = "#242124";
+                            e.currentTarget.style.borderColor = "#242124";
                         }}
                     >
                         Refresh
