@@ -9,11 +9,6 @@ const NAV_ITEMS = [
         label: "Orders",
         icon: <Icon.Orders />,
     },
-    {
-        id: "despatch",
-        label: "Despatch",
-        icon: <Icon.Despatch />,
-    },
 ];
 
 export function Sidebar({ activeTab, onTabChange, onCreateOrder }) {

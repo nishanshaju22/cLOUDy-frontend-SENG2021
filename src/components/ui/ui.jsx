@@ -11,8 +11,6 @@ const statusStyles = {
 };
 
 export function StatusBadge({ status, adviceStatus }) {
-    console.log(adviceStatus)
-
     if (status == 'CREATED' && adviceStatus != undefined) {
         status = 'PROCESSED'
     }

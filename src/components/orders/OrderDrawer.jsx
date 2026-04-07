@@ -90,7 +90,6 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
         }
         setInvoiceLoading(true);
         try {
-            console.log(detail)
             const result = await createInvoice(detail.xml, detail.orderId);
             setInvoice(result);
             onToast("Invoice created successfully", "success");
