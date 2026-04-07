@@ -62,7 +62,7 @@ export default function OrdersPage() {
                         <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-foreground">
                             My Orders
                         </h1>
-                        <p className="mt-1 text-sm text-foreground/60">
+                        <p className="mt-1 text-sm text-amber-50">
                             Browse and manage all orders for this buyer.
                         </p>
                     </div>
@@ -72,21 +72,52 @@ export default function OrdersPage() {
                         className="
                             relative
                             rounded-3xl
-                            p-8
+                            p-10
 
-                            backdrop-blur-[60px]
-                            bg-gradient-to-br from-white/60 to-white/20
-                            border border-white/30
+                            backdrop-blur-[36px]
 
-                            shadow-[0_12px_50px_rgba(0,0,0,0.15)]
+                            border
+                          border-white/30
 
-                            dark:from-white/10 dark:to-white/5
-                            dark:border-white/10
+                            shadow-[0_16px_70px_rgba(0,0,0,0.12)]
+
+                            bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.22),rgba(52,46,55,0.62))]
                         "
                     >
-                        {/* Frosted overlay for extra “mist” effect */}
-                        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-white/20 opacity-50 blur-3xl" />
+                        {/* bg-[linear-gradient(to_bottom_right,rgba(30,101,172,0.22),rgba(30,101,172,0.22))] */}
+                        {/* bg-[linear-gradient(to_bottom_right,rgba(160,200,240,0.22),rgba(160,200,240,0.22))] */}
+                        {/* bg-[linear-gradient(to_bottom_right,rgba(17,59,100,0.22),rgba(17,59,100,0.22))] */}
+                        {/* bg-[linear-gradient(to_bottom_right,rgba(105,56,92,0.22),rgba(105,56,92,0.22))] */}
 
+                        {/* Top glass highlight */}
+                        <div
+                            className="
+                                pointer-events-none
+                                absolute
+                                inset-0
+                                rounded-3xl
+
+                                bg-[linear-gradient(to_bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.06))]
+
+                                opacity-60
+                            "
+                        />
+
+                        {/* Frost diffusion layer */}
+                        <div
+                            className="
+                                pointer-events-none
+                                absolute
+                                inset-0
+                                rounded-3xl
+
+                                bg-white/20
+                                blur-2xl
+                                opacity-40
+                            "
+                        />
+
+                        {/* Content */}
                         <div className="relative">
                             <OrdersList
                                 buyerId={buyerId}
