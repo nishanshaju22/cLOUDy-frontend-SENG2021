@@ -29,7 +29,6 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
                 }
             } catch (err) {
                 if (!cancelled) {
-                    onToast?.(err?.error || "Could not load order", "error");
                     setDespatchData(null);
                 }
             }

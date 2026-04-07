@@ -83,7 +83,7 @@ export function MistBackground() {
 
         // Slight random scale variation
         float scale = 1.2 + fract(u_seed) * 0.5;
-g
+
         // Layered FBM for cloud structure
         float f1 = fbm(flow * scale);
         float f2 = fbm(flow * (scale * 1.7) + 10.0);
