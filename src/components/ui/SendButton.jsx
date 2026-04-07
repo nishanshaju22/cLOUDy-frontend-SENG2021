@@ -22,7 +22,7 @@ export default function SendButton({
     try {
       await onSend?.();
     } catch (_) {
-      // swallow
+
     }
     setTimeout(() => setActive(false), 2600);
   }, [active, disabled, onSend]);

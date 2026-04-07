@@ -8,13 +8,4 @@ const order_api = axios.create({
 	},
 });
 
-//REMOVE FOR PROD
-order_api.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		console.error("API Error:", error.response || error.message);
-		return Promise.reject(error);
-	}
-);
-
 export { order_api }
