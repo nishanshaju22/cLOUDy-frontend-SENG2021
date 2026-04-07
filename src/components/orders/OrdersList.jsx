@@ -13,7 +13,7 @@ const glassInputStyle = {
     border: "1px solid rgba(255,255,255,0.15)",
     borderRadius: 10,
     fontSize: 13,
-    color: "#A5EFFD",
+    color: "#342E37",
     background: "rgba(255,255,255,0.07)",
     backdropFilter: "blur(12px)",
     outline: "none",
@@ -21,6 +21,7 @@ const glassInputStyle = {
     transition: "border-color 0.15s",
     width: "100%",
     boxSizing: "border-box",
+    WebkitTextFillColor: "#342E37",
 };
 
 const labelStyle = {
@@ -28,7 +29,7 @@ const labelStyle = {
     fontWeight: 700,
     letterSpacing: "0.1em",
     textTransform: "uppercase",
-    color: "#A5EFFD",
+    color: "#342E37",
     marginBottom: 6,
     display: "block",
 };
@@ -197,10 +198,10 @@ export function OrdersList({ buyerId, onToast }) {
                         style={{
                             padding: "10px 28px",
                             borderRadius: 100,
-                            border: "1px solid rgba(48,193,255,0.4)",
+                            border: "1px solid rgba(255,255,255,0.6)",
                             background: "rgba(48,193,255,0.15)",
                             backdropFilter: "blur(8px)",
-                            color: "#30C1FF",
+                            color: "#342E37",
                             fontSize: 13,
                             fontWeight: 600,
                             transition: "all 0.2s",
@@ -211,7 +212,7 @@ export function OrdersList({ buyerId, onToast }) {
                         }}
                         onMouseLeave={e => {
                             e.currentTarget.style.background = "rgba(48,193,255,0.15)";
-                            e.currentTarget.style.color = "#30C1FF";
+                            e.currentTarget.style.color = "#342E37";
                         }}
                     >
                         Refresh
@@ -221,15 +222,15 @@ export function OrdersList({ buyerId, onToast }) {
 
             {/* List */}
             {loading ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#342E37", fontSize: 14 }}>
                     Loading orders…
                 </div>
             ) : !buyerId ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#342E37", fontSize: 14 }}>
                     Enter a Buyer ID above to load orders
                 </div>
             ) : orders.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#A5EFFD", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "#342E37", fontSize: 14 }}>
                     No orders found
                 </div>
             ) : (
@@ -249,7 +250,7 @@ export function OrdersList({ buyerId, onToast }) {
             {/* Pagination */}
             {orders.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
-                    <span style={{ fontSize: 13, color: "#A5EFFD" }}>
+                    <span style={{ fontSize: 13, color: "#342E37" }}>
                         Page {page} of {totalPages} · {total} order{total !== 1 ? "s" : ""}
                     </span>
                     <div style={{ display: "flex", gap: 8 }}>
