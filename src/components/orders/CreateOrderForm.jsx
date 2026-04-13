@@ -334,7 +334,11 @@ function SellerDropdown({ sellerId, onChange, sellers, loading, onAddClick }) {
     const [search, setSearch] = useState("");
     const containerRef        = useRef(null);
 
-    const selectedSeller = sellers.find(s => s.sellerId === sellerId || s.customer_assigned_account_id === sellerId);
+    const selectedSeller = sellers.find(s =>
+        s.sellerId === sellerId ||
+        s.seller_id === sellerId ||
+        s.customer_assigned_account_id === sellerId
+    );
 
     useEffect(() => {
         function handleOutside(e) {
@@ -573,15 +577,14 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
 
     const handleSellerCreated = (result) => {
         const newSeller = {
-            sellerId: result.sellerId || result.id || result.customer_assigned_account_id,
-            customer_assigned_account_id: result.customer_assigned_account_id || result.sellerId || result.id,
-            party_name: result.party_name || "New Seller",
-            contact_name: result.contact_name || "",
+            sellerId: result.sellerId || result.seller_id || result.id,
+            customer_assigned_account_id: result.customer_assigned_account_id,
+            party_name:    result.party_name   || "New Seller",
+            contact_name:  result.contact_name  || "",
             contact_email: result.contact_email || "",
         };
         setSellers(prev => [...prev, newSeller]);
-        setForm(f => ({ ...f, seller_id: newSeller.sellerId }));
-        setForm(f => ({ ...f, seller_id: newSeller.customer_assigned_account_id }));
+        setForm(f => ({ ...f, seller_id: newSeller.sellerId || newSeller.customer_assigned_account_id }));
         setShowSellerForm(false);
     };
 
@@ -611,6 +614,7 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
         }
     };
 
+    // ── XML success view ──────────────────────────────────────────────────────
     if (xmlResult) {
         return (
             <div>
@@ -672,6 +676,7 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
         );
     }
 
+    // ── Main order form ───────────────────────────────────────────────────────
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
 
