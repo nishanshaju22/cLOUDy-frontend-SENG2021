@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: ' http://cloudy-1831309437.us-east-1.elb.amazonaws.com/:path*'
+        destination: 'http://cloudy-1831309437.us-east-1.elb.amazonaws.com/:path*'
       }
     ]
   }
