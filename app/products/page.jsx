@@ -8,8 +8,9 @@ import { ProductFormModal } from "../../src/components/products/ProductFormModal
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { extractText } from "../../src/api/ai";
 
-// ─── Replace with your actual IDs (from localStorage, context, etc.) ───────
+// ─── Replace with actual IDs (from localStorage, context, etc.) ───────
 const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
+const API_KEY = process.env.NEXT_PUBLIC_ORDER_API_KEY
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
@@ -101,7 +102,7 @@ export default function ProductsPage() {
     if (!aiText.trim()) return;
     setAiProcessing(true);
     try {
-        const result = await extractText(aiText, SELLER_ID);
+        const result = await extractText(aiText, SELLER_ID, API_KEY);
 
         // Add products to cart
         if (result?.product_id?.length) {
