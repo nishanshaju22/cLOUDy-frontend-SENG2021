@@ -1006,7 +1006,7 @@ function CartItem({ item, sellerId, onToast, onRefresh }) {
         setQty(newQty);
         setUpdating(true);
         try {
-            await updateCartItem(sellerId, item.productId, newQty);
+            await updateCartItem(sellerId, item.productId, { "quantity": newQty });
             onRefresh();
         } catch {
             setQty(item.quantity);
