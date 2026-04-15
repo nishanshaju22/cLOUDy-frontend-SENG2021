@@ -84,7 +84,7 @@ function BuyerAvatar({ name, size = 28, selected }) {
 
 // ─── Buyer dropdown ───────────────────────────────────────────────────────────
 
-function BuyerDropdown({ buyerId, onChange, buyers, loading, onAddClick }) {
+function BuyerDropdown({ buyerId, onChange, buyers, loading, onAddClick, newBuyerPrefill, setView }) {
     const [open, setOpen]     = useState(false);
     const [search, setSearch] = useState("");
     const containerRef        = useRef(null);
@@ -222,22 +222,31 @@ function BuyerDropdown({ buyerId, onChange, buyers, loading, onAddClick }) {
                 )}
             </div>
 
-            {/* Add buyer button */}
-            <button
-                onClick={onAddClick}
-                title="Add new buyer"
-                style={{
-                    width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
-                    border: "1px solid #e2e8f0", background: "#fff",
-                    color: "#475569", display: "flex", alignItems: "center",
-                    justifyContent: "center", cursor: "pointer", transition: "all 0.15s",
-                    marginTop: 1,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#0f172a"; e.currentTarget.style.color = "#fff"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#475569"; }}
-            >
-                <PlusSmallIcon />
-            </button>
+            {/* Add buyer button — with AI prefill indicator */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+                <button
+                    onClick={() => setView("new-buyer")}
+                    title="Add new buyer"
+                    style={{
+                        width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
+                        border: "1px solid #e2e8f0", background: "#fff",
+                        color: "#475569", display: "flex", alignItems: "center",
+                        justifyContent: "center", cursor: "pointer", transition: "all 0.15s",
+                        marginTop: 1,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#0f172a"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = "#475569"; }}
+                >
+                    <PlusSmallIcon />
+                </button>
+                {newBuyerPrefill && !buyerId && (
+                    <div style={{
+                        position: "absolute", top: -3, right: -3,
+                        width: 12, height: 12, borderRadius: "50%",
+                        background: "#f59e0b", border: "2px solid #fff",
+                    }} title="AI has prefilled buyer details" />
+                )}
+            </div>
         </div>
     );
 }
@@ -293,14 +302,43 @@ const emptyBuyerForm = () => ({
     tax_scheme: { registration_name: "", company_id: "", exemption_reason: "", scheme_id: "", tax_type_code: "" },
 });
 
-function NewBuyerForm({ onCreated, onCancel, onToast }) {
-    const [form,    setForm]    = useState(emptyBuyerForm());
+function NewBuyerForm({ onCreated, onCancel, onToast, prefill }) {
+    const [form, setForm] = useState(emptyBuyerForm());
     const [loading, setLoading] = useState(false);
 
-    const set     = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
     const setAddr = (k, v) => setForm(f => ({ ...f, address:    { ...f.address,    [k]: v } }));
     const setCont = (k, v) => setForm(f => ({ ...f, contact:    { ...f.contact,    [k]: v } }));
-    const setTax  = (k, v) => setForm(f => ({ ...f, tax_scheme: { ...f.tax_scheme, [k]: v } }));
+    const setTax = (k, v) => setForm(f => ({ ...f, tax_scheme: { ...f.tax_scheme, [k]: v } }));
+
+    useEffect(() => {
+        if (!prefill) return;
+        setForm({
+            party_name: prefill.party_name || "",
+            customer_assigned_account_id: prefill.customer_assigned_account_id || "",
+            supplier_assigned_account_id: prefill.supplier_assigned_account_id || "",
+            address: {
+                street: prefill.address?.street || "",
+                city: prefill.address?.city || "",
+                state: prefill.address?.state || "",
+                postal_code: prefill.address?.postal_code || "",
+                country_code: prefill.address?.country_code || "AU",
+            },
+            contact: {
+                name: prefill.contact?.name || "",
+                telephone: prefill.contact?.telephone || "",
+                telefax: prefill.contact?.telefax || "",
+                email: prefill.contact?.email || "",
+            },
+            tax_scheme: {
+                registration_name: prefill.tax_scheme?.registration_name || "",
+                company_id: prefill.tax_scheme?.company_id || "",
+                exemption_reason: prefill.tax_scheme?.exemption_reason  || "",
+                scheme_id: prefill.tax_scheme?.scheme_id || "",
+                tax_type_code: prefill.tax_scheme?.tax_type_code || "",
+            },
+        });
+    }, [prefill]);
 
     const handleSubmit = async () => {
         if (!form.party_name.trim()) {
@@ -345,6 +383,18 @@ function NewBuyerForm({ onCreated, onCancel, onToast }) {
                     <ChevronLeftIcon /> Back
                 </button>
             </div>
+
+            {prefill && (
+                <div style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 14px", borderRadius: 8,
+                    background: "#fffbeb", border: "1px solid #fde68a",
+                    fontSize: 12, color: "#92400e",
+                }}>
+                    <span>✦</span>
+                    <span>Fields prefilled by AI — please review before creating</span>
+                </div>
+            )}
 
             {/* Account */}
             <div>
@@ -454,25 +504,52 @@ function NewBuyerForm({ onCreated, onCancel, onToast }) {
 
 // ─── Checkout form ────────────────────────────────────────────────────────────
 
-function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId }) {
+function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) {
     const [view, setView] = useState("checkout"); // "checkout" | "new-buyer" | "success"
 
-    const [buyers,        setBuyers]        = useState([]);
+    const [buyers, setBuyers] = useState([]);
     const [buyersLoading, setBuyersLoading] = useState(false);
 
-    const [buyerId,       setBuyerId]       = useState("");
-    const [deliveryDate,  setDeliveryDate]  = useState("");
-    const [currencyCode,  setCurrencyCode]  = useState("AUD");
-    const [sameAsBuyer,   setSameAsBuyer]   = useState(false);
+    const [buyerId, setBuyerId] = useState("");
+    const [deliveryDate, setDeliveryDate] = useState("");
+    const [currencyCode, setCurrencyCode] = useState("AUD");
+    const [sameAsBuyer, setSameAsBuyer] = useState(false);
     const [address, setAddress] = useState({
         street: "", city: "", state: "", postal_code: "", country_code: "AU",
     });
 
     const [submitting, setSubmitting] = useState(false);
-    const [result,     setResult]     = useState(null);
-    const [errors,     setErrors]     = useState({});
+    const [result, setResult] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [newBuyerPrefill, setNewBuyerPrefill] = useState(null);
 
     const setAddr = (k, v) => setAddress(a => ({ ...a, [k]: v }));
+
+    useEffect(() => {
+        if (!prefill) return;
+        const o = prefill.order;
+        const b = prefill.buyer;
+        const existingBuyerId = prefill.buyer_id;
+
+        if (o?.delivery_date) setDeliveryDate(o.delivery_date);
+        if (o?.currency_code) setCurrencyCode(o.currency_code);
+
+        if (o?.address) {
+            if (o.address.street) setAddr("street", o.address.street);
+            if (o.address.city) setAddr("city", o.address.city);
+            if (o.address.state) setAddr("state", o.address.state);
+            if (o.address.postal_code) setAddr("postal_code", o.address.postal_code);
+            if (o.address.country_code) setAddr("country_code", o.address.country_code);
+        }
+
+        if (existingBuyerId) {
+            setBuyerId(existingBuyerId);
+            setView("checkout");
+        } else if (b) {
+            setNewBuyerPrefill(b);
+            setView("new-buyer");
+        }
+    }, [prefill]);
 
     const fetchBuyers = useCallback(async () => {
         setBuyersLoading(true);
@@ -609,6 +686,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId }) {
                     onCreated={handleBuyerCreated}
                     onCancel={() => setView("checkout")}
                     onToast={onToast}
+                    prefill={newBuyerPrefill}
                 />
                 {/* Greyed checkout preview */}
                 <div style={{
@@ -644,6 +722,8 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId }) {
                             buyers={buyers}
                             loading={buyersLoading}
                             onAddClick={() => setView("new-buyer")}
+                            newBuyerPrefill={newBuyerPrefill}
+                            setView={setView}
                         />
                         {errors.buyerId && (
                             <div style={{ fontSize: 11, color: "#e11d48", marginTop: 4 }}>{errors.buyerId}</div>
@@ -794,7 +874,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId }) {
 
 // ─── Main CartDrawer ──────────────────────────────────────────────────────────
 
-export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId }) {
+export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefill }) {
     // "cart" | "checkout"
     const [view, setView] = useState("cart");
 
@@ -881,6 +961,7 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId }) {
                         onClose={onClose}
                         onSuccess={handleCheckoutSuccess}
                         sellerId={sellerId}
+                        prefill={prefill}
                     />
                 )}
             </div>
