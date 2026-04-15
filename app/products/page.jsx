@@ -6,6 +6,7 @@ import { CartDrawer } from "../../src/components/cart/CartDrawer";
 import { ProductCard } from "../../src/components/products/ProductCard";
 import { ProductFormModal } from "../../src/components/products/ProductFormModal";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
+import { Icon } from "../../src/components/ui/icons";
 
 // ─── Replace with your actual IDs (from localStorage, context, etc.) ───────
 const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
@@ -132,7 +133,7 @@ export default function ProductsPage() {
                     <div style={styles.navRight}>
                         {/* Search */}
                         <div style={styles.searchWrap}>
-                            <SearchIcon />
+                            <Icon.SearchIcon />
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
@@ -159,7 +160,7 @@ export default function ProductsPage() {
                             onClick={() => { setEditProduct(null); setShowForm(true); }}
                             style={styles.addProductBtn}
                         >
-                            <PlusIcon /> New Catalogue
+                            <Icon.PlusIcon /> New Catalogue
                         </button>
 
                         {/* Cart button */}
@@ -168,7 +169,7 @@ export default function ProductsPage() {
                             style={styles.cartBtn}
                             aria-label="Open cart"
                         >
-                            <CartIcon />
+                            <Icon.CartIcon />
                             {cartItemCount > 0 && (
                                 <span style={styles.cartBadge}>{cartItemCount}</span>
                             )}
@@ -202,7 +203,7 @@ export default function ProductsPage() {
                     ) : filtered.length === 0 ? (
                         <div style={styles.emptyState}>
                             <div style={styles.emptyIcon}>
-                                <EmptyIcon />
+                                <Icon.EmptyIcon />
                             </div>
                             <div style={styles.emptyText}>
                                 {search ? "No catalogues match your search" : "No catalogues yet"}
@@ -475,46 +476,3 @@ const skeletonStyles = {
         marginTop: 4,
     },
 };
-
-/* ── Icons ─────────────────────────────────────────────────── */
-function SearchIcon() {
-    return (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-    );
-}
-
-function PlusIcon() {
-    return (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-    );
-}
-
-function CartIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
-    );
-}
-
-function EmptyIcon() {
-    return (
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="1">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21,15 16,10 5,21"/>
-        </svg>
-    );
-}
