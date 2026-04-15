@@ -7,20 +7,26 @@ import { ProductCard } from "../../src/components/products/ProductCard";
 import { ProductFormModal } from "../../src/components/products/ProductFormModal";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { Icon } from "../../src/components/ui/icons";
+import { extractText } from "../../src/api/ai";
 
-// ─── Replace with your actual IDs (from localStorage, context, etc.) ───────
+// ─── Replace with actual IDs (from localStorage, context, etc.) ───────
 const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
+const API_KEY = process.env.NEXT_PUBLIC_ORDER_API_KEY
 
 export default function ProductsPage() {
-    const [products, setProducts]       = useState([]);
-    const [loading, setLoading]         = useState(true);
-    const [cart, setCart]               = useState(null);
-    const [cartOpen, setCartOpen]       = useState(false);
-    const [showForm, setShowForm]       = useState(false);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [cart, setCart] = useState(null);
+    const [cartOpen, setCartOpen] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
-    const [isManaging, setIsManaging]   = useState(false);
-    const [search, setSearch]           = useState("");
+    const [isManaging, setIsManaging] = useState(false);
+    const [search, setSearch] = useState("");
     const [cartLoading, setCartLoading] = useState(false);
+    const [showAiModal, setShowAiModal] = useState(false);
+    const [aiText, setAiText] = useState("");
+    const [aiProcessing, setAiProcessing] = useState(false);
+    const [aiPrefill, setAiPrefill] = useState(null);
 
     const { toasts, addToast } = useToast();
 
@@ -93,6 +99,35 @@ export default function ProductsPage() {
         }
     };
 
+    const handleAiExtract = async () => {
+    if (!aiText.trim()) return;
+    setAiProcessing(true);
+    try {
+        const result = await extractText(aiText, SELLER_ID, API_KEY);
+
+        // Add products to cart
+        if (result?.product_id?.length) {
+            for (const [productId, quantity] of result.product_id) {
+                try {
+                    await addToCart(SELLER_ID, { product_id: productId, quantity: parseInt(quantity) || 1 });
+                } catch { /* skip products that fail */ }
+            }
+            await fetchCart();
+        }
+
+        // Store prefill data and open cart
+        setAiPrefill(result);
+        setShowAiModal(false);
+        setAiText("");
+        setCartOpen(true);
+        addToast("Fields extracted and cart updated!", "success");
+    } catch (err) {
+        addToast(err?.error || "Extraction failed", "error");
+    } finally {
+        setAiProcessing(false);
+    }
+};
+
     const cartItemCount = cart?.itemCount || 0;
 
     const filtered = products.filter(p =>
@@ -141,6 +176,21 @@ export default function ProductsPage() {
                                 style={styles.searchInput}
                             />
                         </div>
+
+                        {/* AI Extract button — add this right before the "New Catalogue" button */}
+                        <button
+                            onClick={() => setShowAiModal(true)}
+                            style={{
+                                display: "flex", alignItems: "center", gap: 6,
+                                padding: "7px 16px", borderRadius: 30,
+                                border: "1px solid #e5e5e5", background: "#0f172a",
+                                fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#fff",
+                                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                                flexShrink: 0,
+                            }}
+                        >
+                            ✦ AI Extract
+                        </button>
 
                         {/* Manage toggle */}
                         <button
@@ -246,11 +296,91 @@ export default function ProductsPage() {
             {cartOpen && (
                 <CartDrawer
                     cart={cart}
-                    onClose={() => setCartOpen(false)}
+                    onClose={() => { setCartOpen(false); setAiPrefill(null); }}
                     onToast={addToast}
                     onRefresh={fetchCart}
                     sellerId={SELLER_ID}
+                    prefill={aiPrefill}
                 />
+            )}
+
+            {/* AI Extract Modal */}
+            {showAiModal && (
+                <div style={{
+                    position: "fixed", inset: 0, zIndex: 500,
+                    background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: 24,
+                }}>
+                    <div style={{
+                        background: "#fff", borderRadius: 16, padding: 28,
+                        width: "100%", maxWidth: 540,
+                        boxShadow: "0 24px 64px rgba(0,0,0,0.16)",
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        display: "flex", flexDirection: "column", gap: 16,
+                    }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                            <div>
+                                <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>✦ AI Order Extract</div>
+                                <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>
+                                    Paste unstructured order text and AI will fill in the checkout form
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => { setShowAiModal(false); setAiText(""); }}
+                                style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", padding: 4 }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <textarea
+                            value={aiText}
+                            onChange={e => setAiText(e.target.value)}
+                            placeholder={"e.g. Order 50 steel bolts from ABC Supplies. Deliver to 123 Main St Sydney NSW 2000 by June 10 2024. Currency AUD."}
+                            rows={6}
+                            style={{
+                                width: "100%", padding: "12px 14px",
+                                border: "1px solid #e2e8f0", borderRadius: 10,
+                                fontSize: 13, color: "#0f172a", resize: "vertical",
+                                fontFamily: "inherit", outline: "none",
+                                boxSizing: "border-box", lineHeight: 1.6,
+                            }}
+                            onFocus={e => e.target.style.borderColor = "#94a3b8"}
+                            onBlur={e => e.target.style.borderColor = "#e2e8f0"}
+                        />
+
+                        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                            <button
+                                onClick={() => { setShowAiModal(false); setAiText(""); }}
+                                style={{
+                                    padding: "9px 20px", borderRadius: 8,
+                                    border: "1px solid #e2e8f0", background: "#fff",
+                                    fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#475569",
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAiExtract}
+                                disabled={aiProcessing || !aiText.trim()}
+                                style={{
+                                    padding: "9px 24px", borderRadius: 8, border: "none",
+                                    background: aiProcessing || !aiText.trim() ? "#94a3b8" : "#0f172a",
+                                    color: "#fff", fontSize: 13, fontWeight: 700,
+                                    cursor: aiProcessing || !aiText.trim() ? "not-allowed" : "pointer",
+                                    display: "flex", alignItems: "center", gap: 8,
+                                }}
+                            >
+                                {aiProcessing ? (
+                                    <><svg style={{ animation: "spin 1s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Processing…</>
+                                ) : "Extract & Fill"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <ToastContainer toasts={toasts} />
