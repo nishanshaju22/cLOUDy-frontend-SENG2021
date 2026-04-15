@@ -529,6 +529,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
         if (!prefill) return;
         const o = prefill.order;
         const b = prefill.buyer;
+        const existingBuyerId = prefill.buyer_id;
 
         if (o?.delivery_date) setDeliveryDate(o.delivery_date);
         if (o?.currency_code) setCurrencyCode(o.currency_code);
@@ -541,7 +542,10 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
             if (o.address.country_code) setAddr("country_code", o.address.country_code);
         }
 
-        if (b) {
+        if (existingBuyerId) {
+            setBuyerId(existingBuyerId);
+            setView("checkout");
+        } else if (b) {
             setNewBuyerPrefill(b);
             setView("new-buyer");
         }
