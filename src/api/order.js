@@ -205,6 +205,16 @@ async function checkout(sellerId, data) {
     }
 };
 
+async function getInventoryBySeller(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 export { 
     createOrder, 
     updateOrder, 
@@ -227,5 +237,6 @@ export {
     updateCartItem,
     removeFromCart,
     clearCart,
-    checkout
+    checkout,
+    getInventoryBySeller
 }

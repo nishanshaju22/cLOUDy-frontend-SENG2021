@@ -522,6 +522,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
     const [result, setResult] = useState(null);
     const [errors, setErrors] = useState({});
     const [newBuyerPrefill, setNewBuyerPrefill] = useState(null);
+    const [inventoryError, setInventoryError] = useState(null);
 
     const setAddr = (k, v) => setAddress(a => ({ ...a, [k]: v }));
 
@@ -631,9 +632,14 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
             setResult(response);
             setView("success");
             onSuccess?.();
-        } catch (err) {
-            console.log(err)
-            onToast(err?.error || "Checkout failed", "error");
+        }  catch (err) {
+            if (err?.items) {
+                setInventoryError(err);
+            } else {
+                onToast(err?.error || "Checkout failed", "error");
+            }
+            setSubmitting(false);
+            return;
         } finally {
             setSubmitting(false);
         }
@@ -707,6 +713,8 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
 
     // ── Main checkout view ────────────────────────────────────────────────────
     const selectedBuyer = buyers.find(b => b.buyerId === buyerId);
+
+    console.log(selectedBuyer)
 
     return (
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -858,6 +866,27 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
                     </div>
                 </div>
             </div>
+
+            {inventoryError && (
+                <div style={{
+                    margin: "0 24px 16px",
+                    padding: "12px 14px",
+                    background: "#fff1f2", border: "1px solid #fecdd3",
+                    borderRadius: 8,
+                }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#be123c", marginBottom: 6 }}>
+                        Insufficient inventory
+                    </div>
+                    {inventoryError.items.map((item, i) => (
+                        <div key={i} style={{ fontSize: 12, color: "#9f1239", marginTop: 3 }}>
+                            {item.itemName}: need {item.required}, only {item.available} available
+                        </div>
+                    ))}
+                    <div style={{ fontSize: 12, color: "#be123c", marginTop: 8 }}>
+                        Reduce quantities or remove affected items from cart.
+                    </div>
+                </div>
+            )}
 
             {/* Sticky footer */}
             <div style={footerStyles}>
