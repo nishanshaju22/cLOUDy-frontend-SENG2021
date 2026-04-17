@@ -1,12 +1,11 @@
 import axios from 'axios'
 
 const order_api = axios.create({
-	baseURL: '/api',
+	baseURL: 'http://localhost:5001/api',
 	headers: {
 		'Content-Type': 'application/json',
 		"api-key": process.env.NEXT_PUBLIC_ORDER_API_KEY,
-	},
-	withCredentials: true
+	}
 });
 
 order_api.interceptors.response.use(response => {

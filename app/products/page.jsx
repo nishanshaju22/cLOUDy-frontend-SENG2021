@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { addToCart, getCart, getProductsBySeller, createProduct, updateProduct, deleteProduct, } from "../../src/api/order";
+import { addToCart, getCart, getProductsBySeller, createProduct, updateProduct, deleteProduct, updateCartItem, } from "../../src/api/order";
 import { CartDrawer } from "../../src/components/cart/CartDrawer";
 import { ProductCard } from "../../src/components/products/ProductCard";
 import { ProductFormModal } from "../../src/components/products/ProductFormModal";
@@ -69,6 +69,15 @@ export default function ProductsPage() {
             console.log(err)
             addToast(err?.error || "Failed to add to cart", "error");
             throw err;
+        }
+    };
+
+    const handleUpdateQty = async (productId, quantity) => {
+        try {
+            await updateCartItem(SELLER_ID, productId, { quantity });
+            await fetchCart();
+        } catch (err) {
+            addToast("Failed to update quantity", "error");
         }
     };
 
@@ -275,6 +284,8 @@ export default function ProductsPage() {
                                     onEdit={handleEdit}
                                     onDelete={handleDelete}
                                     isManaging={isManaging}
+                                    cart={cart}
+                                    onUpdateQty={handleUpdateQty}
                                 />
                             ))}
                         </div>
