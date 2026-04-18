@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const order_api = axios.create({
-	baseURL: 'http://cloudy-1831309437.us-east-1.elb.amazonaws.com/api',
+	baseURL: 'http://localhost:5001/api',
 	headers: {
 		'Content-Type': 'application/json',
 		"api-key": process.env.NEXT_PUBLIC_ORDER_API_KEY,
