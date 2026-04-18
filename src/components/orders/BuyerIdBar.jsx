@@ -54,7 +54,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
     }
 
     function handleSelect(buyer) {
-        onChange(buyer.buyerId || buyer.buyer_id);
+        onChange(buyer.buyerId || buyer.buyer_id, buyer.contact_email);
         setOpen(false);
         setSearch("");
     }
@@ -213,7 +213,10 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
                     onToast={onToast}
                     onSuccess={(buyer) => {
                         if (buyer?.buyerId) {
-                            onChange(buyer.buyerId);
+                            onChange(
+                                buyer.buyerId,
+                                buyer.contact_email
+                            );
                         }
                     }}
                     sellerId={sellerId}
