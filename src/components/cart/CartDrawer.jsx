@@ -527,7 +527,6 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
     const [result, setResult] = useState(null);
     const [errors, setErrors] = useState({});
     const [newBuyerPrefill, setNewBuyerPrefill] = useState(null);
-    const [inventoryError, setInventoryError] = useState(null);
 
     const setAddr = (k, v) => setAddress(a => ({ ...a, [k]: v }));
 
@@ -637,11 +636,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
             setView("success");
             onSuccess?.();
         }  catch (err) {
-            if (err?.items) {
-                setInventoryError(err);
-            } else {
-                onToast(err?.error || "Checkout failed", "error");
-            }
+            onToast(err?.error || "Checkout failed", "error");
             setSubmitting(false);
             return;
         } finally {
@@ -870,27 +865,6 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
                 </div>
             </div>
 
-            {inventoryError && (
-                <div style={{
-                    margin: "0 24px 16px",
-                    padding: "12px 14px",
-                    background: "#fff1f2", border: "1px solid #fecdd3",
-                    borderRadius: 8,
-                }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#be123c", marginBottom: 6 }}>
-                        Insufficient inventory
-                    </div>
-                    {inventoryError.items.map((item, i) => (
-                        <div key={i} style={{ fontSize: 12, color: "#9f1239", marginTop: 3 }}>
-                            {item.itemName}: need {item.required}, only {item.available} available
-                        </div>
-                    ))}
-                    <div style={{ fontSize: 12, color: "#be123c", marginTop: 8 }}>
-                        Reduce quantities or remove affected items from cart.
-                    </div>
-                </div>
-            )}
-
             {/* Sticky footer */}
             <div style={footerStyles}>
                 <button onClick={handleSubmit} disabled={submitting} style={btnStyles.primary}>
@@ -1032,6 +1006,8 @@ function CartItem({ item, sellerId, onToast, onRefresh }) {
     const [qty, setQty] = useState(item.quantity);
     const [updating, setUpdating] = useState(false);
     const [removing, setRemoving] = useState(false);
+    const [atMax, setAtMax] = useState(false);
+
 
     const handleQtyChange = async (newQty) => {
         if (newQty < 1 || !sellerId) return;
@@ -1039,10 +1015,16 @@ function CartItem({ item, sellerId, onToast, onRefresh }) {
         setUpdating(true);
         try {
             await updateCartItem(sellerId, item.productId, { "quantity": newQty });
+            setAtMax(false);
             onRefresh();
-        } catch {
+        } catch (err) {
             setQty(item.quantity);
-            onToast("Failed to update quantity", "error");
+            if (err?.items) {
+                setAtMax(true);
+                onToast("Failed to update quantity, Inventory maxed out", "error");
+            } else {
+                onToast("Failed to update quantity", "error");
+            }
         } finally {
             setUpdating(false);
         }
@@ -1088,10 +1070,12 @@ function CartItem({ item, sellerId, onToast, onRefresh }) {
                             <span style={{ fontSize: 13, fontWeight: 500, minWidth: 24, textAlign: "center", color: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 {updating ? <SpinnerIcon size={11} color="#111" /> : qty}
                             </span>
-                            <button onClick={() => handleQtyChange(qty + 1)} disabled={updating}
-                                style={{ width: 28, height: 28, border: "none", background: "none", cursor: "pointer", fontSize: 16, color: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                +
-                            </button>
+                            {!atMax && (
+                                <button onClick={() => handleQtyChange(qty + 1)} disabled={updating}
+                                    style={{ width: 28, height: 28, border: "none", background: "none", cursor: "pointer", fontSize: 16, color: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    +
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <span style={{ fontSize: 12, color: "#757575" }}>Qty: {qty}</span>

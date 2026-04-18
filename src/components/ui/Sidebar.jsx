@@ -36,7 +36,8 @@ export function Sidebar({ activeTab, onTabChange, onCreateOrder }) {
                 backdropFilter: "blur(20px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
                 borderRight: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "inset -1px 0 0 rgba(255,255,255,0.06), 4px 0 24px rgba(0,0,0,0.18)"
+                boxShadow: "inset -1px 0 0 rgba(255,255,255,0.06), 4px 0 24px rgba(0,0,0,0.18)",
+                borderRadius: "0px 40px 40px 0px"
             }}
         >
             {/* ── Collapse toggle ── */}
