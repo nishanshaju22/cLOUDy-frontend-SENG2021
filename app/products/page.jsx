@@ -9,7 +9,6 @@ import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { Icon } from "../../src/components/ui/icons";
 import { extractText } from "../../src/api/ai";
 
-// ─── Replace with actual IDs (from localStorage, context, etc.) ───────
 const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
 const API_KEY = process.env.NEXT_PUBLIC_ORDER_API_KEY
 

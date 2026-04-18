@@ -457,7 +457,7 @@ const styles = {
     emptyText: { fontSize: 18, fontWeight: 600, color: "#111" },
     emptySub: { fontSize: 14, color: "#757575" },
     backdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200, backdropFilter: "blur(2px)" },
-    drawer: { position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "#fff", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)" },
+    drawer: { position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "#fff", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)", borderRadius: "20px 0px 0px 20px" },
     drawerHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid #f0f0f0" },
     drawerTitle: { fontSize: 17, fontWeight: 600, color: "#111" },
     closeBtn: { background: "none", border: "none", cursor: "pointer", color: "#757575", padding: 4, display: "flex" },

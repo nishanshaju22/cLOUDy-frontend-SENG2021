@@ -1,56 +1,273 @@
+// "use client";
+
+// import { useState, useCallback } from "react";
+// import { BuyerIdBar } from "../../src/components/orders/BuyerIdBar";
+// import { OrdersList } from "../../src/components/orders/OrdersList";
+// import { CreateOrderModal } from "../../src/components/orders/CreateOrderModal";
+// import { Sidebar } from "../../src/components/ui/Sidebar";
+// import { Toast } from "../../src/components/ui/ui";
+
+// /*
+//   THEMING NOTES
+//   ─────────────
+//   This page reads from CSS custom properties defined in globals.css.
+//   The "professional" theme renders a flat white layout identical to the
+//   Inventory / Products pages.
+
+//   When you later implement "cloudy" or "stormy":
+//     • Set --glass-bg, --glass-blur, --glass-border, --glass-shadow,
+//       --glass-highlight in that theme block.
+//     • Add your MistBackground (or equivalent) component back — it only
+//       renders when the theme is NOT "professional".
+//     • Nothing in this JSX file needs to change.
+// */
+
+// export default function OrdersPage() {
+//     const [buyerId, setBuyerId] = useState("");
+//     const [buyerEmail, setBuyerEmail] = useState("");
+//     const [activeTab, setActiveTab] = useState("orders");
+//     const [showCreate, setShowCreate] = useState(false);
+//     const [toast, setToast] = useState(null);
+
+//     const showToast = useCallback((msg, type = "success") => {
+//         setToast({ msg, type });
+//     }, []);
+
+//     const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
+
+//     return (
+//         <>
+//             <style>{`
+//                 @keyframes slideUp {
+//                     from { transform: translateY(12px); opacity: 0; }
+//                     to   { transform: translateY(0);    opacity: 1; }
+//                 }
+//                 @keyframes slideIn {
+//                     from { transform: translateX(100%); }
+//                     to   { transform: translateX(0);    }
+//                 }
+//                 * { box-sizing: border-box; }
+//                 body {
+//                     margin: 0;
+//                     font-family: var(--font-sans);
+//                     background: var(--page-bg);
+//                 }
+//                 select:focus, input:focus {
+//                     outline: none;
+//                     border-color: var(--border-strong) !important;
+//                 }
+//             `}</style>
+
+//             <div style={styles.layout}>
+//                 <Sidebar
+//                     activeTab={activeTab}
+//                     onTabChange={setActiveTab}
+//                     onCreateOrder={() => setShowCreate(true)}
+//                 />
+
+//                 <main style={styles.main}>
+//                     <BuyerIdBar
+//                         buyerId={buyerId}
+//                         onChange={(id, email) => {
+//                             setBuyerId(id);
+//                             setBuyerEmail(email);
+//                         }}
+//                         onClear={() => {
+//                             setBuyerId("");
+//                             setBuyerEmail("");
+//                         }}
+//                         onToast={showToast}
+//                         sellerId={SELLER_ID}
+//                     />
+
+//                     {/* Page heading */}
+//                     <div style={styles.heading}>
+//                         <h1 style={styles.title}>My Orders</h1>
+//                         <p style={styles.subtitle}>
+//                             Browse and manage all orders for this buyer.
+//                         </p>
+//                     </div>
+
+//                     {/*
+//                         The "content card" below uses CSS variables for every
+//                         visual property. In "professional" these resolve to a
+//                         plain white card. In "cloudy" / "stormy" they resolve
+//                         to a frosted-glass panel — no JSX changes needed.
+//                     */}
+//                     <div style={styles.card}>
+//                         {/* Glass highlight overlay — invisible in professional */}
+//                         <div style={styles.cardHighlight} aria-hidden />
+
+//                         {/* Content */}
+//                         <div style={{ position: "relative" }}>
+//                             <OrdersList
+//                                 buyerId={buyerId}
+//                                 buyerEmail={buyerEmail}
+//                                 onToast={showToast}
+//                                 activeTab={activeTab}
+//                             />
+//                         </div>
+//                     </div>
+//                 </main>
+//             </div>
+
+//             {showCreate && (
+//                 <CreateOrderModal
+//                     buyerId={buyerId}
+//                     onClose={() => setShowCreate(false)}
+//                     onToast={showToast}
+//                 />
+//             )}
+
+//             {toast && (
+//                 <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />
+//             )}
+//         </>
+//     );
+// }
+
+// const styles = {
+//     layout: {
+//         minHeight: "100vh",
+//         display: "flex",
+//         background: "var(--page-bg)",
+//         fontFamily: "var(--font-sans)",
+//     },
+
+//     main: {
+//         flex: 1,
+//         padding: "36px 40px",
+//         position: "relative",
+//         zIndex: 1,
+//     },
+
+//     heading: {
+//         marginBottom: 28,
+//     },
+
+//     title: {
+//         margin: 0,
+//         fontSize: 28,
+//         fontWeight: 800,
+//         letterSpacing: "-0.03em",
+//         color: "var(--text-primary)",
+//     },
+
+//     subtitle: {
+//         margin: "4px 0 0",
+//         fontSize: 13,
+//         color: "var(--text-secondary)",
+//     },
+
+//     /*
+//      * This card is the key theme-aware element.
+//      *
+//      * Professional → flat white surface, plain border, no blur
+//      * Cloudy       → frosted blue-white glass, backdrop-blur, soft shadow
+//      * Stormy       → dark glass, high contrast, dramatic shadow
+//      *
+//      * All of that is controlled entirely from globals.css.
+//      */
+//     card: {
+//         position: "relative",
+//         background: "var(--glass-bg)",        // white in professional, gradient in glass themes
+//         border: "1px solid var(--glass-border)",
+//         borderRadius: 14,
+//         padding: "28px 32px",
+//         boxShadow: "var(--glass-shadow)",
+//         backdropFilter: "blur(var(--glass-blur))",
+//         WebkitBackdropFilter: "blur(var(--glass-blur))",
+//         overflow: "hidden",
+//     },
+
+//     /*
+//      * Subtle highlight stripe at the top of the card.
+//      * Invisible (transparent) in professional, glassy sheen in other themes.
+//      */
+//     cardHighlight: {
+//         pointerEvents: "none",
+//         position: "absolute",
+//         inset: 0,
+//         borderRadius: 14,
+//         background: "var(--glass-highlight)",
+//         opacity: 0.6,
+//     },
+// };
+
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { BuyerIdBar } from "../../src/components/orders/BuyerIdBar";
 import { OrdersList } from "../../src/components/orders/OrdersList";
 import { CreateOrderModal } from "../../src/components/orders/CreateOrderModal";
-import { MistBackground } from "../../src/components/ui/MistBackground";
 import { Sidebar } from "../../src/components/ui/Sidebar";
 import { Toast } from "../../src/components/ui/ui";
 
+import { getAuth } from "../../src/lib/auth";
+
 export default function OrdersPage() {
+    const router = useRouter();
+
+    const [auth, setAuth] = useState(null);
     const [buyerId, setBuyerId] = useState("");
     const [buyerEmail, setBuyerEmail] = useState("");
     const [activeTab, setActiveTab] = useState("orders");
     const [showCreate, setShowCreate] = useState(false);
     const [toast, setToast] = useState(null);
 
+    // 🔐 Auth check
+    useEffect(() => {
+        const stored = getAuth();
+
+        if (!stored?.user || !stored?.seller) {
+            router.replace("/login");
+            return;
+        }
+
+        setAuth(stored);
+    }, [router]);
+
     const showToast = useCallback((msg, type = "success") => {
         setToast({ msg, type });
     }, []);
 
+    if (!auth) return null;
+
+    const sellerId = auth.seller?.seller_id;
+
     return (
         <>
-            <MistBackground />
-
             <style>{`
-                @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-                @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
+                @keyframes slideUp {
+                    from { transform: translateY(12px); opacity: 0; }
+                    to   { transform: translateY(0);    opacity: 1; }
+                }
+                @keyframes slideIn {
+                    from { transform: translateX(100%); }
+                    to   { transform: translateX(0);    }
+                }
                 * { box-sizing: border-box; }
-                body { margin: 0; font-family: 'DM Sans', 'Geist', ui-sans-serif, system-ui, sans-serif; }
-
+                body {
+                    margin: 0;
+                    font-family: var(--font-sans);
+                    background: var(--page-bg);
+                }
                 select:focus, input:focus {
                     outline: none;
-                    border-color: rgba(148,163,184,0.4) !important;
+                    border-color: var(--border-strong) !important;
                 }
             `}</style>
 
-            <div className="min-h-screen flex bg-transparent">
+            <div style={styles.layout}>
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                     onCreateOrder={() => setShowCreate(true)}
                 />
 
-                <main 
-                    className="flex-1 px-10 py-9"
-                    style={{
-                        position: "relative",
-                        zIndex: 1,
-                        marginLeft: "-1px",
-                    }}
-                >
+                <main style={styles.main}>
                     <BuyerIdBar
                         buyerId={buyerId}
                         onChange={(id, email) => {
@@ -62,70 +279,20 @@ export default function OrdersPage() {
                             setBuyerEmail("");
                         }}
                         onToast={showToast}
+                        sellerId={sellerId}
                     />
 
-                    {/* Heading */}
-                    <div className="mb-8">
-                        <h1 className="text-[28px] font-extrabold tracking-[-0.03em] text-foreground">
-                            My Orders
-                        </h1>
-                        <p className="mt-1 text-sm text-amber-50">
+                    <div style={styles.heading}>
+                        <h1 style={styles.title}>My Orders</h1>
+                        <p style={styles.subtitle}>
                             Browse and manage all orders for this buyer.
                         </p>
                     </div>
 
-                    {/* Glass container */}
-                    <div
-                        className="
-                            relative
-                            rounded-3xl
-                            p-10
+                    <div style={styles.card}>
+                        <div style={styles.cardHighlight} aria-hidden />
 
-                            backdrop-blur-[36px]
-
-                            border
-                          border-white/30
-
-                            shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-
-                            bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.22),rgba(52,46,55,0.62))]
-                        "
-                    >
-                        {/* bg-[linear-gradient(to_bottom_right,rgba(30,101,172,0.22),rgba(30,101,172,0.22))] */}
-                        {/* bg-[linear-gradient(to_bottom_right,rgba(160,200,240,0.22),rgba(160,200,240,0.22))] */}
-                        {/* bg-[linear-gradient(to_bottom_right,rgba(17,59,100,0.22),rgba(17,59,100,0.22))] */}
-                        {/* bg-[linear-gradient(to_bottom_right,rgba(105,56,92,0.22),rgba(105,56,92,0.22))] */}
-
-                        {/* Top glass highlight */}
-                        <div
-                            className="
-                                pointer-events-none
-                                absolute
-                                inset-0
-                                rounded-3xl
-
-                                bg-[linear-gradient(to_bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.06))]
-
-                                opacity-60
-                            "
-                        />
-
-                        {/* Frost diffusion layer */}
-                        <div
-                            className="
-                                pointer-events-none
-                                absolute
-                                inset-0
-                                rounded-3xl
-
-                                bg-white/20
-                                blur-2xl
-                                opacity-40
-                            "
-                        />
-
-                        {/* Content */}
-                        <div className="relative">
+                        <div style={{ position: "relative" }}>
                             <OrdersList
                                 buyerId={buyerId}
                                 buyerEmail={buyerEmail}
@@ -146,8 +313,67 @@ export default function OrdersPage() {
             )}
 
             {toast && (
-                <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />
+                <Toast
+                    msg={toast.msg}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
             )}
         </>
     );
 }
+
+const styles = {
+    layout: {
+        minHeight: "100vh",
+        display: "flex",
+        background: "var(--page-bg)",
+        fontFamily: "var(--font-sans)",
+    },
+
+    main: {
+        flex: 1,
+        padding: "36px 40px",
+        position: "relative",
+        zIndex: 1,
+    },
+
+    heading: {
+        marginBottom: 28,
+    },
+
+    title: {
+        margin: 0,
+        fontSize: 28,
+        fontWeight: 800,
+        letterSpacing: "-0.03em",
+        color: "var(--text-primary)",
+    },
+
+    subtitle: {
+        margin: "4px 0 0",
+        fontSize: 13,
+        color: "var(--text-secondary)",
+    },
+
+    card: {
+        position: "relative",
+        background: "var(--glass-bg)",
+        border: "1px solid var(--glass-border)",
+        borderRadius: 14,
+        padding: "28px 32px",
+        boxShadow: "var(--glass-shadow)",
+        backdropFilter: "blur(var(--glass-blur))",
+        WebkitBackdropFilter: "blur(var(--glass-blur))",
+        overflow: "hidden",
+    },
+
+    cardHighlight: {
+        pointerEvents: "none",
+        position: "absolute",
+        inset: 0,
+        borderRadius: 14,
+        background: "var(--glass-highlight)",
+        opacity: 0.6,
+    },
+};
