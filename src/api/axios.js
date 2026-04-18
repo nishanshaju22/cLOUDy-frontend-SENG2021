@@ -9,7 +9,6 @@ const order_api = axios.create({
 });
 
 order_api.interceptors.response.use(response => {
-	console.log(`✅ [Response] ${response.status} ${response.config.url}`);
 	return response;
 }, error => {
 	console.error(`❌ [API Error] ${error.response?.status}:`, error.message);

@@ -52,7 +52,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     }
 
     function handleSelect(buyer) {
-        onChange(buyer.buyerId);
+        onChange(buyer.buyerId, buyer.contact_email);
         setOpen(false);
         setSearch("");
     }
@@ -211,7 +211,10 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                     onToast={onToast}
                     onSuccess={(buyer) => {
                         if (buyer?.buyerId) {
-                            onChange(buyer.buyerId);
+                            onChange(
+                                buyer.buyerId,
+                                buyer.contact_email
+                            );
                         }
                     }}
                 />
