@@ -9,6 +9,15 @@ async function createBuyer(buyerData) {
     }
 }
 
+export async function deleteBuyer(buyerId) {
+    try {
+        const response = await order_api.delete(`/v1/buyer/${buyerId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || {error: "Failed to delete buyer"};
+    }
+}
+
 async function createOrder(orderData, buyerId) {
     try {
         const response = await order_api.post(`/v2/buyer/${buyerId}/order`, orderData, { responseType: "text" });

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AddBuyerButton } from "./AddBuyerButton";
 import { getBuyers } from "../../api/order";
+import { deleteBuyer } from "../../api/order";
 
 export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     const [open, setOpen] = useState(false);
@@ -55,6 +56,35 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
         onChange(buyer.buyerId, buyer.contact_email);
         setOpen(false);
         setSearch("");
+    }
+
+    async function handleDeleteBuyer(buyerId) {
+        if (!confirm("Delete this buyer? This cannot be undone.")) {
+            return;
+        }
+
+        try {
+            await deleteBuyer(buyerId);
+
+            onToast?.(
+                "Buyer deleted successfully",
+                "success"
+            );
+
+            const data = await getBuyers();
+            setBuyers(Array.isArray(data) ? data : []);
+
+            if (buyerId === buyerId) {
+                onClear?.();
+            }
+
+        } catch (err) {
+            onToast?.(
+                err?.message ||
+                "Failed to delete buyer. Ensure related orders are deleted.",
+                "error"
+            );
+        }
     }
 
     const filtered = buyers.filter((b) => {
@@ -299,12 +329,9 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                                 <BuyerRow
                                     key={buyer.buyerId}
                                     buyer={buyer}
-                                    selected={
-                                        buyer.buyerId === buyerId
-                                    }
-                                    onSelect={() =>
-                                        handleSelect(buyer)
-                                    }
+                                    selected={buyer.buyerId === buyerId}
+                                    onSelect={() => handleSelect(buyer)}
+                                    onDelete={() => handleDeleteBuyer(buyer.buyerId)}
                                 />
                             ))}
                     </div>
@@ -314,7 +341,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     );
 }
 
-function BuyerRow({ buyer, selected, onSelect }) {
+function BuyerRow({ buyer, selected, onSelect, onDelete }) {
     const [hovered, setHovered] = useState(false);
 
     return (
@@ -465,6 +492,42 @@ function BuyerRow({ buyer, selected, onSelect }) {
                     <path d="M20 6L9 17l-5-5" />
                 </svg>
             )}
+
+            <div
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                }}
+                style={{
+                    marginLeft: 8,
+                    padding: 4,
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    color: "#ef4444",
+                    display: "flex",
+                    alignItems: "center",
+                    opacity: 0.7,
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = 1;
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = 0.7;
+                }}
+            >
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                </svg>
+            </div>
         </div>
     );
 }
