@@ -257,15 +257,6 @@ async function deleteInventoryItem(sellerId, inventoryId) {
     }
 }
 
-async function getInventoryBySeller(sellerId) {
-    try {
-        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
 export { 
     createOrder, 
     updateOrder, 
