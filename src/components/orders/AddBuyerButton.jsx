@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { Field, Input, SectionLabel } from "../ui/ui";
-import { order_api } from "../../api/axios";
-
-async function createBuyer(buyerData) {
-    try {
-        const response = await order_api.post("/v1/buyer", buyerData);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
+import { buyerSellerLink, createBuyer } from "../../api/order";
 
 const emptyForm = () => ({
     customer_assigned_account_id: "",
@@ -39,7 +30,7 @@ const emptyForm = () => ({
     },
 });
 
-export function AddBuyerButton({ onToast, onSuccess }) {
+export function AddBuyerButton({ onToast, onSuccess, sellerId }) {
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState(emptyForm());
     const [loading, setLoading] = useState(false);
@@ -64,6 +55,11 @@ export function AddBuyerButton({ onToast, onSuccess }) {
 
         try {
             const result = await createBuyer(form);
+            const data = {
+                "buyer_id": result.buyerId,
+                "seller_id": sellerId
+            }
+            await buyerSellerLink(data)
             onToast?.("Buyer created successfully!", "success");
             onSuccess?.(result);
             handleClose();

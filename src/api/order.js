@@ -9,6 +9,15 @@ async function createBuyer(buyerData) {
     }
 }
 
+async function buyerSellerLink(buyerData) {
+    try {
+        const response = await order_api.post("/v1/buyer-seller", buyerData);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 async function createOrder(orderData, buyerId) {
     try {
         const response = await order_api.post(`/v2/buyer/${buyerId}/order`, orderData, { responseType: "text" });
@@ -72,10 +81,10 @@ async function deleteCancelledOrders(buyerId) {
     }
 }
 
-async function getBuyers() {
+async function getBuyers(sellerId) {
     try {
-        const response = await order_api.get("/v1/buyers");
-        return response.data.buyers;
+        const response = await order_api.get(`/v1/seller/${sellerId}/buyers`);
+        return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
     }
@@ -153,7 +162,6 @@ async function getCart(sellerId) {
         const response = await order_api.get(`v2/seller/${sellerId}/cart`);
         return response.data;
     } catch (error) {
-        console.log(error)
         throw error.response?.data || { error: "Something went wrong" };
     }
 };
@@ -197,10 +205,8 @@ async function clearCart(sellerId) {
 async function checkout(sellerId, data) {
     try {
         const response = await order_api.post(`/v2/seller/${sellerId}/cart/checkout`, data);
-        console.log(response)
         return response.data;
     } catch (error) {
-        console.log(error)
         throw error.response?.data || { error: "Something went wrong" };
     }
 };
@@ -260,6 +266,7 @@ export {
     getOrdersForBuyer, 
     deleteCancelledOrders, 
     createBuyer, 
+    buyerSellerLink,
     getBuyers, 
     getSellers, 
     createSeller, 

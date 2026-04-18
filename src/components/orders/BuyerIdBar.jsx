@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AddBuyerButton } from "./AddBuyerButton";
 import { getBuyers } from "../../api/order";
 
-export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
+export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
     const [open, setOpen] = useState(false);
     const [buyers, setBuyers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -12,7 +12,9 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     const [search, setSearch] = useState("");
     const containerRef = useRef(null);
 
-    const selectedBuyer = buyers.find((b) => b.buyerId === buyerId);
+    const selectedBuyer = buyers.find(
+        (b) => (b.buyerId || b.buyer_id) === buyerId
+    );
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -42,7 +44,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
         setError(null);
 
         try {
-            const data = await getBuyers();
+            const data = await getBuyers(sellerId);
             setBuyers(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err?.error || "Failed to load buyers");
@@ -52,7 +54,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     }
 
     function handleSelect(buyer) {
-        onChange(buyer.buyerId, buyer.contact_email);
+        onChange(buyer.buyerId || buyer.buyer_id, buyer.contact_email);
         setOpen(false);
         setSearch("");
     }
@@ -217,6 +219,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                             );
                         }
                     }}
+                    sellerId={sellerId}
                 />
             </div>
 
@@ -297,14 +300,10 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                             !error &&
                             filtered.map((buyer) => (
                                 <BuyerRow
-                                    key={buyer.buyerId}
+                                    key={buyer.buyerId || buyer.buyer_id}
                                     buyer={buyer}
-                                    selected={
-                                        buyer.buyerId === buyerId
-                                    }
-                                    onSelect={() =>
-                                        handleSelect(buyer)
-                                    }
+                                    selected={(buyer.buyerId || buyer.buyer_id) === buyerId}
+                                    onSelect={() => handleSelect(buyer)}
                                 />
                             ))}
                     </div>
