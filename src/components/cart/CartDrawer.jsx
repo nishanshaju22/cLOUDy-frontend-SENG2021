@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { updateCartItem, removeFromCart } from "../../api/order";
+import { updateCartItem, removeFromCart, buyerSellerLink } from "../../api/order";
 import { getBuyers, createBuyer, checkout } from "../../api/order";
 import { SpinnerIcon } from "../products/ProductCard";
 
@@ -302,7 +302,7 @@ const emptyBuyerForm = () => ({
     tax_scheme: { registration_name: "", company_id: "", exemption_reason: "", scheme_id: "", tax_type_code: "" },
 });
 
-function NewBuyerForm({ onCreated, onCancel, onToast, prefill }) {
+function NewBuyerForm({ onCreated, onCancel, onToast, prefill, sellerId }) {
     const [form, setForm] = useState(emptyBuyerForm());
     const [loading, setLoading] = useState(false);
 
@@ -350,6 +350,11 @@ function NewBuyerForm({ onCreated, onCancel, onToast, prefill }) {
         setLoading(true);
         try {
             const result = await createBuyer(form);
+            const data = {
+                "buyer_id": result.buyerId,
+                "seller_id": sellerId
+            }
+            await buyerSellerLink(data)
             onToast("Buyer created!", "success");
             onCreated(result);
         } catch (err) {
@@ -364,7 +369,7 @@ function NewBuyerForm({ onCreated, onCancel, onToast, prefill }) {
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>New Buyer</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", padding: "6px 0" }}>New Buyer</div>
                     <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>
                         Created buyer will auto-select for checkout
                     </div>
@@ -555,7 +560,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
     const fetchBuyers = useCallback(async () => {
         setBuyersLoading(true);
         try {
-            const data = await getBuyers();
+            const data = await getBuyers(sellerId);
             setBuyers(data);
         } catch {
             onToast("Failed to load buyers", "error");
@@ -628,7 +633,6 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
 
         try {
             const response = await checkout(sellerId, data);
-            console.log(response)
             setResult(response);
             setView("success");
             onSuccess?.();
@@ -648,11 +652,11 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
     // ── Success view ──────────────────────────────────────────────────────────
     if (view === "success") {
         return (
-            <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: "0 24px 24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: "10px 24px 24px" }}>
                 <div style={successBanner}>
                     <CheckCircleIcon />
                     <div>
-                        <div style={{ fontSize: 15, fontWeight: 700, color: "#15803d" }}>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "#15803d"}}>
                             Order placed successfully!
                         </div>
                         <div style={{ fontSize: 12, color: "#16a34a", marginTop: 2 }}>
@@ -693,6 +697,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
                     onCancel={() => setView("checkout")}
                     onToast={onToast}
                     prefill={newBuyerPrefill}
+                    sellerId={sellerId}
                 />
                 {/* Greyed checkout preview */}
                 <div style={{
@@ -714,15 +719,13 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
     // ── Main checkout view ────────────────────────────────────────────────────
     const selectedBuyer = buyers.find(b => b.buyerId === buyerId);
 
-    console.log(selectedBuyer)
-
     return (
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
             <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
 
                     {/* Buyer */}
-                    <div>
+                    <div style={{ padding: "6px 0" }}>
                         <SectionLabel>Buyer</SectionLabel>
                         <BuyerDropdown
                             buyerId={buyerId}
@@ -893,7 +896,7 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
                 <button onClick={handleSubmit} disabled={submitting} style={btnStyles.primary}>
                     {submitting
                         ? <><SpinnerIcon size={13} color="#fff" /> Placing Order…</>
-                        : "Place Order"
+                        : "Create Order"
                     }
                 </button>
             </div>
@@ -934,7 +937,7 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
                         )}
                         <CartIcon />
                         <span style={headerTitle}>
-                            {view === "checkout" ? "Checkout" : "Cart"}
+                            {view === "checkout" ? "Order Creation" : "View Selected Catalogue"}
                         </span>
                         {view === "cart" && !isEmpty && (
                             <span style={badgeStyle}>{cart.itemCount}</span>
@@ -978,7 +981,7 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
                                     onClick={() => setView("checkout")}
                                     style={btnStyles.primary}
                                 >
-                                    Proceed to Checkout
+                                    Proceed to Order Creation
                                 </button>
                             </div>
                         )}
