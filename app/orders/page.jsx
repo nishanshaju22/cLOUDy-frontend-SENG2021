@@ -10,6 +10,7 @@ import { Toast } from "../../src/components/ui/ui";
 
 export default function OrdersPage() {
     const [buyerId, setBuyerId] = useState("");
+    const [buyerEmail, setBuyerEmail] = useState("");
     const [activeTab, setActiveTab] = useState("orders");
     const [showCreate, setShowCreate] = useState(false);
     const [toast, setToast] = useState(null);
@@ -52,8 +53,14 @@ export default function OrdersPage() {
                 >
                     <BuyerIdBar
                         buyerId={buyerId}
-                        onChange={setBuyerId}
-                        onClear={() => setBuyerId("")}
+                        onChange={(id, email) => {
+                            setBuyerId(id);
+                            setBuyerEmail(email);
+                        }}
+                        onClear={() => {
+                            setBuyerId("");
+                            setBuyerEmail("");
+                        }}
                         onToast={showToast}
                     />
 
@@ -121,6 +128,7 @@ export default function OrdersPage() {
                         <div className="relative">
                             <OrdersList
                                 buyerId={buyerId}
+                                buyerEmail={buyerEmail}
                                 onToast={showToast}
                                 activeTab={activeTab}
                             />

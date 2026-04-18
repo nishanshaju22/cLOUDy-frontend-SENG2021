@@ -60,7 +60,7 @@ function GlassSelect({ style, children, ...props }) {
     );
 }
 
-export function OrdersList({ buyerId, onToast }) {
+export function OrdersList({ buyerId, buyerEmail, onToast }) {
     const [orders,      setOrders]      = useState([]);
     const [loading,     setLoading]     = useState(false);
     const [selected,    setSelected]    = useState(null);
@@ -241,6 +241,7 @@ export function OrdersList({ buyerId, onToast }) {
                         <OrderCard
                             key={order.orderId}
                             order={order}
+                            buyerEmail={buyerEmail}
                             buyerId={buyerId}
                             onClick={() => setSelected(order)}
                             onToast={onToast}
