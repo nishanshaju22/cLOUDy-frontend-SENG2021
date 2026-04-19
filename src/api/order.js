@@ -15,6 +15,8 @@ export async function deleteBuyer(buyerId) {
         return response.data;
     } catch (error) {
         throw error.response?.data || {error: "Failed to delete buyer"};
+    }
+}
       
 async function buyerSellerLink(buyerData) {
     try {
