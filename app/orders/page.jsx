@@ -206,9 +206,13 @@ import { Sidebar } from "../../src/components/ui/Sidebar";
 import { Toast } from "../../src/components/ui/ui";
 
 import { getAuth } from "../../src/lib/auth";
+import { useTheme } from "../context/ThemeContext";
+
+import { MistBackground } from "../../src/components/ui/MistBackground";
 
 export default function OrdersPage() {
     const router = useRouter();
+    const { theme } = useTheme();
 
     const [auth, setAuth] = useState(null);
     const [buyerId, setBuyerId] = useState("");
@@ -237,8 +241,13 @@ export default function OrdersPage() {
 
     const sellerId = auth.seller?.seller_id;
 
+    const isProfessional = theme === "professional";
+    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+
     return (
         <>
+            {hasAtmosphericBg && <MistBackground />}
+
             <style>{`
                 @keyframes slideUp {
                     from { transform: translateY(12px); opacity: 0; }
@@ -252,7 +261,12 @@ export default function OrdersPage() {
                 body {
                     margin: 0;
                     font-family: var(--font-sans);
-                    background: var(--page-bg);
+                    /*
+                     * Keep body transparent so the MistBackground WebGL canvas
+                     * shows through. Professional theme gets its bg from the
+                     * outer layout div below.
+                     */
+                    background: transparent;
                 }
                 select:focus, input:focus {
                     outline: none;
@@ -260,14 +274,33 @@ export default function OrdersPage() {
                 }
             `}</style>
 
-            <div style={styles.layout}>
+            <div
+                style={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    /*
+                     * Atmospheric themes: transparent so the canvas shows through.
+                     * Professional: solid white from the CSS token.
+                     */
+                    background: hasAtmosphericBg ? "transparent" : "var(--page-bg)",
+                    fontFamily: "var(--font-sans)",
+                }}
+            >
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                     onCreateOrder={() => setShowCreate(true)}
                 />
 
-                <main style={styles.main}>
+                <main
+                    style={{
+                        flex: 1,
+                        padding: "36px 40px",
+                        position: "relative",
+                        zIndex: 1,
+                        marginLeft: "-1px",
+                    }}
+                >
                     <BuyerIdBar
                         buyerId={buyerId}
                         onChange={(id, email) => {
@@ -282,17 +315,87 @@ export default function OrdersPage() {
                         sellerId={sellerId}
                     />
 
-                    <div style={styles.heading}>
-                        <h1 style={styles.title}>My Orders</h1>
-                        <p style={styles.subtitle}>
+                    {/* Heading */}
+                    <div style={{ marginBottom: 28 }}>
+                        <h1
+                            style={{
+                                margin: 0,
+                                fontSize: 28,
+                                fontWeight: 800,
+                                letterSpacing: "-0.03em",
+                                color: "var(--text-primary)",
+                            }}
+                        >
+                            My Orders
+                        </h1>
+                        <p
+                            style={{
+                                margin: "4px 0 0",
+                                fontSize: 13,
+                                color: hasAtmosphericBg
+                                    ? "rgb(0 0 0)"
+                                    : "var(--text-secondary)",
+                            }}
+                        >
                             Browse and manage all orders for this buyer.
                         </p>
                     </div>
 
-                    <div style={styles.card}>
-                        <div style={styles.cardHighlight} aria-hidden />
+                    {/* ── CLOUDY / STORMY GLASS GRID WRAPPER ── */}
+                    {hasAtmosphericBg && (
+                        <div
+                            className="
+                                relative w-full
+                                max-w-400 mx-auto
+                                rounded-3xl p-10
+                                overflow-hidden
+                                backdrop-blur-[20px]
+                                border border-white/30 border-s-8
+                                shadow-[0_16px_70px_rgba(0,0,0,0.12)]
+                                bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
+                            "
+                        >
+                            {/* Top glass highlight */}
+                            <div
+                                className="
+                                    pointer-events-none absolute inset-0
+                                    rounded-3xl
+                                    bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
+                                    opacity-60
+                                "
+                            />
 
-                        <div style={{ position: "relative" }}>
+                            {/* Frost diffusion layer */}
+                            <div
+                                className="
+                                    pointer-events-none absolute inset-0
+                                    rounded-3xl
+                                    bg-white/20 blur-2xl opacity-40
+                                "
+                            />
+                            {/* Content */}
+                            <div style={{ position: "relative" }}>
+                                <OrdersList
+                                    buyerId={buyerId}
+                                    buyerEmail={buyerEmail}
+                                    onToast={showToast}
+                                    activeTab={activeTab}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {isProfessional && (
+                        <div
+                            style={{
+                                position: "relative",
+                                background: "var(--surface)",
+                                border: "1px solid var(--border)",
+                                borderRadius: 14,
+                                padding: "28px 32px",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                            }}
+                        >
                             <OrdersList
                                 buyerId={buyerId}
                                 buyerEmail={buyerEmail}
@@ -300,7 +403,7 @@ export default function OrdersPage() {
                                 activeTab={activeTab}
                             />
                         </div>
-                    </div>
+                    )}
                 </main>
             </div>
 

@@ -6,13 +6,13 @@ import { createContext, useContext, useEffect, useState } from "react";
 const THEMES = ["professional", "cloudy", "stormy"];
 
 const ThemeContext = createContext({
-    theme: "professional",
+    theme: "cloudy",
     setTheme: () => {},
     themes: THEMES,
 });
 
 export function ThemeProvider({ children }) {
-    const [theme, setThemeState] = useState("professional");
+    const [theme, setThemeState] = useState("cloudy");
 
     const setTheme = (t) => {
         setThemeState(t);
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }) {
         if (saved && THEMES.includes(saved)) {
             setTheme(saved);
         } else {
-            document.documentElement.setAttribute("data-theme", "professional");
+            document.documentElement.setAttribute("data-theme", "cloudy");
         }
     }, []);
 

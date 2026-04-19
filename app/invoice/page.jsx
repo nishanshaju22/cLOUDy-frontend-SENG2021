@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { getInvoices, getInvoiceSummary, getInvoiceById, deleteInvoice, updateInvoice, getInvoicePdf } from "../../src/api/invoice";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
+import { MistBackground } from "../../src/components/ui/MistBackground";
+import { useTheme } from "../context/ThemeContext";
 
 const STATUS_COLORS = {
     DRAFT:  { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
@@ -10,19 +12,15 @@ const STATUS_COLORS = {
     PAID:   { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
     ISSUED: { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
 };
-
 const STATUS_OPTIONS = ["DRAFT", "FINAL", "PAID", "ISSUED"];
-
-function normalizeStatus(s) {
-    return s ? s.toUpperCase() : "DRAFT";
-}
-
+function normalizeStatus(s) { return s ? s.toUpperCase() : "DRAFT"; }
 function formatMoney(val) {
     if (val === undefined || val === null) return "—";
     return "$" + Number(val).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 export default function InvoicesPage() {
+    const { theme } = useTheme();
     const [invoices, setInvoices] = useState([]);
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -35,6 +33,9 @@ export default function InvoicesPage() {
     const [pdfLoading, setPdfLoading] = useState(null);
     const { toasts, addToast } = useToast();
 
+    const isProfessional   = theme === "professional";
+    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+
     const fetchInvoices = useCallback(async () => {
         setLoading(true);
         try {
@@ -42,289 +43,232 @@ export default function InvoicesPage() {
             if (statusFilter) params.status = statusFilter;
             const data = await getInvoices(params);
             setInvoices(data.data || []);
-        } catch {
-            addToast("Failed to load invoices", "error");
-        } finally {
-            setLoading(false);
-        }
+        } catch { addToast("Failed to load invoices", "error"); }
+        finally { setLoading(false); }
     }, [statusFilter]);
 
     const fetchSummary = useCallback(async () => {
-        try {
-            const data = await getInvoiceSummary();
-            setSummary(data);
-        } catch {}
+        try { const data = await getInvoiceSummary(); setSummary(data); } catch {}
     }, []);
 
-    useEffect(() => {
-        fetchInvoices();
-        fetchSummary();
-    }, [fetchInvoices, fetchSummary]);
+    useEffect(() => { fetchInvoices(); fetchSummary(); }, [fetchInvoices, fetchSummary]);
 
     const handleRowClick = async (inv) => {
-        setSelectedInvoice(inv);
-        setDrawerLoading(true);
-        try {
-            const full = await getInvoiceById(inv.invoiceId);
-            setSelectedInvoice(full);
-        } catch {
-            // keep the list data at minimum
-        } finally {
-            setDrawerLoading(false);
-        }
+        setSelectedInvoice(inv); setDrawerLoading(true);
+        try { const full = await getInvoiceById(inv.invoiceId); setSelectedInvoice(full); } catch {}
+        finally { setDrawerLoading(false); }
     };
 
     const handleDelete = async (invoiceId) => {
         if (!confirm("Delete this invoice?")) return;
         setDeleting(invoiceId);
         try {
-            await deleteInvoice(invoiceId);
-            await fetchInvoices();
-            await fetchSummary();
-            if (selectedInvoice?.invoiceId === invoiceId || selectedInvoice?.id === invoiceId) {
-                setSelectedInvoice(null);
-            }
+            await deleteInvoice(invoiceId); await fetchInvoices(); await fetchSummary();
+            if (selectedInvoice?.invoiceId === invoiceId || selectedInvoice?.id === invoiceId) setSelectedInvoice(null);
             addToast("Invoice deleted", "success");
-        } catch (err) {
-            addToast(err?.errorMessage || "Failed to delete invoice", "error");
-        } finally {
-            setDeleting(null);
-        }
+        } catch (err) { addToast(err?.errorMessage || "Failed to delete invoice", "error"); }
+        finally { setDeleting(null); }
     };
 
     const handleStatusUpdate = async (invoiceId, status) => {
-        try {
-            await updateInvoice(invoiceId, { status: status.toLowerCase() });
-            await fetchInvoices();
-            addToast("Status updated", "success");
-        } catch (err) {
-            addToast(err?.errorMessage || "Failed to update status", "error");
-        }
+        try { await updateInvoice(invoiceId, { status: status.toLowerCase() }); await fetchInvoices(); addToast("Status updated", "success"); }
+        catch (err) { addToast(err?.errorMessage || "Failed to update status", "error"); }
     };
 
     const handlePdf = async (invoiceId) => {
         setPdfLoading(invoiceId);
         try {
             const data = await getInvoicePdf(invoiceId);
-            
-            // If it's a base64 string or raw PDF data
             if (data) {
                 const blob = new Blob([data], { type: "application/pdf" });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `invoice-${invoiceId}.pdf`;
-                a.click();
-                URL.revokeObjectURL(url);
-                addToast("PDF downloaded", "success");
+                const a = document.createElement("a"); a.href = url; a.download = `invoice-${invoiceId}.pdf`; a.click();
+                URL.revokeObjectURL(url); addToast("PDF downloaded", "success");
             }
-        } catch {
-            addToast("Failed to generate PDF", "error");
-        } finally {
-            setPdfLoading(null);
-        }
+        } catch { addToast("Failed to generate PDF", "error"); }
+        finally { setPdfLoading(null); }
     };
 
     const filtered = invoices.filter(inv => {
         if (!search.trim()) return true;
         const q = search.toLowerCase();
-        return (
-            inv.invoiceId?.toLowerCase().includes(q) ||
-            inv.description?.toLowerCase().includes(q) ||
-            inv.supplierName?.toLowerCase().includes(q) ||
-            inv.customerName?.toLowerCase().includes(q)
-        );
+        return inv.invoiceId?.toLowerCase().includes(q) || inv.description?.toLowerCase().includes(q) || inv.supplierName?.toLowerCase().includes(q) || inv.customerName?.toLowerCase().includes(q);
     });
+
+    /* ── Shared nav ── */
+    function Nav() {
+        return (
+            <nav style={{ position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", height: 60, gap: 20, background: "var(--nav-bg)", borderBottom: "1px solid var(--nav-border)", backdropFilter: "blur(8px)" }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Invoices</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--search-bg)", borderRadius: 30, padding: "0 14px", height: 38 }}>
+                        <SearchIcon />
+                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search invoices..." style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, color: "var(--search-text)", width: 180, fontFamily: "var(--font-sans)" }} />
+                    </div>
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ padding: "7px 12px", borderRadius: 30, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 13, fontWeight: 500, color: "var(--text-primary)", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                        <option value="">All Statuses</option>
+                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <button onClick={() => setIsManaging(m => !m)} style={{ padding: "7px 16px", borderRadius: 30, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", background: isManaging ? "var(--btn-primary-bg)" : "var(--btn-ghost-bg)", color: isManaging ? "var(--btn-primary-text)" : "var(--btn-ghost-text)", border: `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}` }}>
+                        {isManaging ? "Done" : "Manage"}
+                    </button>
+                </div>
+            </nav>
+        );
+    }
+
+    /* ── Shared table content ── */
+    function TableContent() {
+        return (
+            <>
+                {summary && (
+                    <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
+                        <SummaryCard label="Total Invoices" value={summary.totalInvoices?.toLocaleString()} />
+                        <SummaryCard label="Total Amount" value={formatMoney(summary.totalAmount)} />
+                        <SummaryCard label="Average Amount" value={formatMoney(summary.averageInvoiceAmount)} />
+                        {summary.statusBreakdown && Object.entries(summary.statusBreakdown).map(([k, v]) => <SummaryCard key={k} label={normalizeStatus(k)} value={v} />)}
+                    </div>
+                )}
+                <div style={{ marginBottom: 24 }}>
+                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
+                        {search ? `Results for "${search}"` : "All Invoices"}
+                    </h1>
+                    {!loading && <p style={{ fontSize: 13, color: hasAtmosphericBg ? "rgb(0 0 0)" : "var(--text-secondary)", margin: "6px 0 0" }}>{filtered.length} {filtered.length === 1 ? "invoice" : "invoices"}</p>}
+                </div>
+                {loading ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 300 }}>
+                        <div style={{ color: "var(--border-strong)", marginBottom: 4 }}><EmptyIcon /></div>
+                        <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>{search ? "No invoices match your search" : "No invoices yet"}</div>
+                        <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>{search ? "Try a different search term" : "Invoices will appear here once orders are created"}</div>
+                    </div>
+                ) : (
+                    <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                            <thead>
+                                <tr>
+                                    {["Invoice ID", "Description", "Issue Date", "Status", "Amount", ""].map(h => (
+                                        <th key={h} style={{ textAlign: "left", padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtered.map(inv => {
+                                    const status = normalizeStatus(inv.status);
+                                    const sc = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
+                                    const invId = inv.invoiceId || inv.id;
+                                    return (
+                                        <tr key={invId} style={{ cursor: "pointer" }} onClick={() => handleRowClick(inv)}>
+                                            <td style={td}><span style={{ fontWeight: 600 }}>{invId}</span></td>
+                                            <td style={{ ...td, color: "var(--text-secondary)" }}>{inv.description || "—"}</td>
+                                            <td style={td}>{inv.issueDate ? new Date(inv.issueDate).toLocaleDateString("en-AU") : "—"}</td>
+                                            <td style={td}>
+                                                {isManaging ? (
+                                                    <select value={status} onClick={e => e.stopPropagation()} onChange={e => handleStatusUpdate(invId, e.target.value)} style={{ display: "inline-block", fontSize: 11, fontWeight: 700, borderRadius: 4, padding: "3px 8px", cursor: "pointer", ...sc, border: `1px solid ${sc.border}` }}>
+                                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                    </select>
+                                                ) : (
+                                                    <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, borderRadius: 4, padding: "3px 8px", letterSpacing: "0.04em", ...sc }}>{status}</span>
+                                                )}
+                                            </td>
+                                            <td style={td}>{formatMoney(inv.totalAmount)}</td>
+                                            <td style={{ ...td, textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                                                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                                                    <button onClick={() => handlePdf(invId)} disabled={pdfLoading === invId} style={{ padding: "5px 8px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-primary)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600 }} title="Download PDF">
+                                                        {pdfLoading === invId ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> : <PdfIcon />}
+                                                    </button>
+                                                    {isManaging && (
+                                                        <button onClick={() => handleDelete(invId)} disabled={deleting === invId} style={{ padding: "5px 8px", borderRadius: 6, border: "none", background: "var(--error-bg)", color: "var(--error)", cursor: "pointer", display: "inline-flex", alignItems: "center" }} title="Delete">
+                                                            {deleting === invId ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> : <TrashIcon />}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </>
+        );
+    }
 
     return (
         <>
+            {hasAtmosphericBg && <MistBackground />}
+
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
                 * { box-sizing: border-box; }
-                body { margin: 0; background: #fff; }
+                body { margin: 0; background: transparent; font-family: var(--font-sans); }
                 button:disabled { opacity: 0.6; cursor: not-allowed !important; }
-                tr:hover td { background: #fafafa; }
+                tr:hover td { background: var(--surface-raised) !important; }
             `}</style>
 
-            <div style={styles.page}>
-                <nav style={styles.nav}>
-                    <div style={styles.navLeft}>
-                        <span style={styles.logo}>Invoices</span>
-                    </div>
-                    <div style={styles.navRight}>
-                        <div style={styles.searchWrap}>
-                            <SearchIcon />
-                            <input
-                                value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                placeholder="Search invoices..."
-                                style={styles.searchInput}
+            {/* ── CLOUDY / STORMY — glass card ── */}
+            {hasAtmosphericBg && (
+                <div style={{ minHeight: "100vh", background: "transparent", fontFamily: "var(--font-sans)" }}>
+                    <Nav />
+                    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px", position: "relative", zIndex: 1 }}>
+                        <div
+                            className="
+                                relative w-full
+                                max-w-400 mx-auto
+                                rounded-3xl p-10
+                                overflow-hidden
+                                backdrop-blur-[20px]
+                                border border-white/30
+                                shadow-[0_16px_70px_rgba(0,0,0,0.12)]
+                                bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
+                            "
+                        >
+                            {/* Top glass highlight */}
+                            <div
+                                className="
+                                    pointer-events-none absolute inset-0
+                                    rounded-3xl
+                                    bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
+                                    opacity-60
+                                "
                             />
-                        </div>
-                        <select
-                            value={statusFilter}
-                            onChange={e => setStatusFilter(e.target.value)}
-                            style={styles.select}
-                        >
-                            <option value="">All Statuses</option>
-                            {STATUS_OPTIONS.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
-                        <button
-                            onClick={() => setIsManaging(m => !m)}
-                            style={{
-                                ...styles.navBtn,
-                                background: isManaging ? "#111" : "transparent",
-                                color: isManaging ? "#fff" : "#111",
-                                border: isManaging ? "1px solid #111" : "1px solid #e5e5e5",
-                            }}
-                        >
-                            {isManaging ? "Done" : "Manage"}
-                        </button>
-                    </div>
-                </nav>
 
-                <main style={styles.main}>
-                    {summary && (
-                        <div style={styles.summaryRow}>
-                            <SummaryCard label="Total Invoices" value={summary.totalInvoices?.toLocaleString()} />
-                            <SummaryCard label="Total Amount" value={formatMoney(summary.totalAmount)} />
-                            <SummaryCard label="Average Amount" value={formatMoney(summary.averageInvoiceAmount)} />
-                            {summary.statusBreakdown && Object.entries(summary.statusBreakdown).map(([k, v]) => (
-                                <SummaryCard key={k} label={normalizeStatus(k)} value={v} />
-                            ))}
-                        </div>
-                    )}
-
-                    <div style={styles.pageHeader}>
-                        <div>
-                            <h1 style={styles.pageTitle}>
-                                {search ? `Results for "${search}"` : "All Invoices"}
-                            </h1>
-                            {!loading && (
-                                <p style={styles.pageSubtitle}>
-                                    {filtered.length} {filtered.length === 1 ? "invoice" : "invoices"}
-                                </p>
-                            )}
+                            {/* Frost diffusion layer */}
+                            <div
+                                className="
+                                    pointer-events-none absolute inset-0
+                                    rounded-3xl
+                                    bg-white/20 blur-2xl opacity-40
+                                "
+                            />
+                            <div style={{ position: "relative" }}>
+                                <TableContent />
+                            </div>
                         </div>
                     </div>
-
-                    {loading ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
-                        </div>
-                    ) : filtered.length === 0 ? (
-                        <div style={styles.emptyState}>
-                            <div style={styles.emptyIcon}><EmptyIcon /></div>
-                            <div style={styles.emptyText}>{search ? "No invoices match your search" : "No invoices yet"}</div>
-                            <div style={styles.emptySub}>{search ? "Try a different search term" : "Invoices will appear here once orders are created"}</div>
-                        </div>
-                    ) : (
-                        <div style={styles.tableWrap}>
-                            <table style={styles.table}>
-                                <thead>
-                                    <tr>
-                                        {["Invoice ID", "Description", "Issue Date", "Status", "Amount", ""].map(h => (
-                                            <th key={h} style={styles.th}>{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filtered.map(inv => {
-                                        const status = normalizeStatus(inv.status);
-                                        const statusStyle = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
-                                        const invId = inv.invoiceId || inv.id;
-                                        return (
-                                            <tr
-                                                key={invId}
-                                                style={styles.tr}
-                                                onClick={() => handleRowClick(inv)}
-                                            >
-                                                <td style={styles.td}>
-                                                    <span style={styles.invoiceId}>{invId}</span>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    <span style={styles.description}>{inv.description || "—"}</span>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    {inv.issueDate ? new Date(inv.issueDate).toLocaleDateString("en-AU") : "—"}
-                                                </td>
-                                                <td style={styles.td}>
-                                                    {isManaging ? (
-                                                        <select
-                                                            value={status}
-                                                            onClick={e => e.stopPropagation()}
-                                                            onChange={e => handleStatusUpdate(invId, e.target.value)}
-                                                            style={{
-                                                                ...styles.statusBadge,
-                                                                ...statusStyle,
-                                                                cursor: "pointer",
-                                                                border: `1px solid ${statusStyle.border}`,
-                                                            }}
-                                                        >
-                                                            {STATUS_OPTIONS.map(s => (
-                                                                <option key={s} value={s}>{s}</option>
-                                                            ))}
-                                                        </select>
-                                                    ) : (
-                                                        <span style={{ ...styles.statusBadge, ...statusStyle }}>
-                                                            {status}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td style={styles.td}>
-                                                    {formatMoney(inv.totalAmount)}
-                                                </td>
-                                                <td style={{ ...styles.td, textAlign: "right" }} onClick={e => e.stopPropagation()}>
-                                                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                                                        <button
-                                                            onClick={() => handlePdf(invId)}
-                                                            disabled={pdfLoading === invId}
-                                                            style={styles.pdfBtn}
-                                                            title="Download PDF"
-                                                        >
-                                                            {pdfLoading === invId
-                                                                ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                                                                : <PdfIcon />
-                                                            }
-                                                        </button>
-                                                        {isManaging && (
-                                                            <button
-                                                                onClick={() => handleDelete(invId)}
-                                                                disabled={deleting === invId}
-                                                                style={styles.deleteBtn}
-                                                                title="Delete"
-                                                            >
-                                                                {deleting === invId
-                                                                    ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                                                                    : <TrashIcon />
-                                                                }
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </main>
-            </div>
-
-            {selectedInvoice && (
-                <InvoiceDetailDrawer
-                    invoice={selectedInvoice}
-                    loading={drawerLoading}
-                    onClose={() => setSelectedInvoice(null)}
-                    onPdf={handlePdf}
-                    pdfLoading={pdfLoading}
-                />
+                </div>
             )}
 
+            {/* ── PROFESSIONAL — flat card ── */}
+            {isProfessional && (
+                <div style={{ minHeight: "100vh", background: "var(--page-bg)", fontFamily: "var(--font-sans)" }}>
+                    <Nav />
+                    <main style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px" }}>
+                        <div style={{ position: "relative", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "28px 32px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                            <TableContent />
+                        </div>
+                    </main>
+                </div>
+            )}
+
+            {selectedInvoice && (
+                <InvoiceDetailDrawer invoice={selectedInvoice} loading={drawerLoading} onClose={() => setSelectedInvoice(null)} onPdf={handlePdf} pdfLoading={pdfLoading} />
+            )}
             <ToastContainer toasts={toasts} />
         </>
     );
@@ -332,9 +276,9 @@ export default function InvoicesPage() {
 
 function SummaryCard({ label, value }) {
     return (
-        <div style={styles.summaryCard}>
-            <div style={styles.summaryValue}>{value}</div>
-            <div style={styles.summaryLabel}>{label}</div>
+        <div style={{ flex: "1 1 140px", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>{value}</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</div>
         </div>
     );
 }
@@ -342,69 +286,34 @@ function SummaryCard({ label, value }) {
 function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
     const id = invoice.invoiceId || invoice.id;
     const status = (invoice.status || "").toUpperCase();
-    const statusStyle = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
+    const sc = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
     const xml = invoice.invoiceUBLXML || invoice.invoiceXML || invoice.orderDocumentXML;
-
     return (
         <>
-            <div onClick={onClose} style={styles.backdrop} />
-            <div style={styles.drawer}>
-                <div style={styles.drawerHeader}>
-                    <span style={styles.drawerTitle}>Invoice Detail</span>
+            <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200, backdropFilter: "blur(2px)" }} />
+            <div style={{ position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "var(--surface)", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)", borderRadius: "20px 0 0 20px", fontFamily: "var(--font-sans)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: 17, fontWeight: 600, color: "var(--text-primary)" }}>Invoice Detail</span>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <button
-                            onClick={() => onPdf(id)}
-                            disabled={pdfLoading === id}
-                            style={styles.pdfBtnLarge}
-                        >
-                            {pdfLoading === id
-                                ? <><svg style={{ animation: "spin 0.7s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generating…</>
-                                : <><PdfIcon /> Download PDF</>
-                            }
+                        <button onClick={() => onPdf(id)} disabled={pdfLoading === id} style={{ padding: "7px 14px", borderRadius: 30, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-primary)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, fontFamily: "var(--font-sans)" }}>
+                            {pdfLoading === id ? <><svg style={{ animation: "spin 0.7s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generating…</> : <><PdfIcon /> Download PDF</>}
                         </button>
-                        <button onClick={onClose} style={styles.closeBtn}><CloseIcon /></button>
+                        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 4, display: "flex" }}><CloseIcon /></button>
                     </div>
                 </div>
-
-                <div style={styles.drawerBody}>
+                <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
                     {loading ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                            {Array.from({ length: 6 }).map((_, i) => (
-                                <div key={i} style={{ height: 14, background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "200% 100%", borderRadius: 4, animation: "shimmer 1.4s infinite", width: i % 2 === 0 ? "60%" : "90%" }} />
-                            ))}
-                        </div>
+                        Array.from({ length: 6 }).map((_, i) => <div key={i} style={{ height: 14, background: "var(--surface-raised)", borderRadius: 4, animation: "shimmer 1.4s infinite", width: i % 2 === 0 ? "60%" : "90%" }} />)
                     ) : (
                         <>
-                            {/* Status badge */}
-                            <div style={{ marginBottom: 4 }}>
-                                <span style={{ ...styles.statusBadge, ...statusStyle, fontSize: 12, padding: "4px 10px" }}>
-                                    {status}
-                                </span>
-                            </div>
-
-                            {[
-                                ["Invoice ID", id],
-                                ["Issue Date", invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString("en-AU") : "—"],
-                                ["Description", invoice.description || "—"],
-                                ["Supplier", invoice.supplierName || "—"],
-                                ["Customer", invoice.customerName || "—"],
-                                ["Currency", invoice.currency || "—"],
-                                ["Total Amount", invoice.totalAmount ? formatMoney(invoice.totalAmount) : "—"],
-                                ["Created At", invoice.createdAt ? new Date(invoice.createdAt).toLocaleString("en-AU") : "—"],
-                                ["Updated At", invoice.updatedAt ? new Date(invoice.updatedAt).toLocaleString("en-AU") : "—"],
-                            ].map(([label, value]) => (
-                                <div key={label} style={styles.drawerRow}>
-                                    <span style={styles.drawerLabel}>{label}</span>
-                                    <span style={styles.drawerValue}>{value}</span>
+                            <div><span style={{ display: "inline-block", fontSize: 12, fontWeight: 700, borderRadius: 4, padding: "4px 10px", letterSpacing: "0.04em", ...sc }}>{status}</span></div>
+                            {[["Invoice ID", id], ["Issue Date", invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString("en-AU") : "—"], ["Description", invoice.description || "—"], ["Supplier", invoice.supplierName || "—"], ["Customer", invoice.customerName || "—"], ["Currency", invoice.currency || "—"], ["Total Amount", invoice.totalAmount ? formatMoney(invoice.totalAmount) : "—"], ["Created At", invoice.createdAt ? new Date(invoice.createdAt).toLocaleString("en-AU") : "—"], ["Updated At", invoice.updatedAt ? new Date(invoice.updatedAt).toLocaleString("en-AU") : "—"]].map(([label, value]) => (
+                                <div key={label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase" }}>{label}</span>
+                                    <span style={{ fontSize: 14, color: "var(--text-primary)" }}>{value}</span>
                                 </div>
                             ))}
-
-                            {xml && (
-                                <div style={{ marginTop: 8 }}>
-                                    <div style={styles.drawerLabel}>Invoice XML</div>
-                                    <pre style={styles.xmlBox}>{xml}</pre>
-                                </div>
-                            )}
+                            {xml && <div><div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Invoice XML</div><pre style={{ fontSize: 11, background: "var(--surface-raised)", borderRadius: 6, padding: 12, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", color: "var(--text-secondary)", marginTop: 8, maxHeight: 300, overflowY: "auto" }}>{xml}</pre></div>}
                         </>
                     )}
                 </div>
@@ -415,14 +324,13 @@ function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
 
 function SkeletonRow() {
     return (
-        <div style={{ display: "flex", gap: 16, padding: "12px 0", borderBottom: "1px solid #f0f0f0" }}>
-            {[120, 200, 80, 70, 60].map((w, i) => (
-                <div key={i} style={{ height: 14, width: w, background: "linear-gradient(90deg,#f5f5f5 25%,#ebebeb 50%,#f5f5f5 75%)", backgroundSize: "200% 100%", borderRadius: 4, animation: "shimmer 1.4s infinite" }} />
-            ))}
+        <div style={{ display: "flex", gap: 16, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+            {[120, 200, 80, 70, 60].map((w, i) => <div key={i} style={{ height: 14, width: w, background: "var(--surface-raised)", borderRadius: 4, animation: "shimmer 1.4s infinite" }} />)}
         </div>
     );
 }
 
+const td = { padding: "14px 16px", borderBottom: "1px solid var(--border)", color: "var(--text-primary)", verticalAlign: "middle" };
 const styles = {
     page: { minHeight: "100vh", background: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
     nav: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", height: 60, background: "rgba(255,255,255,0.96)", borderBottom: "1px solid #f0f0f0", backdropFilter: "blur(8px)", gap: 20 },
