@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getInvoices, getInvoiceSummary, getInvoiceById, deleteInvoice, updateInvoice, getInvoicePdf } from "../../src/api/invoice";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { MistBackground } from "../../src/components/ui/MistBackground";
-import { useTheme } from "context/ThemeContext.jsx";
+import { useTheme } from "../context/ThemeContext";
 
 const STATUS_COLORS = {
     DRAFT:  { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
