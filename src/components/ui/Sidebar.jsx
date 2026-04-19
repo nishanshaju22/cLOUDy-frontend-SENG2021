@@ -1,421 +1,265 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Icon } from "./icons";
-import { clearAuth } from "../../lib/auth";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 const NAV_ITEMS = [
-    {
-        id: "orders",
-        label: "Orders",
-        icon: <Icon.Orders />,
-    },
+  { path: "/",          label: "Home",       icon: "/icons/home.png", scale: 2.5 },
+  { path: "/orders",    label: "Orders",     icon: "/icons/orders.png", scale: 1.3 },
+  { path: "/products",  label: "Catalogues", icon: "/icons/catalogues.png", scale: 1.2 },
+  { path: "/inventory", label: "Inventory",  icon: "/icons/inventory.png", scale: 1.1},
+  { path: "/invoice",   label: "Invoice",    icon: "/icons/invoice.png", scale: 1.2 },
+  { path: "/despatch",  label: "Despatch",   icon: "/icons/despatch.png", scale: 3 },
 ];
 
-export function Sidebar({ activeTab, onTabChange, onCreateOrder }) {
-    const [collapsed, setCollapsed] = useState(false);
-    const [expandedItem, setExpandedItem] = useState("orders");
-    const router = useRouter();
+const BOTTOM_ITEMS = [
+  { path: "/settings", label: "Settings", icon: "/icons/settings.png", scale: 1.15 },
+  { path: "/profile",  label: "Profile",  icon: "/icons/profile.png", scale: 1 },
+];
 
-    const toggleExpand = (id) => {
-        setExpandedItem((prev) => (prev === id ? null : id));
+export default function Sidebar() {
+  const pathname  = usePathname();
+  const router    = useRouter();
+  const [visible, setVisible] = useState(false);
+
+  const isActive = (path) =>
+    path === "/" ? pathname === "/" : pathname.startsWith(path);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      const fromBottom = window.innerHeight - e.clientY;
+      setVisible(fromBottom < 80);
     };
-
-    const handleLogout = () => {
-        clearAuth();
-        router.push("/login");
+    const onLeave = () => setVisible(false);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
     };
+  }, []);
 
-    return (
-        <aside
-            style={{
-                width: collapsed ? 72 : 240,
-                minHeight: "100vh",
-                position: "sticky",
-                top: 0,
-                height: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                transition: "width 0.25s cubic-bezier(0.4,0,0.2,1)",
-                overflow: "hidden",
-                flexShrink: 0,
-                background:
-                    "linear-gradient(160deg, rgba(57,10,35,0.82) 0%, rgba(115,88,102,0.78) 100%)",
-                backdropFilter: "blur(20px) saturate(1.4)",
-                WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-                borderRight: "1px solid rgba(255,255,255,0.08)",
-                boxShadow:
-                    "inset -1px 0 0 rgba(255,255,255,0.06), 4px 0 24px rgba(0,0,0,0.18)",
-            }}
-        >
-            <button
-                onClick={() => setCollapsed((c) => !c)}
-                title={collapsed ? "Expand" : "Collapse"}
-                style={{
-                    position: "absolute",
-                    top: 22,
-                    right: collapsed ? "50%" : 14,
-                    transform: collapsed ? "translateX(50%)" : "none",
-                    transition: "right 0.25s, transform 0.25s",
-                    width: 26,
-                    height: 26,
-                    borderRadius: "50%",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    background: "rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.7)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    zIndex: 10,
-                    flexShrink: 0,
-                }}
-            >
-                {collapsed ? <Icon.ChevronRight /> : <Icon.ChevronLeft />}
-            </button>
+  return (
+    <>
+      <style>{`
+        @keyframes dockIn {
+          from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+          to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+        }
+        @keyframes dockOut {
+          from { transform: translateX(-50%) translateY(0);    opacity: 1; }
+          to   { transform: translateX(-50%) translateY(100%); opacity: 0; }
+        }
+        .dock-wrap {
+          position: fixed;
+          bottom: 16px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 1000;
+          pointer-events: none;
+        }
+        .dock-wrap.visible {
+          pointer-events: all;
+          animation: dockIn 0.28s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
+        }
+        .dock-wrap.hidden {
+          animation: dockOut 0.22s ease forwards;
+        }
+        .dock-inner {
+          position: relative;
+          display: flex;
+          align-items: flex-end;
+          gap: 18px;
+          padding: 12px 20px 10px;
 
-            <div style={{ height: 70, flexShrink: 0 }} />
+          border-radius: 24px;
+          overflow: visable;
 
-            {!collapsed && (
-                <div
-                    style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: "0.12em",
-                        color: "rgba(255,255,255,0.35)",
-                        textTransform: "uppercase",
-                        padding: "0 20px",
-                        marginBottom: 8,
-                    }}
-                >
-                    Main
+          backdrop-filter: blur(36px);
+          -webkit-backdrop-filter: blur(36px);
+
+          border: 0.5px solid rgba(255, 255, 255, 0.28);
+
+          background: linear-gradient(
+            to bottom right,
+            rgba(52, 46, 55, 0.55),
+            rgba(250, 255, 253, 0.55)
+          );
+
+          box-shadow:
+            0 16px 70px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+        .dock-content {
+          position: relative;
+          display: flex;
+          gap: 18px;
+          align-items: flex-end;
+          z-index: 2;
+        }
+        .dock-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+          cursor: pointer;
+          position: relative;
+        }
+        .dock-item:hover .dock-label {
+          opacity: 1;
+          transform: translateX(-50%) translateY(-2px);
+        }
+        .dock-label {
+          position: absolute;
+          bottom: calc(100% + 10px);
+          left: 50%;
+          transform: translateX(-50%) translateY(0px);
+          background: rgba(24, 24, 28, 0.88);
+          color: rgba(255, 255, 255, 0.92);
+          font-size: 11.5px;
+          font-weight: 500;
+          padding: 4px 10px;
+          border-radius: 7px;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.12s, transform 0.12s;
+          border: 0.5px solid rgba(255, 255, 255, 0.14);
+          letter-spacing: 0.01em;
+          z-index: 20;
+          font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        }
+        .dock-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dock-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: transparent;
+          flex-shrink: 0;
+          transition: background 0.2s;
+          flex-shrink: 0;
+        }
+        .dock-dot.active {
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        .dock-sep {
+          width: 2px;
+          height: 50px;
+          align-self: center;
+          flex-shrink: 0;
+          border-radius: 999px;
+
+          background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.35),
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.35)
+          );
+        }
+        .dock-highlight {
+          pointer-events: none;
+          position: absolute;
+          inset: 0;
+          border-radius: 24px;
+
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.35),
+            rgba(255, 255, 255, 0.05)
+          );
+
+          opacity: 0.6;
+          z-index: 1;
+        }
+        .dock-frost {
+          pointer-events: none;
+          position: absolute;
+          inset: 0;
+          border-radius: 24px;
+
+          background: rgba(255, 255, 255, 0.2);
+          opacity: 0.25;
+          filter: blur(24px);
+          z-index: 1;
+        }
+      `}</style>
+
+      <div className={`dock-wrap ${visible ? "visible" : "hidden"}`}>
+        <div className="dock-inner">
+
+          <div className="dock-highlight" />
+
+          {/* Frost diffusion */}
+          <div className="dock-frost" />
+
+          {/* Actual content */}
+          <div className="dock-content">
+            {NAV_ITEMS.map((item) => (
+              <div
+                key={item.path}
+                className="dock-item"
+                onClick={() => router.push(item.path)}
+              >
+                <div className="dock-icon">
+                  <Image
+                      src={item.icon}
+                      alt={item.label}
+                      fill
+                      style={{
+                          objectFit: "contain",
+                          transform: `scale(${item.scale})`,
+                      }}
+                      sizes="58px"
+                  />
                 </div>
-            )}
+                <div className={`dock-dot ${isActive(item.path) ? "active" : ""}`} />
+                <div className="dock-label">{item.label}</div>
+              </div>
+            ))}
 
-            <nav
-                style={{
-                    flex: 1,
-                    padding: collapsed ? "0 10px" : "0 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                }}
-            >
-                {NAV_ITEMS.map((item) => {
-                    const isExpanded = expandedItem === item.id;
-                    const isActive =
-                        activeTab === item.id ||
-                        item.children?.some((c) => c.id === activeTab);
+            <div className="dock-sep" />
 
-                    return (
-                        <div key={item.id}>
-                            <button
-                                onClick={() => {
-                                    if (collapsed) {
-                                        setCollapsed(false);
-                                        setExpandedItem(item.id);
-                                    } else {
-                                        toggleExpand(item.id);
-                                        onTabChange(item.id);
-                                    }
-                                }}
-                                style={{
-                                    width: "100%",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 11,
-                                    padding: collapsed ? "11px 0" : "10px 12px",
-                                    justifyContent: collapsed
-                                        ? "center"
-                                        : "flex-start",
-                                    borderRadius: 10,
-                                    border: "none",
-                                    cursor: "pointer",
-                                    background: isActive
-                                        ? "rgba(255,255,255,0.12)"
-                                        : "transparent",
-                                    color: isActive
-                                        ? "#fff"
-                                        : "rgba(255,255,255,0.6)",
-                                    fontSize: 14,
-                                    fontWeight: isActive ? 600 : 400,
-                                    transition: "background 0.15s, color 0.15s",
-                                    position: "relative",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background =
-                                            "rgba(255,255,255,0.07)";
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background =
-                                            "transparent";
-                                    }
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        flexShrink: 0,
-                                        display: "flex",
-                                    }}
-                                >
-                                    {item.icon}
-                                </span>
+            {BOTTOM_ITEMS.map((item) => (
+              <div
+                key={item.path}
+                className="dock-item"
+                onClick={() => router.push(item.path)}
+              >
+                <div className="dock-icon">
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    fill
+                    style={{
+                        objectFit: "contain",
+                        transform: `scale(${item.scale})`,
+                    }}
+                    sizes="58px"
+                  />
+                </div>
+                <div className={`dock-dot ${isActive(item.path) ? "active" : ""}`} />
+                <div className="dock-label">{item.label}</div>
+              </div>
+            ))}
+          </div>
 
-                                {!collapsed && (
-                                    <>
-                                        <span
-                                            style={{
-                                                flex: 1,
-                                                textAlign: "left",
-                                            }}
-                                        >
-                                            {item.label}
-                                        </span>
-                                        <span
-                                            style={{
-                                                display: "flex",
-                                                transition: "transform 0.2s",
-                                                transform: isExpanded
-                                                    ? "rotate(0deg)"
-                                                    : "rotate(-90deg)",
-                                                opacity: 0.5,
-                                            }}
-                                        ></span>
-                                    </>
-                                )}
-                            </button>
-
-                            {!collapsed && isExpanded && item.children && (
-                                <div
-                                    style={{
-                                        marginLeft: 18,
-                                        paddingLeft: 16,
-                                        borderLeft:
-                                            "1px solid rgba(255,255,255,0.12)",
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: 1,
-                                        marginTop: 2,
-                                        marginBottom: 4,
-                                    }}
-                                >
-                                    {item.children.map((child) => {
-                                        const childActive =
-                                            activeTab === child.id;
-
-                                        return (
-                                            <button
-                                                key={child.id}
-                                                onClick={() =>
-                                                    onTabChange(child.id)
-                                                }
-                                                style={{
-                                                    background: childActive
-                                                        ? "rgba(255,255,255,0.10)"
-                                                        : "transparent",
-                                                    border: "none",
-                                                    borderRadius: 8,
-                                                    padding: "8px 10px",
-                                                    textAlign: "left",
-                                                    fontSize: 13,
-                                                    fontWeight: childActive
-                                                        ? 600
-                                                        : 400,
-                                                    color: childActive
-                                                        ? "#fff"
-                                                        : "rgba(255,255,255,0.5)",
-                                                    cursor: "pointer",
-                                                    transition:
-                                                        "background 0.12s, color 0.12s",
-                                                    whiteSpace: "nowrap",
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (!childActive) {
-                                                        e.currentTarget.style.background =
-                                                            "rgba(255,255,255,0.07)";
-                                                        e.currentTarget.style.color =
-                                                            "rgba(255,255,255,0.8)";
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (!childActive) {
-                                                        e.currentTarget.style.background =
-                                                            "transparent";
-                                                        e.currentTarget.style.color =
-                                                            "rgba(255,255,255,0.5)";
-                                                    }
-                                                }}
-                                            >
-                                                {child.label}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </nav>
-
-            <div
-                style={{
-                    padding: collapsed ? "16px 10px" : "16px 14px",
-                    flexShrink: 0,
-                }}
-            >
-                {!collapsed ? (
-                    <>
-                        <div
-                            style={{
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                borderRadius: 14,
-                                padding: "16px 14px",
-                                marginBottom: 10,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    fontSize: 14,
-                                    fontWeight: 700,
-                                    color: "#fff",
-                                    marginBottom: 4,
-                                }}
-                            >
-                                New Order
-                            </div>
-                            <div
-                                style={{
-                                    fontSize: 12,
-                                    color: "rgba(255,255,255,0.45)",
-                                    marginBottom: 14,
-                                    lineHeight: 1.4,
-                                }}
-                            >
-                                Create a purchase order quickly
-                            </div>
-                            <button
-                                onClick={onCreateOrder}
-                                style={{
-                                    width: "100%",
-                                    padding: "10px 0",
-                                    borderRadius: 10,
-                                    border: "none",
-                                    background:
-                                        "linear-gradient(135deg, #e07b2a 0%, #c45e10 100%)",
-                                    color: "#fff",
-                                    fontSize: 13,
-                                    fontWeight: 700,
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: 7,
-                                    boxShadow:
-                                        "0 4px 14px rgba(200,90,20,0.35)",
-                                    transition: "opacity 0.15s",
-                                }}
-                                onMouseEnter={(e) =>
-                                    (e.currentTarget.style.opacity = "0.88")
-                                }
-                                onMouseLeave={(e) =>
-                                    (e.currentTarget.style.opacity = "1")
-                                }
-                            >
-                                <Icon.Plus /> Create Order
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={handleLogout}
-                            style={{
-                                width: "100%",
-                                padding: "10px 0",
-                                borderRadius: 10,
-                                border: "1px solid rgba(255,255,255,0.18)",
-                                background: "rgba(255,255,255,0.08)",
-                                color: "#fff",
-                                cursor: "pointer",
-                                fontSize: 13,
-                                fontWeight: 600,
-                                transition: "opacity 0.15s",
-                            }}
-                            onMouseEnter={(e) =>
-                                (e.currentTarget.style.opacity = "0.88")
-                            }
-                            onMouseLeave={(e) =>
-                                (e.currentTarget.style.opacity = "1")
-                            }
-                        >
-                            Logout
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <button
-                            onClick={onCreateOrder}
-                            title="Create Order"
-                            style={{
-                                width: "100%",
-                                padding: "11px 0",
-                                borderRadius: 10,
-                                border: "none",
-                                background:
-                                    "linear-gradient(135deg, #e07b2a 0%, #c45e10 100%)",
-                                color: "#fff",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                boxShadow:
-                                    "0 4px 14px rgba(200,90,20,0.35)",
-                                transition: "opacity 0.15s",
-                                marginBottom: 10,
-                            }}
-                            onMouseEnter={(e) =>
-                                (e.currentTarget.style.opacity = "0.88")
-                            }
-                            onMouseLeave={(e) =>
-                                (e.currentTarget.style.opacity = "1")
-                            }
-                        >
-                            <Icon.Plus />
-                        </button>
-
-                        <button
-                            onClick={handleLogout}
-                            title="Logout"
-                            style={{
-                                width: "100%",
-                                padding: "11px 0",
-                                borderRadius: 10,
-                                border: "1px solid rgba(255,255,255,0.18)",
-                                background: "rgba(255,255,255,0.08)",
-                                color: "#fff",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                transition: "opacity 0.15s",
-                            }}
-                            onMouseEnter={(e) =>
-                                (e.currentTarget.style.opacity = "0.88")
-                            }
-                            onMouseLeave={(e) =>
-                                (e.currentTarget.style.opacity = "1")
-                            }
-                        >
-                            Logout
-                        </button>
-                    </>
-                )}
-            </div>
-        </aside>
-    );
+        </div>
+      </div>
+    </>
+  );
 }

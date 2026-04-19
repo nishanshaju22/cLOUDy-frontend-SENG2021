@@ -59,21 +59,33 @@ export default function ProductsPage() {
         try {
             await addToCart(SELLER_ID, { product_id: productId, quantity: 1 });
             await fetchCart();
+            await fetchProducts();
             addToast("Added to cart", "success");
         } catch (err) {
-            addToast(err?.error || "Failed to add to cart", "error");
+            if (err?.items) {
+                const itemList = err.items.map(i => `${i.itemName} (need ${i.required}, have ${i.available})`).join(", ");
+                addToast(`Not enough stock: ${itemList}`, "error");
+            } else {
+                addToast(err?.error || "Failed to add to cart", "error");
+            }
             throw err;
         }
     };
 
     const handleUpdateQty = async (productId, quantity) => {
-        try {
-            await updateCartItem(SELLER_ID, productId, { quantity });
-            await fetchCart();
-        } catch (err) {
-            addToast("Failed to update quantity", "error");
+    try {
+        await updateCartItem(SELLER_ID, productId, { quantity });
+        await fetchCart();
+        await fetchProducts();
+    } catch (err) {
+        if (err?.items) {
+            const itemList = err.items.map(i => `${i.itemName} (need ${i.required}, have ${i.available})`).join(", ");
+            addToast(`Not enough stock: ${itemList}`, "error");
+        } else {
+            addToast(err?.error || "Failed to update quantity", "error");
         }
-    };
+    }
+};
 
     const handleCreate = async (data) => {
         await createProduct(SELLER_ID, data);
