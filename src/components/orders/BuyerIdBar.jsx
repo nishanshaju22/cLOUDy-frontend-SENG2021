@@ -67,7 +67,6 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
         }
         
         const parsed = getAuth()
-        console.log(parsed)
         const sellerId = parsed?.user?.seller_id;
 
         try {
@@ -86,7 +85,6 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
             }
 
         } catch (err) {
-            console.log(err)
             onToast?.(
                 err?.message ||
                 "Failed to delete buyer. Ensure related orders are deleted.",
