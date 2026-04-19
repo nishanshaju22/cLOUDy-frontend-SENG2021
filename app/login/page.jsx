@@ -310,51 +310,32 @@ function Wordmark({ fontSize }) {
 function BrandingPanel() {
   return (
     <div
-      className="hidden md:flex flex-col items-start justify-center px-16 h-full"
+      className="hidden md:flex items-center justify-center h-full w-full"
       style={{
         zIndex: 2,
         position: "relative",
-        transform: "translateX(70px)",
       }}
     >
-      <Wordmark fontSize={52} />
+      <div style={{ textAlign: "center" }}>
+        <Wordmark fontSize={82} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px 0" }}>
-        <div style={{ width: 36, height: 1, background: "linear-gradient(to right,transparent,rgba(140,170,255,0.35))" }} />
-        <div style={{ width: 4, height: 4, background: "rgba(155,185,255,0.45)", transform: "rotate(45deg)" }} />
-        <div style={{ width: 36, height: 1, background: "linear-gradient(to left,transparent,rgba(140,170,255,0.35))" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "20px 0" }}>
+          <div style={{ width: 36, height: 1, background: "linear-gradient(to right,transparent,rgba(140,170,255,0.35))" }} />
+          <div style={{ width: 4, height: 4, background: "rgba(155,185,255,0.45)", transform: "rotate(45deg)" }} />
+          <div style={{ width: 36, height: 1, background: "linear-gradient(to left,transparent,rgba(140,170,255,0.35))" }} />
+        </div>
+
+        <p style={{ color: "rgba(195,215,255,0.65)", marginBottom: 8 }}>
+          Sign in to manage your business
+        </p>
+
+        <p style={{ color: "rgba(150,175,255,0.38)", fontSize: 12 }}>
+          Fast systems. LOUD results.
+        </p>
       </div>
-
-      <p
-        style={{
-          fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-          fontSize: 16,
-          fontWeight: 400,
-          color: "rgba(195,215,255,0.65)",
-          letterSpacing: "0.01em",
-          lineHeight: 1.7,
-          maxWidth: 280,
-          marginBottom: 10,
-        }}
-      >
-        Sign in to manage your business
-      </p>
-
-      <p
-        style={{
-          fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-          fontSize: 12,
-          color: "rgba(150,175,255,0.38)",
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-        }}
-      >
-        Fast systems. LOUD results.
-      </p>
     </div>
   );
 }
-
 // ─── Main login page ───────────────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
@@ -455,17 +436,17 @@ export default function LoginPage() {
           <BrandingPanel />
         </div>
 
-        <div className="flex items-center justify-center h-full px-8 md:px-16" style={{ minWidth: 420 }}>
+        <div className="flex items-center justify-center h-full px-8 md:px-16" style={{ minWidth: 680 }}>
           <div
             style={{
               background: "rgba(6,5,20,0.72)",
               border: "1px solid rgba(80,110,220,0.18)",
-              borderRadius: 18,
+              borderRadius: 22,
               boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(80,110,255,0.08)",
               backdropFilter: "blur(20px)",
-              padding: "40px 36px",
+              padding: "48px 42px",
               width: "100%",
-              maxWidth: 380,
+              maxWidth: 500,
             }}
           >
             <div
