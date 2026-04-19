@@ -8,8 +8,10 @@ import { ProductFormModal } from "../../src/components/products/ProductFormModal
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { Icon } from "../../src/components/ui/icons";
 import { extractText } from "../../src/api/ai";
+import { getAuth } from "../../src/lib/auth";
 
-const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
+const parsed = getAuth()
+const SELLER_ID = parsed?.user?.seller_id;
 const API_KEY = process.env.NEXT_PUBLIC_ORDER_API_KEY
 
 export default function ProductsPage() {
@@ -111,7 +113,7 @@ export default function ProductsPage() {
     if (!aiText.trim()) return;
     setAiProcessing(true);
     try {
-        const result = await extractText(aiText, SELLER_ID, API_KEY);
+        const result = await extractText(aiText, SELLER_ID);
 
         // Add products to cart
         if (result?.product_id?.length) {

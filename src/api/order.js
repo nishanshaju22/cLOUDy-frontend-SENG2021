@@ -20,9 +20,9 @@ export async function deleteBuyer(sellerId, buyerId) {
     }
 } 
 
-async function buyerSellerLink(buyerData) {
+async function buyerSellerLink(sellerId, buyerId) {
     try {
-        const response = await order_api.post("/v1/buyer-seller", buyerData);
+        const response = await order_api.post(`/v1/seller/${sellerId}/buyers/${buyerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };

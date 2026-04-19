@@ -55,11 +55,7 @@ export function AddBuyerButton({ onToast, onSuccess, sellerId }) {
 
         try {
             const result = await createBuyer(form);
-            const data = {
-                "buyer_id": result.buyerId,
-                "seller_id": sellerId
-            }
-            await buyerSellerLink(data)
+            await buyerSellerLink(sellerId, result.buyerId)
             onToast?.("Buyer created successfully!", "success");
             onSuccess?.(result);
             handleClose();
