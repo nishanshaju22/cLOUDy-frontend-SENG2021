@@ -206,7 +206,7 @@ import { Toast } from "../../src/components/ui/ui";
 
 import { getAuth } from "../../src/lib/auth";
 import Sidebar from "../../src/components/ui/Sidebar";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "context/ThemeContext.jsx";
 import { MistBackground } from "../../src/components/ui/MistBackground";
 
 export default function OrdersPage() {

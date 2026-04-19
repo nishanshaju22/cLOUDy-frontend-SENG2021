@@ -10,7 +10,7 @@ import { Icon } from "../../src/components/ui/icons";
 import { MistBackground } from "../../src/components/ui/MistBackground";
 import { extractText } from "../../src/api/ai";
 import { getAuth } from "../../src/lib/auth";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "context/ThemeContext.jsx";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;

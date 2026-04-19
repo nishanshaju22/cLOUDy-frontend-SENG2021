@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { DespatchList } from "../../src/components/despatch/DespatchList";
 import { MistBackground } from "../../src/components/ui/MistBackground";
 import { Toast } from "../../src/components/ui/ui";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "context/ThemeContext.jsx";
 import Sidebar from "../../src/components/ui/Sidebar";
 
 export default function DespatchPage() {
