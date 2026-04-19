@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AddBuyerButton } from "./AddBuyerButton";
 import { getBuyers } from "../../api/order";
 import { deleteBuyer } from "../../api/order";
+import { getAuth } from "../../lib/auth"
 
 export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
     const [open, setOpen] = useState(false);
@@ -64,9 +65,12 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
         if (!confirm("Delete this buyer? This cannot be undone.")) {
             return;
         }
+        
+        const parsed = getAuth()
+        const sellerId = parsed?.user?.seller_id;
 
         try {
-            await deleteBuyer(buyerId);
+            await deleteBuyer(sellerId, buyerId);
 
             onToast?.(
                 "Buyer deleted successfully",

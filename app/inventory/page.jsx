@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "../../src/api/order";
 import { InventoryFormModal } from "../../src/components/inventory/InventoryFormModal";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
+import { getAuth } from "../../src/lib/auth";
 
-const SELLER_ID = process.env.NEXT_PUBLIC_SELLER_ID || "be45f62d-06cf-4f9e-a23e-bc68ba7ab0d1";
+const parsed = getAuth()
+const SELLER_ID = parsed?.user?.seller_id;
 
 export default function InventoryPage() {
     const [items, setItems] = useState([]);

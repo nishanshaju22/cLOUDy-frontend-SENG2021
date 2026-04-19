@@ -350,11 +350,7 @@ function NewBuyerForm({ onCreated, onCancel, onToast, prefill, sellerId }) {
         setLoading(true);
         try {
             const result = await createBuyer(form);
-            const data = {
-                "buyer_id": result.buyerId,
-                "seller_id": sellerId
-            }
-            await buyerSellerLink(data)
+            await buyerSellerLink(sellerId, result.buyerId)
             onToast("Buyer created!", "success");
             onCreated(result);
         } catch (err) {

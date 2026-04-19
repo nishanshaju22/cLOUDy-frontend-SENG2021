@@ -9,18 +9,20 @@ async function createBuyer(buyerData) {
     }
 }
 
-export async function deleteBuyer(buyerId) {
+export async function deleteBuyer(sellerId, buyerId) {
     try {
-        const response = await order_api.delete(`/v1/buyer/${buyerId}`);
+        const response = await order_api.delete(`/v1/seller/${sellerId}/buyers/${buyerId}`);
         return response.data;
     } catch (error) {
-        throw error.response?.data || {error: "Failed to delete buyer"};
+        throw error.response?.data || {
+            error: "Failed to delete buyer"
+        };
     }
-}
-      
-async function buyerSellerLink(buyerData) {
+} 
+
+async function buyerSellerLink(sellerId, buyerId) {
     try {
-        const response = await order_api.post("/v1/buyer-seller", buyerData);
+        const response = await order_api.post(`/v1/seller/${sellerId}/buyers/${buyerId}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };

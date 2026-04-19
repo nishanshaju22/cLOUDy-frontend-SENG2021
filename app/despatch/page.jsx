@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { DespatchList } from "../../src/components/despatch/DespatchList";
-import { Sidebar } from "../../src/components/ui/Sidebar";
 import { Toast } from "../../src/components/ui/ui";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 export default function DespatchPage() {
     const [activeTab,  setActiveTab]  = useState("despatch");

@@ -202,10 +202,10 @@ import { useRouter } from "next/navigation";
 import { BuyerIdBar } from "../../src/components/orders/BuyerIdBar";
 import { OrdersList } from "../../src/components/orders/OrdersList";
 import { CreateOrderModal } from "../../src/components/orders/CreateOrderModal";
-import { Sidebar } from "../../src/components/ui/Sidebar";
 import { Toast } from "../../src/components/ui/ui";
 
 import { getAuth } from "../../src/lib/auth";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 export default function OrdersPage() {
     const router = useRouter();
