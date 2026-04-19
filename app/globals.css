@@ -72,28 +72,16 @@
     --search-text:          #111111;
     --search-placeholder:   #999999;
 
-    /* Special — background layers (used by pages with decorative bgs) */
-    --bg-layer-1:           transparent;   /* no background effect in professional */
-    --bg-layer-2:           transparent;
-
-    /* Glass card (orders page) — flat in professional */
-    --glass-bg:             #ffffff;
-    --glass-border:         #e5e5e5;
-    --glass-shadow:         0 1px 4px rgba(0, 0, 0, 0.06);
-    --glass-blur:           0px;           /* no blur in professional */
-    --glass-highlight:      transparent;
-
     /* Typography */
     --font-sans:            'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 
 /* ----------------------------------------------------------
-   CLOUDY  — placeholder
-   Soft blue-grey atmosphere, light frosted glass
+   CLOUDY  — soft blue-grey atmosphere, frosted glass
    ---------------------------------------------------------- */
 [data-theme="cloudy"] {
-    /* Page */
+    /* Page — not used directly (canvas is the bg), but available */
     --page-bg:              #dce8f5;
     --page-bg-secondary:    #c8d9ed;
 
@@ -135,7 +123,7 @@
     --accent:               #3a6ea8;
     --accent-text:          #ffffff;
 
-    /* Status — keep semantic colours legible */
+    /* Status */
     --success:              #15803d;
     --success-bg:           rgba(240, 253, 244, 0.8);
     --success-border:       #bbf7d0;
@@ -149,17 +137,6 @@
     --search-bg:            rgba(255, 255, 255, 0.45);
     --search-text:          #1a2a3a;
     --search-placeholder:   #7a9ab8;
-
-    /* Background layers */
-    --bg-layer-1:           /* set in MistBackground component */  transparent;
-    --bg-layer-2:           transparent;
-
-    /* Glass card */
-    --glass-bg:             linear-gradient(to bottom right, rgba(250,255,255,0.32), rgba(180,210,240,0.45));
-    --glass-border:         rgba(255, 255, 255, 0.4);
-    --glass-shadow:         0 16px 70px rgba(60, 100, 160, 0.15);
-    --glass-blur:           28px;
-    --glass-highlight:      linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0.08));
 
     --font-sans:            'DM Sans', 'Geist', ui-sans-serif, system-ui, sans-serif;
 }
@@ -227,17 +204,6 @@
     --search-text:          #e6edf3;
     --search-placeholder:   #484f58;
 
-    /* Background layers */
-    --bg-layer-1:           transparent;
-    --bg-layer-2:           transparent;
-
-    /* Glass card */
-    --glass-bg:             linear-gradient(to bottom right, rgba(56,139,253,0.08), rgba(13,17,23,0.72));
-    --glass-border:         rgba(255, 255, 255, 0.1);
-    --glass-shadow:         0 16px 70px rgba(0, 0, 0, 0.5);
-    --glass-blur:           32px;
-    --glass-highlight:      linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
-
     --font-sans:            'DM Sans', 'Geist', ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -248,20 +214,23 @@
 :root {
     --background: var(--page-bg);
     --foreground: var(--text-primary);
-    --font-sans:  var(--font-sans, 'Helvetica Neue', Helvetica, Arial, sans-serif);
 }
 
 @theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --font-sans:        var(--font-sans);
-    --font-mono:        var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-    margin: 0;
-    background: var(--page-bg);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    transition: background 0.3s ease, color 0.3s ease;
+  margin: 0;
+  background: transparent; 
 }

@@ -180,7 +180,8 @@ const styles = {
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
     },
     imageArea: {
-        position: "relative", background: "#f5f5f5", borderRadius: 4,
+        position: "relative", background: "#f5f5f5", borderTopLeftRadius: 24,
+        borderTopRightRadius: 24, borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
         aspectRatio: "1 / 1", overflow: "hidden", marginBottom: 12,
     },
     imagePlaceholder: {
