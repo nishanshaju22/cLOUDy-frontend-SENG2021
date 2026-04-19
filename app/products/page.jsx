@@ -26,6 +26,7 @@ export default function ProductsPage() {
     const [editProduct, setEditProduct] = useState(null);
     const [isManaging, setIsManaging] = useState(false);
     const [search, setSearch] = useState("");
+    const [cartLoading, setCartLoading] = useState(false);
     const [showAiModal, setShowAiModal] = useState(false);
     const [aiText, setAiText] = useState("");
     const [aiProcessing, setAiProcessing] = useState(false);
@@ -69,7 +70,7 @@ export default function ProductsPage() {
         try {
             await updateCartItem(SELLER_ID, productId, { quantity });
             await fetchCart();
-        } catch {
+        } catch (err) {
             addToast("Failed to update quantity", "error");
         }
     };
@@ -80,7 +81,10 @@ export default function ProductsPage() {
         addToast("Catalogue created", "success");
     };
 
-    const handleEdit = (product) => { setEditProduct(product); setShowForm(true); };
+    const handleEdit = (product) => {
+        setEditProduct(product);
+        setShowForm(true);
+    };
 
     const handleUpdate = async (data) => {
         await updateProduct(SELLER_ID, editProduct.productId, data);

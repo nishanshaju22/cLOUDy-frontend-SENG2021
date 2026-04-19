@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createOrder, getSellers, createSeller } from "../../api/order";
+import { extractText } from "../../api/ai";
 import { Icon } from "../ui/icons";
 import { Field, Input, SectionLabel } from "../ui/ui";
 
@@ -334,7 +335,11 @@ function SellerDropdown({ sellerId, onChange, sellers, loading, onAddClick }) {
     const [search, setSearch] = useState("");
     const containerRef        = useRef(null);
 
-    const selectedSeller = sellers.find(s => s.sellerId === sellerId || s.customer_assigned_account_id === sellerId);
+    const selectedSeller = sellers.find(s =>
+        s.sellerId === sellerId ||
+        s.seller_id === sellerId ||
+        s.customer_assigned_account_id === sellerId
+    );
 
     useEffect(() => {
         function handleOutside(e) {
@@ -359,7 +364,7 @@ function SellerDropdown({ sellerId, onChange, sellers, loading, onAddClick }) {
     });
 
     function handleSelect(seller) {
-        onChange(seller.sellerId || seller.customer_assigned_account_id);
+        onChange(seller.seller_id ?? seller.customer_assigned_account_id);
         setOpen(false);
         setSearch("");
     }
@@ -545,6 +550,8 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
     const [showSellerForm, setShowSellerForm] = useState(false);
     const [sellers,        setSellers]        = useState([]);
     const [sellersLoading, setSellersLoading] = useState(false);
+    const [extractInput, setExtractInput] = useState("");
+    const [extracting,   setExtracting]   = useState(false);
 
     // Load sellers on mount
     useEffect(() => {
@@ -572,15 +579,15 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
     const removeItem = (i) => setForm(f => ({ ...f, items: f.items.filter((_, idx) => idx !== i) }));
 
     const handleSellerCreated = (result) => {
-        // Add new seller to list and auto-select it
         const newSeller = {
-            customer_assigned_account_id: result.sellerId || result.id || result.customer_assigned_account_id,
-            party_name:   result.party_name   || "New Seller",
+            sellerId: result.sellerId || result.seller_id || result.id,
+            customer_assigned_account_id: result.customer_assigned_account_id,
+            party_name:    result.party_name   || "New Seller",
             contact_name:  result.contact_name  || "",
             contact_email: result.contact_email || "",
         };
         setSellers(prev => [...prev, newSeller]);
-        setForm(f => ({ ...f, seller_id: newSeller.customer_assigned_account_id }));
+        setForm(f => ({ ...f, seller_id: newSeller.sellerId || newSeller.customer_assigned_account_id }));
         setShowSellerForm(false);
     };
 
@@ -607,6 +614,32 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
             onToast(err?.error || "Failed to create order", "error");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExtract = async () => {
+        if (!extractInput.trim()) return;
+
+        setExtracting(true);
+
+        try {
+            const result = await extractText(extractInput);
+
+            if (result?.order?.order_date) setField("order_date", result.order.order_date);
+            if (result?.order?.delivery_date) setField("delivery_date", result.order.delivery_date);
+            if (result?.order?.currency_code) setField("currency_code", result.order.currency_code);
+
+            if (result?.order?.address?.street) setAddress("street", result.order.address.street);
+            if (result?.order?.address?.city) setAddress("city", result.order.address.city);
+            if (result?.order?.address?.state) setAddress("state", result.order.address.state);
+            if (result?.order?.address?.postal_code) setAddress("postal_code", result.order.address.postal_code);
+            if (result?.order?.address?.country_code)setAddress("country_code", result.order.address.country_code);
+
+            onToast("Fields extracted!", "success");
+        } catch (err) {
+            onToast("Extraction failed", "error");
+        } finally {
+            setExtracting(false);
         }
     };
 
@@ -675,6 +708,37 @@ export function CreateOrderForm({ buyerId, onToast, onSuccess }) {
     // ── Main order form ───────────────────────────────────────────────────────
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            {/* AI Extraction */}
+            <div>
+                <SectionLabel>AI Extract</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <textarea
+                        value={extractInput}
+                        onChange={e => setExtractInput(e.target.value)}
+                        placeholder="Paste unstructured order text here and let AI fill in the fields…"
+                        rows={4}
+                        style={{
+                            width: "100%", padding: "10px 12px",
+                            border: "1px solid #e2e8f0", borderRadius: 8,
+                            fontSize: 13, color: "#1e293b", resize: "vertical",
+                            fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+                        }}
+                    />
+                    <button
+                        onClick={handleExtract}
+                        disabled={extracting || !extractInput.trim()}
+                        style={{
+                            alignSelf: "flex-start",
+                            padding: "9px 20px", borderRadius: 8, border: "none",
+                            background: extracting || !extractInput.trim() ? "#94a3b8" : "#0f172a",
+                            color: "#fff", fontSize: 13, fontWeight: 700,
+                            cursor: extracting || !extractInput.trim() ? "not-allowed" : "pointer",
+                        }}
+                    >
+                        {extracting ? "Extracting…" : "Extract Fields"}
+                    </button>
+                </div>
+            </div>
 
             {/* Seller */}
             <div>

@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { AddBuyerButton } from "./AddBuyerButton";
 import { getBuyers } from "../../api/order";
+import { deleteBuyer } from "../../api/order";
+import { getAuth } from "../../lib/auth"
 
-export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
+export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
     const [open, setOpen] = useState(false);
     const [buyers, setBuyers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -12,7 +14,9 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     const [search, setSearch] = useState("");
     const containerRef = useRef(null);
 
-    const selectedBuyer = buyers.find((b) => b.buyerId === buyerId);
+    const selectedBuyer = buyers.find(
+        (b) => (b.buyerId || b.buyer_id) === buyerId
+    );
 
     useEffect(() => {
         function handleClickOutside(e) {
@@ -42,7 +46,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
         setError(null);
 
         try {
-            const data = await getBuyers();
+            const data = await getBuyers(sellerId);
             setBuyers(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err?.error || "Failed to load buyers");
@@ -52,9 +56,41 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     }
 
     function handleSelect(buyer) {
-        onChange(buyer.buyerId);
+        onChange(buyer.buyerId || buyer.buyer_id, buyer.contact_email);
         setOpen(false);
         setSearch("");
+    }
+
+    async function handleDeleteBuyer(buyerId) {
+        if (!confirm("Delete this buyer? This cannot be undone.")) {
+            return;
+        }
+        
+        const parsed = getAuth()
+        const sellerId = parsed?.user?.seller_id;
+
+        try {
+            await deleteBuyer(sellerId, buyerId);
+
+            onToast?.(
+                "Buyer deleted successfully",
+                "success"
+            );
+
+            const data = await getBuyers();
+            setBuyers(Array.isArray(data) ? data : []);
+
+            if (buyerId === buyerId) {
+                onClear?.();
+            }
+
+        } catch (err) {
+            onToast?.(
+                err?.message ||
+                "Failed to delete buyer. Ensure related orders are deleted.",
+                "error"
+            );
+        }
     }
 
     const filtered = buyers.filter((b) => {
@@ -211,9 +247,13 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                     onToast={onToast}
                     onSuccess={(buyer) => {
                         if (buyer?.buyerId) {
-                            onChange(buyer.buyerId);
+                            onChange(
+                                buyer.buyerId,
+                                buyer.contact_email
+                            );
                         }
                     }}
+                    sellerId={sellerId}
                 />
             </div>
 
@@ -294,14 +334,11 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
                             !error &&
                             filtered.map((buyer) => (
                                 <BuyerRow
-                                    key={buyer.buyerId}
+                                    key={buyer.buyerId || buyer.buyer_id}
                                     buyer={buyer}
-                                    selected={
-                                        buyer.buyerId === buyerId
-                                    }
-                                    onSelect={() =>
-                                        handleSelect(buyer)
-                                    }
+                                    selected={buyer.buyerId === buyerId}
+                                    onSelect={() => handleSelect(buyer)}
+                                    onDelete={() => handleDeleteBuyer(buyer.buyerId)}
                                 />
                             ))}
                     </div>
@@ -311,7 +348,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast }) {
     );
 }
 
-function BuyerRow({ buyer, selected, onSelect }) {
+function BuyerRow({ buyer, selected, onSelect, onDelete }) {
     const [hovered, setHovered] = useState(false);
 
     return (
@@ -462,6 +499,42 @@ function BuyerRow({ buyer, selected, onSelect }) {
                     <path d="M20 6L9 17l-5-5" />
                 </svg>
             )}
+
+            <div
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                }}
+                style={{
+                    marginLeft: 8,
+                    padding: 4,
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    color: "#ef4444",
+                    display: "flex",
+                    alignItems: "center",
+                    opacity: 0.7,
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = 1;
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = 0.7;
+                }}
+            >
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                </svg>
+            </div>
         </div>
     );
 }

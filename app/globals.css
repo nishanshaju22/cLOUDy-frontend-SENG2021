@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-<<<<<<< Updated upstream
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-=======
 /* ============================================================
    THEME TOKENS
    All pages consume these variables — never hard-code colours.
@@ -219,7 +214,6 @@
 :root {
     --background: var(--page-bg);
     --foreground: var(--text-primary);
->>>>>>> Stashed changes
 }
 
 @theme inline {
@@ -237,21 +231,6 @@
 }
 
 body {
-<<<<<<< Updated upstream
   margin: 0;
   background: transparent; 
 }
-=======
-    margin: 0;
-    /*
-     * IMPORTANT: body stays transparent.
-     * Pages with a canvas background (cloudy, stormy) need to show through.
-     * Pages with a solid background (professional) set it on their own
-     * outermost layout div using var(--page-bg).
-     */
-    background: transparent;
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    transition: color 0.3s ease;
-}
->>>>>>> Stashed changes

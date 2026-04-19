@@ -9,6 +9,26 @@ async function createBuyer(buyerData) {
     }
 }
 
+export async function deleteBuyer(sellerId, buyerId) {
+    try {
+        const response = await order_api.delete(`/v1/seller/${sellerId}/buyers/${buyerId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || {
+            error: "Failed to delete buyer"
+        };
+    }
+} 
+
+async function buyerSellerLink(sellerId, buyerId) {
+    try {
+        const response = await order_api.post(`/v1/seller/${sellerId}/buyers/${buyerId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 async function createOrder(orderData, buyerId) {
     try {
         const response = await order_api.post(`/v2/buyer/${buyerId}/order`, orderData, { responseType: "text" });
@@ -72,10 +92,10 @@ async function deleteCancelledOrders(buyerId) {
     }
 }
 
-async function getBuyers() {
+async function getBuyers(sellerId) {
     try {
-        const response = await order_api.get("/v1/buyers");
-        return response.data.buyers;
+        const response = await order_api.get(`/v1/seller/${sellerId}/buyers`);
+        return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
     }
@@ -99,5 +119,182 @@ async function getSellers() {
     }
 }
 
+// Products
 
-export { createOrder, updateOrder, getOrderById, cancelOrder, deleteOrderById, getOrdersForBuyer, deleteCancelledOrders, createBuyer, getBuyers, getSellers, createSeller }
+async function getProductsBySeller(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/products`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function getProductById(productId) {
+    try {
+        const response = await order_api.get(`/v2/product/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function createProduct(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/product`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function updateProduct(sellerId, productId, data) {
+    try {
+        const response = await order_api.put(`/v2/seller/${sellerId}/product/${productId}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function deleteProduct(sellerId, productId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/product/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+// Cart
+
+async function getCart(sellerId) {
+    try {
+        const response = await order_api.get(`v2/seller/${sellerId}/cart`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function addToCart(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/cart/item`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function updateCartItem(sellerId, productId, data) {
+    try {
+        const response = await order_api.put(`/v2/seller/${sellerId}/cart/item/${productId}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function removeFromCart(sellerId, productId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/cart/item/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function clearCart(sellerId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/cart`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function checkout(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/cart/checkout`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+};
+
+async function getInventoryBySeller(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getInventory(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function createInventoryItem(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/inventory`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function updateInventoryItem(sellerId, inventoryId, data) {
+    try {
+        const response = await order_api.put(`/v2/seller/${sellerId}/inventory/${inventoryId}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function deleteInventoryItem(sellerId, inventoryId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/inventory/${inventoryId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+export { 
+    createOrder, 
+    updateOrder, 
+    getOrderById, 
+    cancelOrder, 
+    deleteOrderById, 
+    getOrdersForBuyer, 
+    deleteCancelledOrders, 
+    createBuyer, 
+    buyerSellerLink,
+    getBuyers, 
+    getSellers, 
+    createSeller, 
+    getProductsBySeller, 
+    getProductById,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    getCart,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
+    clearCart,
+    checkout,
+    getInventoryBySeller,
+    getInventory,
+    createInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem
+}

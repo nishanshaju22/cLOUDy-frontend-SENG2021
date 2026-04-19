@@ -5,41 +5,157 @@ import { Icon } from "../ui/icons";
 import { StatusBadge } from "../ui/ui";
 import { createDespatch, retrieveDespatch } from "../../api/despatch";
 import { getOrderById } from "../../api/order";
+import { sendEmail } from "../../api/email";
 
-export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated }) {
+export function OrderCard({ order, buyerId, buyerEmail, onClick, onToast, onDespatchCreated }) {
     const [despatching, setDespatching] = useState(false);
     const [despatchData, setDespatchData] = useState(null);
+    const [autoDespatched, setAutoDespatched] = useState(false);
     const [ripples, setRipples] = useState([]);
     const cardRef = useRef(null);
 
     const statusColor = order.status === "CANCELED" ? "#ef4444" : "#22c55e";
+
+    const buildDespatchEmail = () => {
+
+        if (!buyerEmail) return null;
+
+        const deliveryDate = new Date(order.deliveryDate);
+
+        const expectedDelivery = new Date(deliveryDate);
+        expectedDelivery.setDate(
+            expectedDelivery.getDate() + 10
+        );
+
+        const formattedExpected =
+            expectedDelivery.toLocaleDateString("en-AU", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            });
+
+        return {
+            to: buyerEmail,
+            subject: `Order ${order.orderId} Despatched`,
+            body:
+`Dear Customer,
+
+We are pleased to inform you that your order ${order.orderId} has now been successfully despatched.
+
+Order Summary:
+- Order ID: ${order.orderId}
+- Item Count: ${order.itemCount}
+- Total Amount: ${order.currencyCode} ${parseFloat(order.totalAmount || 0).toFixed(2)}
+
+Your expected delivery date is ${formattedExpected}.
+
+If you have any questions regarding your shipment, please contact our support team.
+
+Thank you for your business.
+
+Kind regards,
+Dispatch Team`
+        };
+    };
 
     useEffect(() => {
         if (!buyerId || !order?.orderId) return;
 
         let cancelled = false;
 
-        const fetchDespatch = async () => {
+        const runEffect = async () => {
+
+            let fetchedDespatch = null;
+
+            // -------- Fetch existing despatch FIRST --------
             try {
                 const d = await getOrderById(buyerId, order.orderId);
-                const despatch = await retrieveDespatch(d.xml);
+
+                if (d.xml) {
+                    fetchedDespatch = await retrieveDespatch(d.xml);
+                }
 
                 if (!cancelled) {
-                    setDespatchData(despatch);
+                    setDespatchData(fetchedDespatch);
                 }
+
             } catch (err) {
                 if (!cancelled) {
                     setDespatchData(null);
                 }
             }
+
+            if (
+                !buyerId ||
+                !order?.orderId ||
+                !order?.deliveryDate ||
+                fetchedDespatch ||
+                autoDespatched ||
+                order.status === "CANCELED"
+            ) {
+                return;
+            }
+
+            // -------- Check delivery date --------
+            const deliveryDate = new Date(order.deliveryDate);
+            const today = new Date();
+
+            deliveryDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            if (today < deliveryDate) return;
+
+            // -------- Auto-despatch --------
+            try {
+                const d = await getOrderById(buyerId, order.orderId);
+                if (!d.xml) return;
+
+                setDespatching(true);
+
+                const result = await createDespatch(d.xml);
+
+                if (!cancelled) {
+                    setAutoDespatched(true);
+
+                    onToast?.(
+                        `Auto-despatch created for order ${order.orderId?.slice(0, 8)}… — ID: ${result.adviceIds?.[0]}`,
+                        "success"
+                    );
+
+                    onDespatchCreated?.();
+
+                    try {
+                        const emailPayload = buildDespatchEmail();
+
+                        if (emailPayload) {
+                            await sendEmail(emailPayload);
+                        }
+
+                    } catch (emailErr) {
+                        console.error("Email failed:", emailErr);
+                    }
+                }
+
+            } catch (err) {
+                if (!cancelled) {
+                    onToast?.(
+                        err?.error || "Auto-despatch failed",
+                        "error"
+                    );
+                }
+
+            } finally {
+                if (!cancelled) setDespatching(false);
+            }
         };
 
-        fetchDespatch();
+        runEffect();
 
         return () => {
             cancelled = true;
         };
-    }, [buyerId]);
+
+    }, [buyerId, order]);
 
     const handleDespatch = async (e) => {
         e.stopPropagation();
@@ -56,6 +172,18 @@ export function OrderCard({ order, buyerId, onClick, onToast, onDespatchCreated 
             const result = await createDespatch(d.xml);
             onToast?.(`Despatch created — ID: ${result.adviceIds?.[0]}`, "success");
             onDespatchCreated?.();
+
+            try {
+                const emailPayload = buildDespatchEmail();
+                console.log(emailPayload)
+
+                if (emailPayload) {
+                    await sendEmail(emailPayload);
+                }
+
+            } catch (emailErr) {
+                console.error("Email failed:", emailErr);
+            }
 
         } catch (err) {
             onToast?.(err?.error || "Could not load order", "error");
