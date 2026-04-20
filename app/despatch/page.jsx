@@ -3,9 +3,9 @@
 import { useState, useCallback } from "react";
 import { DespatchList } from "../../src/components/despatch/DespatchList";
 import { MistBackground } from "../../src/components/ui/MistBackground";
-import { Sidebar } from "../../src/components/ui/Sidebar";
 import { Toast } from "../../src/components/ui/ui";
 import { useTheme } from "../context/ThemeContext";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 export default function DespatchPage() {
     const { theme } = useTheme();

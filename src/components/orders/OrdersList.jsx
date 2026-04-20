@@ -197,11 +197,11 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                         style={{
                             padding: "10px 28px",
                             borderRadius: 100,
-                            borderColor: "#242124",
                             border: "1px solid rgba(255,255,255,0.6)",
                             background: "#41EAD4",
                             backdropFilter: "blur(8px)",
                             color: "#242124",
+                            borderColor: "#242124",
                             fontSize: 13,
                             fontWeight: 600,
                             transition: "all 0.2s",

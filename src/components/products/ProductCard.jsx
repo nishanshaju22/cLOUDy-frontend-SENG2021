@@ -140,8 +140,11 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
 
                     <button
                         onClick={() => handleUpdateQty(product.productId, quantity + 1)}
-                        disabled={updatingQty}
-                        style={styles.qtyBtn}
+                        disabled={updatingQty || outOfStock}
+                        style={{
+                            ...styles.qtyBtn,
+                            ...(outOfStock ? { background: "#e5e5e5", color: "#999", cursor: "not-allowed" } : {}),
+                        }}
                     >
                         +
                     </button>
