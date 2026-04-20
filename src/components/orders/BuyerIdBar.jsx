@@ -56,7 +56,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
     }
 
     function handleSelect(buyer) {
-        onChange(buyer.buyerId || buyer.buyer_id, buyer.contact_email);
+        onChange(buyer.buyerId || buyer.buyer_id, buyer?.contact?.email);
         setOpen(false);
         setSearch("");
     }
@@ -249,7 +249,7 @@ export function BuyerIdBar({ buyerId, onChange, onClear, onToast, sellerId }) {
                         if (buyer?.buyerId) {
                             onChange(
                                 buyer.buyerId,
-                                buyer.contact_email
+                                buyer.contact?.email
                             );
                         }
                     }}
@@ -426,7 +426,7 @@ function BuyerRow({ buyer, selected, onSelect, onDelete }) {
                     )}
                 </div>
 
-                {(buyer.contact_name || buyer.contact_email) && (
+                {(buyer.contact_name || buyer?.contact?.email) && (
                     <div
                         style={{
                             display: "flex",
@@ -448,7 +448,7 @@ function BuyerRow({ buyer, selected, onSelect, onDelete }) {
                         )}
 
                         {buyer.contact_name &&
-                            buyer.contact_email && (
+                            buyer?.contact?.email && (
                                 <span
                                     style={{
                                         fontSize: 11,
@@ -459,7 +459,7 @@ function BuyerRow({ buyer, selected, onSelect, onDelete }) {
                                 </span>
                             )}
 
-                        {buyer.contact_email && (
+                        {buyer?.contact?.email && (
                             <span
                                 style={{
                                     fontSize: 11,
@@ -469,7 +469,7 @@ function BuyerRow({ buyer, selected, onSelect, onDelete }) {
                                     whiteSpace: "nowrap",
                                 }}
                             >
-                                {buyer.contact_email}
+                                {buyer?.contact?.email}
                             </span>
                         )}
                     </div>
