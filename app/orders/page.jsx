@@ -285,11 +285,7 @@ export default function OrdersPage() {
                     fontFamily: "var(--font-sans)",
                 }}
             >
-                <Sidebar
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    onCreateOrder={() => setShowCreate(true)}
-                />
+                <Sidebar/>
 
                 <main
                     style={{

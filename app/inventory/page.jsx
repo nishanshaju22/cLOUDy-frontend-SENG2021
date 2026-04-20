@@ -7,6 +7,7 @@ import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { MistBackground } from "../../src/components/ui/MistBackground";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
@@ -82,6 +83,8 @@ export default function InventoryPage() {
                 button:disabled { opacity: 0.6; cursor: not-allowed !important; }
                 input:focus, textarea:focus { outline: none; border-color: var(--border-strong) !important; }
             `}</style>
+
+            <Sidebar />
 
             <div style={{
                 minHeight: "100vh",

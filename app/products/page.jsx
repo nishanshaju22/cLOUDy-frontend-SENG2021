@@ -11,6 +11,7 @@ import { MistBackground } from "../../src/components/ui/MistBackground";
 import { extractText } from "../../src/api/ai";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
@@ -147,6 +148,7 @@ export default function ProductsPage() {
 
     return (
         <>
+            <Sidebar />
             {hasAtmosphericBg && <MistBackground />}
 
             <style>{`

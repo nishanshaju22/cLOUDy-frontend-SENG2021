@@ -36,13 +36,7 @@ export default function DespatchPage() {
                 background: hasAtmosphericBg ? "transparent" : "var(--page-bg)",
                 fontFamily: "var(--font-sans)",
             }}>
-                <Sidebar
-                    activeTab={activeTab}
-                    onTabChange={(tab) => {
-                        if (tab !== "despatch") window.location.href = "/orders";
-                    }}
-                    onCreateOrder={() => { window.location.href = "/orders"; }}
-                />
+                <Sidebar/>
 
                 <main style={{ flex: 1, padding: "36px 40px", position: "relative", zIndex: 1 }}>
                     {/* Page heading */}
