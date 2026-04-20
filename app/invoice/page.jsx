@@ -5,6 +5,7 @@ import { getInvoices, getInvoiceSummary, getInvoiceById, deleteInvoice, updateIn
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { MistBackground } from "../../src/components/ui/MistBackground";
 import { useTheme } from "../context/ThemeContext";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 const STATUS_COLORS = {
     DRAFT:  { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
@@ -200,6 +201,7 @@ export default function InvoicesPage() {
 
     return (
         <>
+            <Sidebar />
             {hasAtmosphericBg && <MistBackground />}
 
             <style>{`
