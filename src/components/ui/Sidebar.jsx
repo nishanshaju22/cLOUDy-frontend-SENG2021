@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { path: "/products",  label: "Catalogues", icon: "/icons/catalogues.png", scale: 1.2 },
   { path: "/inventory", label: "Inventory",  icon: "/icons/inventory.png", scale: 1.1},
   { path: "/invoice",   label: "Invoice",    icon: "/icons/invoice.png", scale: 1.2 },
-  { path: "/despatch",  label: "Despatch",   icon: "/icons/despatch.png", scale: 3 },
+  { path: "/despatch",  label: "Despatch",   icon: "/icons/despatch.png", scale: 1.85 },
 ];
 
 const BOTTOM_ITEMS = [
