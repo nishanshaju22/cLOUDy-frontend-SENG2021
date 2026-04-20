@@ -17,7 +17,6 @@ export function OrderCard({ order, buyerId, buyerEmail, onClick, onToast, onDesp
     const statusColor = order.status === "CANCELED" ? "#ef4444" : "#22c55e";
 
     const buildDespatchEmail = () => {
-
         if (!buyerEmail) return null;
 
         const deliveryDate = new Date(order.deliveryDate);
@@ -131,6 +130,9 @@ Dispatch Team`
                             await sendEmail(emailPayload);
                         }
 
+                        console.log("email sent")
+
+
                     } catch (emailErr) {
                         console.error("Email failed:", emailErr);
                     }
@@ -180,6 +182,8 @@ Dispatch Team`
                 if (emailPayload) {
                     await sendEmail(emailPayload);
                 }
+
+                console.log("email sent")
 
             } catch (emailErr) {
                 console.error("Email failed:", emailErr);
