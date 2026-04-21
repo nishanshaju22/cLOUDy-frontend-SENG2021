@@ -86,6 +86,9 @@ export function DespatchDrawer({ despatch, onClose, onToast, onRefresh }) {
                     display: "flex",
                     flexDirection: "column",
                     animation: "slideIn 0.22s ease",
+                    borderTopLeftRadius: 20,
+                    borderBottomLeftRadius: 20,
+                    overflow: "hidden",
                 }}
             >
                 {/* Header */}

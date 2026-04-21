@@ -50,13 +50,23 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
     return (
         <div style={styles.card}>
             <div style={styles.imageArea}>
-                <div style={styles.imagePlaceholder}>
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="#c8c8c8" strokeWidth="1" style={{ opacity: 0.5 }}>
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21,15 16,10 5,21"/>
-                    </svg>
+                <div style={styles.imageWrapper}>
+                    {product.imageUrl ? (
+                        <img
+                            src={product.imageUrl}
+                            alt={product.productName}
+                            style={styles.productImage}
+                        />
+                    ) : (
+                        <div style={styles.imagePlaceholder}>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
+                                stroke="#c8c8c8" strokeWidth="1" style={{ opacity: 0.5 }}>
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                        </div>
+                    )}
                 </div>
 
                 {/* Out of stock badge */}
@@ -100,83 +110,88 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
                     </div>
                 )}
             </div>
+                <div style={styles.bottomArea}>
+                    {isManaging ? (
+                        <div style={styles.manageBtnRow}>
+                            <button
+                                onClick={() => onEdit(product)}
+                                style={styles.editBtn}
+                            >
+                                <EditIcon /> Edit
+                            </button>
 
-            {isManaging ? (
-                <div style={styles.manageBtnRow}>
-                    <button
-                        onClick={() => onEdit(product)}
-                        style={styles.editBtn}
-                    >
-                        <EditIcon /> Edit
-                    </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                style={styles.deleteBtn}
+                            >
+                                {deleting ? (
+                                    <SpinnerIcon size={13} color="#fff" />
+                                ) : (
+                                    <>
+                                        <TrashIcon /> Delete
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    ) : inCart ? (
+                        <div style={styles.qtyControl}>
+                            <button
+                                onClick={() => handleUpdateQty(product.productId, quantity - 1)}
+                                disabled={updatingQty || quantity <= 1}
+                                style={styles.qtyBtn}
+                            >
+                                −
+                            </button>
 
-                    <button
-                        onClick={handleDelete}
-                        disabled={deleting}
-                        style={styles.deleteBtn}
-                    >
-                        {deleting ? (
-                            <SpinnerIcon size={13} color="#fff" />
-                        ) : (
-                            <>
-                                <TrashIcon /> Delete
-                            </>
-                        )}
-                    </button>
-                </div>
-            ) : inCart ? (
-                <div style={styles.qtyControl}>
-                    <button
-                        onClick={() => handleUpdateQty(product.productId, quantity - 1)}
-                        disabled={updatingQty || quantity <= 1}
-                        style={styles.qtyBtn}
-                    >
-                        −
-                    </button>
+                            <div style={styles.qtyValue}>
+                                {updatingQty ? <SpinnerIcon size={12} color="#111" /> : quantity}
+                            </div>
 
-                    <div style={styles.qtyValue}>
-                        {updatingQty ? <SpinnerIcon size={12} color="#111" /> : quantity}
-                    </div>
-
-                    <button
-                        onClick={() => handleUpdateQty(product.productId, quantity + 1)}
-                        disabled={updatingQty || outOfStock}
-                        style={{
-                            ...styles.qtyBtn,
-                            ...(outOfStock ? { background: "#e5e5e5", color: "#999", cursor: "not-allowed" } : {}),
-                        }}
-                    >
-                        +
-                    </button>
-                </div>
-            ) : (
-                <button
-                    onClick={handleAddToCart}
-                    disabled={adding || outOfStock}
-                    style={{
-                        ...styles.addBtn,
-                        ...(added ? styles.addBtnAdded : {}),
-                        ...(outOfStock ? styles.addBtnDisabled : {}),
-                    }}
-                >
-                    {adding ? (
-                        <><SpinnerIcon size={13} color="#fff" /> Adding…</>
-                    ) : added ? (
-                        <><CheckIcon /> Added</>
-                    ) : outOfStock ? (
-                        "Out of Stock"
+                            <button
+                                onClick={() => handleUpdateQty(product.productId, quantity + 1)}
+                                disabled={updatingQty || outOfStock}
+                                style={{
+                                    ...styles.qtyBtn,
+                                    ...(outOfStock ? { background: "#e5e5e5", color: "#999", cursor: "not-allowed" } : {}),
+                                }}
+                            >
+                                +
+                            </button>
+                        </div>
                     ) : (
-                        "Add to Cart"
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={adding || outOfStock}
+                            style={{
+                                ...styles.addBtn,
+                                ...(added ? styles.addBtnAdded : {}),
+                                ...(outOfStock ? styles.addBtnDisabled : {}),
+                            }}
+                        >
+                            {adding ? (
+                                <><SpinnerIcon size={13} color="#fff" /> Adding…</>
+                            ) : added ? (
+                                <><CheckIcon /> Added</>
+                            ) : outOfStock ? (
+                                "Out of Stock"
+                            ) : (
+                                "Add to Cart"
+                            )}
+                        </button>
                     )}
-                </button>
-            )}
+                </div>
         </div>
     );
 }
 
 const styles = {
     card: {
-        display: "flex", flexDirection: "column", cursor: "default",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        height: "100%",
+        cursor: "default",
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
     },
     imageArea: {
@@ -295,6 +310,38 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+    },
+    imageWrapper: {
+        width: "100%",
+        aspectRatio: "1 / 1",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16,
+        overflow: "hidden",
+        position: "relative",
+        background: "#f5f5f5",
+        marginBottom: 12,
+    },
+
+    productImage: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        objectPosition: "center",
+        display: "block",
+    },
+
+    imagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    bottomArea: {
+        marginTop: "auto",
+        paddingBottom: 2,
     },
 };
 

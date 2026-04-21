@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SpinnerIcon } from "./ProductCard";
-import { getInventoryBySeller } from "../../api/order";
+import { getInventoryBySeller, uploadImage } from "../../api/order";
 
-export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }) {
+export function ProductFormModal({ sellerId, product, onClose, onSave, onSaveDone, onToast }) {
     const isEdit = !!product;
 
     const [form, setForm] = useState({
@@ -14,7 +14,6 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
         unit_price: product?.unitPrice || "",
     });
 
-    // inventory_items: [{ inventory_id, quantity_required, item_name, quantityAvailable }]
     const [linkedItems, setLinkedItems] = useState(
         product?.inventoryItems?.map(i => ({
             inventory_id: i.inventoryId,
@@ -27,7 +26,11 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
     const [inventoryList, setInventoryList] = useState([]);
     const [inventoryLoading, setInventoryLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [errors, setErrors] = useState({});
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(product?.imageUrl || null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         const handler = (e) => { if (e.key === "Escape") onClose(); };
@@ -42,7 +45,7 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                 const data = await getInventoryBySeller(sellerId);
                 setInventoryList(data.items || []);
             } catch {
-                // silently fail — inventory section just won't show
+
             } finally {
                 setInventoryLoading(false);
             }
@@ -63,11 +66,15 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
 
     const handleSubmit = async () => {
         const errs = validate();
-        if (Object.keys(errs).length) { setErrors(errs); return; }
+        if (Object.keys(errs).length) {
+            setErrors(errs);
+            return;
+        }
 
         setSaving(true);
+
         try {
-            await onSave({
+            const saved = await onSave({
                 product_name: form.product_name.trim(),
                 product_description: form.product_description.trim() || undefined,
                 unit_price: parseFloat(form.unit_price),
@@ -78,12 +85,31 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                     }))
                     : undefined,
             });
+
+            if (imageFile && saved?.productId) {
+                setUploadingImage(true);
+                await uploadImage({
+                    file: imageFile,
+                    product_id: saved.productId,
+                });
+                setUploadingImage(false);
+            }
+
+            if (onSaveDone) await onSaveDone();
+
             onClose();
+
         } catch (err) {
             onToast(err?.error || "Save failed", "error");
         } finally {
             setSaving(false);
+            setUploadingImage(false);
         }
+    };
+
+    const handleImageSelect = (file) => {
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
     };
 
     const set = (key, val) => {
@@ -114,6 +140,8 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
         ));
     };
 
+    const savingLabel = uploadingImage ? "Uploading…" : "Saving…";
+
     return createPortal(
         <>
             <div onClick={onClose} style={styles.backdrop} />
@@ -124,7 +152,6 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                 </div>
 
                 <div style={styles.body}>
-                    {/* Name */}
                     <Field label="Catalogue Name" required error={errors.product_name}>
                         <input
                             value={form.product_name}
@@ -134,7 +161,6 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                         />
                     </Field>
 
-                    {/* Description */}
                     <Field label="Description">
                         <textarea
                             value={form.product_description}
@@ -145,7 +171,6 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                         />
                     </Field>
 
-                    {/* Price */}
                     <Field label="Unit Price (AUD)" required error={errors.unit_price}>
                         <div style={styles.priceWrap}>
                             <span style={styles.currencySymbol}>$</span>
@@ -161,6 +186,48 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                         </div>
                     </Field>
 
+                    {/* Image upload */}
+                    <div>
+                        <div style={styles.sectionLabel}>Product Image</div>
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                e.currentTarget.style.border = "1px dashed #0ea5e9";
+                                e.currentTarget.style.background = "#f0f9ff";
+                            }}
+                            onDragLeave={(e) => {
+                                e.preventDefault();
+                                e.currentTarget.style.border = "1px dashed #e5e5e5";
+                                e.currentTarget.style.background = "#fafafa";
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                const file = e.dataTransfer.files?.[0];
+                                if (file) handleImageSelect(file);
+                            }}
+                            style={{ ...styles.dropzone, cursor: "pointer" }}
+                        >
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleImageSelect(file);
+                                }}
+                                style={{ display: "none" }}
+                            />
+                            {imagePreview ? (
+                                <img src={imagePreview} style={styles.previewImage} alt="preview" />
+                            ) : (
+                                <div style={{ textAlign: "center", color: "#94a3b8", fontSize: 13 }}>
+                                    Drag & drop an image here or click to upload
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Inventory linker */}
                     <div>
                         <div style={styles.sectionLabel}>Inventory Items</div>
@@ -168,7 +235,6 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                             Click an item to link it. Each unit of this catalogue requires the quantities below.
                         </div>
 
-                        {/* Linked items — shown at top */}
                         {linkedItems.length > 0 && (
                             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
                                 {linkedItems.map(item => (
@@ -181,27 +247,12 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                                                 {item.quantityAvailable} in stock
                                             </div>
                                         </div>
-
-                                        {/* Qty stepper */}
                                         <div style={styles.stepper}>
-                                            <button
-                                                onClick={() => updateQty(item.inventory_id, -1)}
-                                                style={styles.stepBtn}
-                                                disabled={item.quantity_required <= 1}
-                                            >−</button>
+                                            <button onClick={() => updateQty(item.inventory_id, -1)} style={styles.stepBtn} disabled={item.quantity_required <= 1}>−</button>
                                             <span style={styles.stepVal}>{item.quantity_required}</span>
-                                            <button
-                                                onClick={() => updateQty(item.inventory_id, 1)}
-                                                style={styles.stepBtn}
-                                            >+</button>
+                                            <button onClick={() => updateQty(item.inventory_id, 1)} style={styles.stepBtn}>+</button>
                                         </div>
-
-                                        {/* Remove */}
-                                        <button
-                                            onClick={() => toggleItem({ inventoryId: item.inventory_id })}
-                                            style={styles.unlinkBtn}
-                                            title="Remove"
-                                        >
+                                        <button onClick={() => toggleItem({ inventoryId: item.inventory_id })} style={styles.unlinkBtn} title="Remove">
                                             <XSmallIcon />
                                         </button>
                                     </div>
@@ -209,15 +260,10 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                             </div>
                         )}
 
-                        {/* Available inventory to pick from */}
                         {inventoryLoading ? (
-                            <div style={{ fontSize: 12, color: "#94a3b8", padding: "10px 0" }}>
-                                Loading inventory…
-                            </div>
+                            <div style={{ fontSize: 12, color: "#94a3b8", padding: "10px 0" }}>Loading inventory…</div>
                         ) : inventoryList.length === 0 ? (
-                            <div style={{ fontSize: 12, color: "#94a3b8", fontStyle: "italic" }}>
-                                No inventory items found
-                            </div>
+                            <div style={{ fontSize: 12, color: "#94a3b8", fontStyle: "italic" }}>No inventory items found</div>
                         ) : (
                             <div style={styles.inventoryPickerScroll}>
                                 {inventoryList
@@ -231,22 +277,16 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                                             onMouseLeave={e => e.currentTarget.style.background = "#fff"}
                                         >
                                             <div style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{ fontSize: 13, fontWeight: 500, color: "#0f172a" }}>
-                                                    {inv.itemName}
-                                                </div>
+                                                <div style={{ fontSize: 13, fontWeight: 500, color: "#0f172a" }}>{inv.itemName}</div>
                                                 {inv.itemDescription && (
-                                                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>
-                                                        {inv.itemDescription}
-                                                    </div>
+                                                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>{inv.itemDescription}</div>
                                                 )}
                                             </div>
                                             <div style={{ textAlign: "right", flexShrink: 0 }}>
                                                 <div style={{ fontSize: 11, color: inv.quantity > 0 ? "#16a34a" : "#dc2626", fontWeight: 600 }}>
                                                     {inv.quantity} in stock
                                                 </div>
-                                                <div style={{ fontSize: 11, color: "#94a3b8" }}>
-                                                    ${parseFloat(inv.purchasePrice || 0).toFixed(2)}
-                                                </div>
+                                                <div style={{ fontSize: 11, color: "#94a3b8" }}>${parseFloat(inv.purchasePrice || 0).toFixed(2)}</div>
                                             </div>
                                             <div style={styles.addChip}>+ Add</div>
                                         </div>
@@ -260,7 +300,7 @@ export function ProductFormModal({ sellerId, product, onClose, onSave, onToast }
                     <button onClick={onClose} style={styles.cancelBtn}>Cancel</button>
                     <button onClick={handleSubmit} disabled={saving} style={styles.saveBtn}>
                         {saving
-                            ? <><SpinnerIcon size={13} color="#fff" /> Saving…</>
+                            ? <><SpinnerIcon size={13} color="#fff" /> {savingLabel}</>
                             : isEdit ? "Save Changes" : "Create Catalogue"
                         }
                     </button>
@@ -329,8 +369,6 @@ const styles = {
     priceWrap: { position: "relative", display: "flex", alignItems: "center" },
     currencySymbol: { position: "absolute", left: 14, fontSize: 14, color: "#757575", pointerEvents: "none" },
     priceInput: { paddingLeft: 28 },
-
-    // Linked item row
     linkedItem: {
         display: "flex", alignItems: "center", gap: 10,
         padding: "10px 12px", borderRadius: 8,
@@ -356,8 +394,6 @@ const styles = {
         alignItems: "center", justifyContent: "center", flexShrink: 0,
         borderRadius: "50%",
     },
-
-    // Picker list
     inventoryPickerScroll: {
         border: "1px solid #e5e5e5", borderRadius: 8,
         maxHeight: 180, overflowY: "auto",
@@ -373,7 +409,6 @@ const styles = {
         background: "#e0f2fe", borderRadius: 4, padding: "2px 8px",
         flexShrink: 0,
     },
-
     footer: {
         display: "flex", gap: 10, padding: "16px 24px",
         borderTop: "1px solid #f0f0f0", justifyContent: "flex-end", flexShrink: 0,
@@ -388,6 +423,23 @@ const styles = {
         fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer",
         display: "flex", alignItems: "center", gap: 6,
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    },
+    dropzone: {
+        border: "1px dashed #e5e5e5",
+        borderRadius: 10,
+        padding: 18,
+        background: "#fafafa",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: 120,
+        transition: "0.15s",
+    },
+    previewImage: {
+        width: "100%",
+        maxHeight: 160,
+        objectFit: "cover",
+        borderRadius: 8,
     },
 };
 

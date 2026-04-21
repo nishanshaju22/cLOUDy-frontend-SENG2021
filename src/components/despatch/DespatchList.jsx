@@ -5,10 +5,9 @@ import { Icon } from "../ui/icons";
 import { DespatchDrawer } from "./DespatchDrawer";
 import { listDespatch } from "../../api/despatch";
 
-export function DespatchList({ onToast }) {
+export function DespatchList({ onToast, onSelect }) {
     const [despatches, setDespatches] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [selected, setSelected] = useState(null);
 
     const fetchDespatches = useCallback(async () => {
         setLoading(true);
@@ -66,20 +65,10 @@ export function DespatchList({ onToast }) {
                         <DespatchCard
                             key={d["advice-id"] || i}
                             despatch={d}
-                            onClick={() => setSelected(d)}
+                            onClick={() => onSelect(d)}
                         />
                     ))}
                 </div>
-            )}
-
-            {/* Drawer */}
-            {selected && (
-                <DespatchDrawer
-                    despatch={selected}
-                    onClose={() => setSelected(null)}
-                    onToast={onToast}
-                    onRefresh={fetchDespatches}
-                />
             )}
         </div>
     );

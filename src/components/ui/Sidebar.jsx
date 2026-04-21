@@ -23,13 +23,12 @@ export default function Sidebar() {
   const router    = useRouter();
   const [visible, setVisible] = useState(false);
 
-  const isActive = (path) =>
-    path === "/" ? pathname === "/" : pathname.startsWith(path);
+  const isActive = (path) => path === "/" ? pathname === "/" : pathname.startsWith(path);
 
   useEffect(() => {
     const onMove = (e) => {
       const fromBottom = window.innerHeight - e.clientY;
-      setVisible(fromBottom < 80);
+      setVisible(fromBottom < 70);
     };
     const onLeave = () => setVisible(false);
     window.addEventListener("mousemove", onMove);
@@ -43,28 +42,22 @@ export default function Sidebar() {
   return (
     <>
       <style>{`
-        @keyframes dockIn {
-          from { transform: translateX(-50%) translateY(100%); opacity: 0; }
-          to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
-        }
-        @keyframes dockOut {
-          from { transform: translateX(-50%) translateY(0);    opacity: 1; }
-          to   { transform: translateX(-50%) translateY(100%); opacity: 0; }
-        }
         .dock-wrap {
           position: fixed;
           bottom: 16px;
           left: 50%;
-          transform: translateX(-50%);
           z-index: 1000;
           pointer-events: none;
+          transform: translateX(-50%) translateY(100%);
+          opacity: 0;
+          transition: transform 0.2s ease-in, opacity 0.15s ease-in;
         }
+
         .dock-wrap.visible {
           pointer-events: all;
-          animation: dockIn 0.28s cubic-bezier(0.34, 1.26, 0.64, 1) forwards;
-        }
-        .dock-wrap.hidden {
-          animation: dockOut 0.22s ease forwards;
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+          transition: transform 0.28s cubic-bezier(0.34, 1.26, 0.64, 1);
         }
         .dock-inner {
           position: relative;
@@ -199,7 +192,7 @@ export default function Sidebar() {
         }
       `}</style>
 
-      <div className={`dock-wrap ${visible ? "visible" : "hidden"}`}>
+      <div className={`dock-wrap ${visible ? "visible" : ""}`}>
         <div className="dock-inner">
 
           <div className="dock-highlight" />
