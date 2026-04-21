@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { DespatchList } from "../../src/components/despatch/DespatchList";
 import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 import { Toast } from "../../src/components/ui/ui";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
@@ -22,11 +23,32 @@ export default function DespatchPage() {
         setToast({ msg, type });
     }, []);
 
-    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+    const hasMistBg = theme === "cloudy";
+    const hasNightSkyBg = theme === "nightsky";
+    const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
 
     return (
         <>
-            {hasAtmosphericBg && <MistBackground />}
+            {hasMistBg && <MistBackground />}
+
+            {hasNightSkyBg && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 0,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <NightSkyBackground
+                        cloudIntensity={1}
+                        starDensity="full"
+                        showTopo={true}
+                        showRings={true}
+                        vignetteStrength={0.52}
+                    />
+                </div>
+            )}
 
             <style>{`
                 @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -51,7 +73,7 @@ export default function DespatchPage() {
                             margin: 0,
                             fontSize: 22,
                             fontWeight: 800,
-                            color: "var(--text-primary)",
+                            color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
                             letterSpacing: "-0.03em",
                         }}>
                             Despatches
@@ -59,7 +81,11 @@ export default function DespatchPage() {
                         <p style={{
                             margin: "4px 0 0",
                             fontSize: 13,
-                            color: hasAtmosphericBg ? "rgb(0 0 0)" : "var(--text-secondary)",
+                            color: hasMistBg
+                            ? "rgb(0 0 0)"
+                            : hasNightSkyBg
+                                ? "rgb(180 200 255)"
+                                : "var(--text-secondary)",
                         }}>
                             View and manage all despatch advices.
                         </p>
@@ -68,34 +94,47 @@ export default function DespatchPage() {
                     {/* Content card */}
                     {hasAtmosphericBg ? (
                         <div
-                            className="
+                            className={`
                                 relative w-full
                                 max-w-400 mx-auto
                                 rounded-3xl p-3
                                 overflow-hidden
                                 backdrop-blur-[20px]
-                                border border-white/30
-                                shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-                                bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
-                            "
+                                border
+                                ${hasNightSkyBg ? "border-white/20" : "border-white/30"}
+                                ${hasNightSkyBg
+                                    ? "shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+                                    : "shadow-[0_16px_70px_rgba(0,0,0,0.12)]"
+                                }
+                                ${hasNightSkyBg
+                                    ? "bg-[linear-gradient(to_bottom_right,rgba(200,220,255,0.22),rgba(180,200,255,0.12))]"
+                                    : "bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]"
+                                }
+                            `}
+                            style={{
+                                color: hasNightSkyBg ? "rgb(220 230 255)": undefined,
+                            }}
                         >
                             {/* Top glass highlight */}
                             <div
-                                className="
+                                className={`
                                     pointer-events-none absolute inset-0
                                     rounded-3xl
-                                    bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
+                                    ${hasNightSkyBg
+                                        ? "bg-[linear-gradient(to_bottom,rgba(120,160,255,0.12),rgba(0,0,0,0))]"
+                                        : "bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]"
+                                    }
                                     opacity-60
-                                "
+                                `}
                             />
 
                             {/* Frost diffusion layer */}
                             <div
-                                className="
+                                className={`
                                     pointer-events-none absolute inset-0
                                     rounded-3xl
-                                    bg-white/20 blur-2xl opacity-40
-                                "
+                                    ${hasNightSkyBg ? "bg-blue-300/20 blue-2xl opacity-20" : "bg-white/20 blur-2xl opacity-40"}
+                                `}
                             />
                             <div style={{ position: "relative" }}>
                                 <DespatchList 

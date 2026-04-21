@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Icon } from "../ui/icons";
 import { listDespatch, getSellerAdviceIds } from "../../api/despatch";
-
+import { useTheme } from "../../../app/context/ThemeContext";
 export function DespatchList({ onToast, onSelect, sellerId }) {
+    const { theme } = useTheme();
+    const isNightSky = theme === "nightsky";
     const [despatches, setDespatches] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -43,16 +45,30 @@ export function DespatchList({ onToast, onSelect, sellerId }) {
                     style={{
                         padding: "9px 22px",
                         borderRadius: 8,
-                        border: "none",
-                        background: "#38bdf8",
-                        color: "#fff",
+                        border: isNightSky ? "1px solid rgba(255,255,255,0.12)" : "none",
+                        background: isNightSky ? "#000000" : "#38bdf8",
+                        color: isNightSky ? "#ffffff" : "#ffffff",
                         fontSize: 13,
                         fontWeight: 600,
                         cursor: "pointer",
-                        transition: "background 0.15s",
+                        transition: "all 0.15s",
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = "#0ea5e9"}
-                    onMouseLeave={e => e.currentTarget.style.background = "#38bdf8"}
+                    onMouseEnter={e => {
+                        if (isNightSky) {
+                            e.currentTarget.style.background = "#ffffff";
+                            e.currentTarget.style.color = "#000000";
+                        } else {
+                            e.currentTarget.style.background = "#0ea5e9";
+                        }
+                    }}
+                    onMouseLeave={e => {
+                        if (isNightSky) {
+                            e.currentTarget.style.background = "#000000";
+                            e.currentTarget.style.color = "#ffffff";
+                        } else {
+                            e.currentTarget.style.background = "#38bdf8";
+                        }
+                    }}
                 >
                     Refresh
                 </button>
