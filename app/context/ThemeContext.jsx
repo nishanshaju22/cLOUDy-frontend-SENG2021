@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-// Add new theme names here as you build them out
+// Add new theme here
 const THEMES = ["professional", "cloudy", "nightsky"];
 
 const ThemeContext = createContext({
