@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { getAuth, setAuth, clearAuth, isLoggedIn } from "../../src/lib/auth";
 import { updateSellerSettings } from "../../src/api/seller";
+import Sidebar from "../../src/components/ui/Sidebar";
 
 // ─── Full-page background canvas ─────────────────────────────────────────────
 function CloudyBackground() {
@@ -579,363 +580,367 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <CloudyBackground />
+    <div style = {{ display: "flex", minHeight: "100vh"}}>
+        <Sidebar />
+    
+        <div className="relative min-h-screen overflow-x-hidden" style={{ flex: 1 }}>
+        <CloudyBackground />
 
-      {["tl", "tr", "bl", "br"].map((pos) => (
-        <div
-          key={pos}
-          className="fixed pointer-events-none"
-          style={{
-            zIndex: 5,
-            width: 28,
-            height: 28,
-            top: pos.startsWith("t") ? 22 : undefined,
-            bottom: pos.startsWith("b") ? 22 : undefined,
-            left: pos.endsWith("l") ? 22 : undefined,
-            right: pos.endsWith("r") ? 22 : undefined,
-            borderTop: pos.startsWith("t") ? "1px solid rgba(140,170,255,0.18)" : undefined,
-            borderBottom: pos.startsWith("b") ? "1px solid rgba(140,170,255,0.18)" : undefined,
-            borderLeft: pos.endsWith("l") ? "1px solid rgba(140,170,255,0.18)" : undefined,
-            borderRight: pos.endsWith("r") ? "1px solid rgba(140,170,255,0.18)" : undefined,
-          }}
-        />
-      ))}
-
-      <div
-        className="relative flex justify-center px-4 py-10"
-        style={{
-          zIndex: 2,
-          minHeight: "100vh",
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(16px)",
-          transition: "opacity 1.2s ease, transform 1.2s ease",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: 1240 }}>
-          <div style={{ marginBottom: 24 }}>
-            <h1
-              style={{
-                fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-                fontSize: 28,
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                color: "#f1f5f9",
-                marginBottom: 6,
-              }}
-            >
-              Settings
-            </h1>
-            <p
-              style={{
-                fontFamily: "system-ui, sans-serif",
-                fontSize: 13,
-                color: "rgba(150,170,220,0.5)",
-              }}
-            >
-              View your account info and update your seller details.
-            </p>
-          </div>
-
-          <div
+        {["tl", "tr", "bl", "br"].map((pos) => (
+            <div
+            key={pos}
+            className="fixed pointer-events-none"
             style={{
-              display: "grid",
-              gridTemplateColumns: "320px minmax(0,1fr)",
-              gap: 18,
-              alignItems: "start",
+                zIndex: 5,
+                width: 28,
+                height: 28,
+                top: pos.startsWith("t") ? 22 : undefined,
+                bottom: pos.startsWith("b") ? 22 : undefined,
+                left: pos.endsWith("l") ? 22 : undefined,
+                right: pos.endsWith("r") ? 22 : undefined,
+                borderTop: pos.startsWith("t") ? "1px solid rgba(140,170,255,0.18)" : undefined,
+                borderBottom: pos.startsWith("b") ? "1px solid rgba(140,170,255,0.18)" : undefined,
+                borderLeft: pos.endsWith("l") ? "1px solid rgba(140,170,255,0.18)" : undefined,
+                borderRight: pos.endsWith("r") ? "1px solid rgba(140,170,255,0.18)" : undefined,
             }}
-          >
-            <div>
-              <Section icon={<User size={15} />} title="Account">
-                <Field label="Username">
-                  <input
-                    type="text"
-                    value={authData?.user?.username || ""}
-                    readOnly
-                    style={{ ...inputStyle, opacity: 0.85 }}
-                  />
-                </Field>
+            />
+        ))}
 
-                <Field label="Email">
-                  <input
-                    type="email"
-                    value={authData?.user?.email || ""}
-                    readOnly
-                    style={{ ...inputStyle, opacity: 0.85 }}
-                  />
-                </Field>
-
-                <div
-                  style={{
-                    padding: "10px 12px",
-                    borderRadius: 8,
-                    background: "rgba(55,80,200,0.08)",
-                    border: "1px solid rgba(80,110,220,0.14)",
-                    fontFamily: "system-ui, sans-serif",
-                    fontSize: 12,
-                    color: "rgba(140,165,230,0.55)",
-                    lineHeight: 1.6,
-                  }}
+        <div
+            className="relative flex justify-center px-4 py-10"
+            style={{
+            zIndex: 2,
+            minHeight: "100vh",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(16px)",
+            transition: "opacity 1.2s ease, transform 1.2s ease",
+            }}
+        >
+            <div style={{ width: "100%", maxWidth: 1240 }}>
+            <div style={{ marginBottom: 24 }}>
+                <h1
+                style={{
+                    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+                    fontSize: 28,
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                    color: "#f1f5f9",
+                    marginBottom: 6,
+                }}
                 >
-                  You can change your information or sign out on this page
-                </div>
-              </Section>
-
-              <Section icon={<LogOut size={15} />} title="Session">
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    background: "rgba(180,40,40,0.12)",
-                    border: "1px solid rgba(200,80,80,0.22)",
-                    borderRadius: 9,
-                    padding: "10px 18px",
-                    fontFamily: "system-ui, sans-serif",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "rgba(220,130,130,0.75)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <LogOut size={14} /> Sign out
-                </button>
-              </Section>
-            </div>
-
-            <div>
-              <Section icon={<Building2 size={15} />} title="Seller Information">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <Field label="Company name">
-                    <input
-                      type="text"
-                      value={form.party_name}
-                      onChange={(e) => updateField("party_name", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Customer assigned account ID">
-                    <input
-                      type="text"
-                      value={form.customer_assigned_account_id}
-                      onChange={(e) => updateField("customer_assigned_account_id", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-                </div>
-              </Section>
-
-              <Section icon={<User size={15} />} title="Contact">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-                  <Field label="Name">
-                    <input
-                      type="text"
-                      value={form.contact_name}
-                      onChange={(e) => updateField("contact_name", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Email">
-                    <input
-                      type="email"
-                      value={form.contact_email}
-                      onChange={(e) => updateField("contact_email", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Telephone">
-                    <input
-                      type="text"
-                      value={form.contact_telephone}
-                      onChange={(e) => updateField("contact_telephone", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-                </div>
-              </Section>
-
-              <Section icon={<MapPin size={15} />} title="Address">
-                <Field label="Street">
-                  <input
-                    type="text"
-                    value={form.street}
-                    onChange={(e) => updateField("street", e.target.value)}
-                    style={inputStyle}
-                    onFocus={focusIn}
-                    onBlur={focusOut}
-                  />
-                </Field>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-                  <Field label="City">
-                    <input
-                      type="text"
-                      value={form.city}
-                      onChange={(e) => updateField("city", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="State">
-                    <input
-                      type="text"
-                      value={form.state}
-                      onChange={(e) => updateField("state", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Postal code">
-                    <input
-                      type="text"
-                      value={form.postal_code}
-                      onChange={(e) => updateField("postal_code", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Country code">
-                    <input
-                      type="text"
-                      value={form.country_code}
-                      onChange={(e) => updateField("country_code", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-                </div>
-              </Section>
-
-              <Section icon={<Receipt size={15} />} title="Tax Scheme">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <Field label="Registration name">
-                    <input
-                      type="text"
-                      value={form.registration_name}
-                      onChange={(e) => updateField("registration_name", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Company ID">
-                    <input
-                      type="text"
-                      value={form.company_id}
-                      onChange={(e) => updateField("company_id", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-                </div>
-
-                <Field label="Exemption reason">
-                  <input
-                    type="text"
-                    value={form.exemption_reason}
-                    onChange={(e) => updateField("exemption_reason", e.target.value)}
-                    style={inputStyle}
-                    onFocus={focusIn}
-                    onBlur={focusOut}
-                  />
-                </Field>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <Field label="Scheme ID">
-                    <input
-                      type="text"
-                      value={form.scheme_id}
-                      onChange={(e) => updateField("scheme_id", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-
-                  <Field label="Tax type code">
-                    <input
-                      type="text"
-                      value={form.tax_type_code}
-                      onChange={(e) => updateField("tax_type_code", e.target.value)}
-                      style={inputStyle}
-                      onFocus={focusIn}
-                      onBlur={focusOut}
-                    />
-                  </Field>
-                </div>
-              </Section>
-
-              {error ? (
+                Settings
+                </h1>
                 <p
-                  style={{
-                    marginTop: 0,
-                    marginBottom: 16,
-                    color: "#f87171",
-                    fontSize: 14,
-                    fontFamily: "system-ui, sans-serif",
-                  }}
-                >
-                  {error}
-                </p>
-              ) : null}
-
-              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 40 }}>
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: loading
-                      ? "linear-gradient(135deg,#334155,#475569)"
-                      : "linear-gradient(135deg,#3552d8,#4c3bbe)",
-                    color: "#fff",
-                    borderRadius: 9,
-                    padding: "12px 24px",
+                style={{
                     fontFamily: "system-ui, sans-serif",
                     fontSize: 13,
-                    fontWeight: 500,
-                    border: "none",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    boxShadow: "0 4px 18px rgba(55,80,210,0.3)",
-                  }}
+                    color: "rgba(150,170,220,0.5)",
+                }}
                 >
-                  <Save size={14} />
-                  {loading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
+                View your account info and update your seller details.
+                </p>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <SaveToast show={showToast} />
+            <div
+                style={{
+                display: "grid",
+                gridTemplateColumns: "320px minmax(0,1fr)",
+                gap: 18,
+                alignItems: "start",
+                }}
+            >
+                <div>
+                <Section icon={<User size={15} />} title="Account">
+                    <Field label="Username">
+                    <input
+                        type="text"
+                        value={authData?.user?.username || ""}
+                        readOnly
+                        style={{ ...inputStyle, opacity: 0.85 }}
+                    />
+                    </Field>
+
+                    <Field label="Email">
+                    <input
+                        type="email"
+                        value={authData?.user?.email || ""}
+                        readOnly
+                        style={{ ...inputStyle, opacity: 0.85 }}
+                    />
+                    </Field>
+
+                    <div
+                    style={{
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        background: "rgba(55,80,200,0.08)",
+                        border: "1px solid rgba(80,110,220,0.14)",
+                        fontFamily: "system-ui, sans-serif",
+                        fontSize: 12,
+                        color: "rgba(140,165,230,0.55)",
+                        lineHeight: 1.6,
+                    }}
+                    >
+                    You can change your information or sign out on this page
+                    </div>
+                </Section>
+
+                <Section icon={<LogOut size={15} />} title="Session">
+                    <button
+                    onClick={handleLogout}
+                    style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        background: "rgba(180,40,40,0.12)",
+                        border: "1px solid rgba(200,80,80,0.22)",
+                        borderRadius: 9,
+                        padding: "10px 18px",
+                        fontFamily: "system-ui, sans-serif",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: "rgba(220,130,130,0.75)",
+                        cursor: "pointer",
+                    }}
+                    >
+                    <LogOut size={14} /> Sign out
+                    </button>
+                </Section>
+                </div>
+
+                <div>
+                <Section icon={<Building2 size={15} />} title="Seller Information">
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <Field label="Company name">
+                        <input
+                        type="text"
+                        value={form.party_name}
+                        onChange={(e) => updateField("party_name", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Customer assigned account ID">
+                        <input
+                        type="text"
+                        value={form.customer_assigned_account_id}
+                        onChange={(e) => updateField("customer_assigned_account_id", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+                    </div>
+                </Section>
+
+                <Section icon={<User size={15} />} title="Contact">
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                    <Field label="Name">
+                        <input
+                        type="text"
+                        value={form.contact_name}
+                        onChange={(e) => updateField("contact_name", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Email">
+                        <input
+                        type="email"
+                        value={form.contact_email}
+                        onChange={(e) => updateField("contact_email", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Telephone">
+                        <input
+                        type="text"
+                        value={form.contact_telephone}
+                        onChange={(e) => updateField("contact_telephone", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+                    </div>
+                </Section>
+
+                <Section icon={<MapPin size={15} />} title="Address">
+                    <Field label="Street">
+                    <input
+                        type="text"
+                        value={form.street}
+                        onChange={(e) => updateField("street", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                    />
+                    </Field>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+                    <Field label="City">
+                        <input
+                        type="text"
+                        value={form.city}
+                        onChange={(e) => updateField("city", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="State">
+                        <input
+                        type="text"
+                        value={form.state}
+                        onChange={(e) => updateField("state", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Postal code">
+                        <input
+                        type="text"
+                        value={form.postal_code}
+                        onChange={(e) => updateField("postal_code", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Country code">
+                        <input
+                        type="text"
+                        value={form.country_code}
+                        onChange={(e) => updateField("country_code", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+                    </div>
+                </Section>
+
+                <Section icon={<Receipt size={15} />} title="Tax Scheme">
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <Field label="Registration name">
+                        <input
+                        type="text"
+                        value={form.registration_name}
+                        onChange={(e) => updateField("registration_name", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Company ID">
+                        <input
+                        type="text"
+                        value={form.company_id}
+                        onChange={(e) => updateField("company_id", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+                    </div>
+
+                    <Field label="Exemption reason">
+                    <input
+                        type="text"
+                        value={form.exemption_reason}
+                        onChange={(e) => updateField("exemption_reason", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                    />
+                    </Field>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <Field label="Scheme ID">
+                        <input
+                        type="text"
+                        value={form.scheme_id}
+                        onChange={(e) => updateField("scheme_id", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+
+                    <Field label="Tax type code">
+                        <input
+                        type="text"
+                        value={form.tax_type_code}
+                        onChange={(e) => updateField("tax_type_code", e.target.value)}
+                        style={inputStyle}
+                        onFocus={focusIn}
+                        onBlur={focusOut}
+                        />
+                    </Field>
+                    </div>
+                </Section>
+
+                {error ? (
+                    <p
+                    style={{
+                        marginTop: 0,
+                        marginBottom: 16,
+                        color: "#f87171",
+                        fontSize: 14,
+                        fontFamily: "system-ui, sans-serif",
+                    }}
+                    >
+                    {error}
+                    </p>
+                ) : null}
+
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 40 }}>
+                    <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        background: loading
+                        ? "linear-gradient(135deg,#334155,#475569)"
+                        : "linear-gradient(135deg,#3552d8,#4c3bbe)",
+                        color: "#fff",
+                        borderRadius: 9,
+                        padding: "12px 24px",
+                        fontFamily: "system-ui, sans-serif",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        border: "none",
+                        cursor: loading ? "not-allowed" : "pointer",
+                        boxShadow: "0 4px 18px rgba(55,80,210,0.3)",
+                    }}
+                    >
+                    <Save size={14} />
+                    {loading ? "Saving..." : "Save Changes"}
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <SaveToast show={showToast} />
+        </div>
     </div>
-  );
+    );
 }
