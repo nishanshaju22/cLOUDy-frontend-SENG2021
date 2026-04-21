@@ -8,6 +8,7 @@ import { ProductFormModal } from "../../src/components/products/ProductFormModal
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { Icon } from "../../src/components/ui/icons";
 import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 import { extractText } from "../../src/api/ai";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
@@ -38,7 +39,9 @@ export default function ProductsPage() {
     const [aiPrefill, setAiPrefill] = useState(null);
     const { toasts, addToast } = useToast();
 
-    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+    const hasMistBg = theme === "cloudy"
+    const hasNightSkyBg = theme === "nightsky"
+    const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
 
     useEffect(() => {
         const stored = getAuth();
@@ -185,12 +188,20 @@ export default function ProductsPage() {
                         borderRadius: 20,
                         backdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
                         WebkitBackdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
-                        border: hasAtmosphericBg ? "1px solid rgba(255,255,255,0.3)" : "none",
+                        border: hasAtmosphericBg
+                            ? hasNightSkyBg
+                                ? "1px solid rgba(255,255,255,0.12)"
+                                : "1px solid rgba(255,255,255,0.3)"
+                            : "none",
                         background: hasAtmosphericBg
-                            ? "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
+                            ? hasNightSkyBg
+                                ? "linear-gradient(to bottom right, rgba(200,220,255,0.22), rgba(180,200,255,0.12))"
+                                : "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
                             : "transparent",
                         boxShadow: hasAtmosphericBg
-                            ? "0 8px 30px rgba(0,0,0,0.08)"
+                            ? hasNightSkyBg
+                                ? "0 20px 80px rgba(0,0,0,0.35)"
+                                : "0 8px 30px rgba(0,0,0,0.08)"
                             : "none",
                     }}
                 >
@@ -211,7 +222,26 @@ export default function ProductsPage() {
     return (
         <>
             <Sidebar />
-            {hasAtmosphericBg && <MistBackground />}
+            {hasMistBg && <MistBackground />}
+
+            {hasNightSkyBg && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 0,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <NightSkyBackground
+                        cloudIntensity={1}
+                        starDensity="full"
+                        showTopo={true}
+                        showRings={true}
+                        vignetteStrength={0.52}
+                    />
+                </div>
+            )}
 
             <style>{`
                 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -235,20 +265,39 @@ export default function ProductsPage() {
                 {/* Nav */}
                 <nav style={{
                     ...styles.nav,
-                    background: "var(--nav-bg)",
-                    borderBottom: "1px solid var(--nav-border)",
+                    background: hasNightSkyBg ? "rgba(10,12,35,0.72)" : "var(--nav-bg)",
+                    borderBottom: hasNightSkyBg ? "1px solid rgba(255,255,255,0.08)" : "1px solid var(--nav-border)",
                 }}>
                     <div style={styles.navLeft}>
-                        <span style={{ ...styles.logo, color: "var(--text-primary)" }}>Catalogues</span>
+                        <span
+                            style={{
+                                ...styles.logo,
+                                color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                            }}
+                        >
+                            Catalogues
+                        </span>
                     </div>
                     <div style={styles.navRight}>
-                        <div style={{ ...styles.searchWrap, background: "var(--search-bg)" }}>
-                            <Icon.SearchIcon />
+                        <div
+                            style={{
+                                ...styles.searchWrap,
+                                background: hasNightSkyBg ? "rgba(20,25,60,0.55)" : "var(--search-bg)",
+                                border: hasNightSkyBg ? "1px solid rgba(255,255,255,0.12)" : "none",
+                            }}
+                        >
+                            <div style={{ color: hasNightSkyBg ? "rgb(220 230 255)" : "inherit", display: "flex" }}>
+                                <Icon.SearchIcon />
+                            </div>
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search catalogues..."
-                                style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
+                                style={{
+                                    ...styles.searchInput,
+                                    color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--search-text)",
+                                    fontFamily: "var(--font-sans)",
+                                }}
                             />
                         </div>
                         <RippleButton
@@ -286,8 +335,18 @@ export default function ProductsPage() {
                                 fontSize: 13,
                                 fontWeight: 600,
                                 background: isManaging ? "var(--btn-primary-bg)" : "var(--btn-ghost-bg)",
-                                color: isManaging ? "var(--btn-primary-text)" : "var(--btn-ghost-text)",
-                                border: `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}`,
+                                color: isManaging
+                                    ? "var(--btn-primary-text)"
+                                    : hasNightSkyBg
+                                        ? "rgb(220 230 255)"
+                                        : "var(--btn-ghost-text)",
+                                border: `1px solid ${
+                                    isManaging
+                                        ? "var(--btn-primary-border)"
+                                        : hasNightSkyBg
+                                            ? "rgba(255,255,255,0.15)"
+                                            : "var(--btn-ghost-border)"
+                                }`,
                                 transition: "all 0.2s ease",
                             }}
                             onMouseEnter={e => {
@@ -352,11 +411,25 @@ export default function ProductsPage() {
                 <main style={{ ...styles.main, position: "relative", zIndex: 1 }}>
                     <div style={styles.pageHeader}>
                         <div>
-                            <h1 style={{ ...styles.pageTitle, color: "var(--text-primary)" }}>
+                           <h1
+                                style={{
+                                    ...styles.pageTitle,
+                                    color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                                }}
+                            >
                                 {search ? `Results for "${search}"` : "All Catalogue"}
                             </h1>
                             {!loading && (
-                                <p style={{ ...styles.pageSubtitle, color: "var(--text-secondary)" }}>
+                                <p
+                                    style={{
+                                        ...styles.pageSubtitle,
+                                        color: hasMistBg
+                                            ? "rgb(0 0 0)"
+                                            : hasNightSkyBg
+                                                ? "rgb(180 200 255)"
+                                                : "var(--text-secondary)",
+                                    }}
+                                >
                                     {filtered.length} {filtered.length === 1 ? "Catalogue" : "Catalogues"}
                                 </p>
                             )}
@@ -370,10 +443,21 @@ export default function ProductsPage() {
                     ) : filtered.length === 0 ? (
                         <div style={styles.emptyState}>
                             <div style={{ color: "var(--border-strong)", marginBottom: 4 }}><Icon.EmptyIcon /></div>
-                            <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>
+                            <div
+                                style={{
+                                    fontSize: 18,
+                                    fontWeight: 600,
+                                    color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                                }}
+                            >
                                 {search ? "No catalogues match your search" : "No catalogues yet"}
                             </div>
-                            <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: hasNightSkyBg ? "rgb(180 200 255)" : "var(--text-secondary)",
+                                }}
+                            >
                                 {search ? "Try a different search term" : "Click New Catalogue to add your first one"}
                             </div>
                         </div>

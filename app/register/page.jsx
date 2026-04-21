@@ -341,7 +341,7 @@ function BrandingPanel() {
             marginBottom: 12,
           }}
         >
-          We are here to help you rise your business above the clouds.
+          Elevate your Business above the Clouds.
         </p>
 
         <p
@@ -511,7 +511,7 @@ function ContactAddressStep({ form, updateField }) {
         <label style={labelStyle}>Contact name</label>
         <input
           type="text"
-          placeholder="cLOUDy SENG Sender"
+          placeholder="Enter your preferred name"
           value={form.contact_name}
           onChange={(e) => updateField("contact_name", e.target.value)}
           style={inputStyle}
@@ -525,7 +525,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>Contact email</label>
           <input
             type="email"
-            placeholder="cloudyuser@gmail.com"
+            placeholder="Enter your contact email"
             value={form.contact_email}
             onChange={(e) => updateField("contact_email", e.target.value)}
             style={inputStyle}
@@ -537,7 +537,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>Telephone</label>
           <input
             type="text"
-            placeholder="0400000001"
+            placeholder="+61 4XX XXX XXX"
             value={form.contact_telephone}
             onChange={(e) => updateField("contact_telephone", e.target.value)}
             style={inputStyle}
@@ -551,7 +551,7 @@ function ContactAddressStep({ form, updateField }) {
         <label style={labelStyle}>Street</label>
         <input
           type="text"
-          placeholder="123 some st"
+          placeholder="Enter your street address"
           value={form.street}
           onChange={(e) => updateField("street", e.target.value)}
           style={inputStyle}
@@ -565,7 +565,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>City</label>
           <input
             type="text"
-            placeholder="Lidcombe"
+            placeholder="City"
             value={form.city}
             onChange={(e) => updateField("city", e.target.value)}
             style={inputStyle}
@@ -577,7 +577,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>State</label>
           <input
             type="text"
-            placeholder="NSW"
+            placeholder="State code"
             value={form.state}
             onChange={(e) => updateField("state", e.target.value)}
             style={inputStyle}
@@ -592,7 +592,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>Postal code</label>
           <input
             type="text"
-            placeholder="2000"
+            placeholder="Postal Code"
             value={form.postal_code}
             onChange={(e) => updateField("postal_code", e.target.value)}
             style={inputStyle}
@@ -604,7 +604,7 @@ function ContactAddressStep({ form, updateField }) {
           <label style={labelStyle}>Country code</label>
           <input
             type="text"
-            placeholder="AU"
+            placeholder="Country Code"
             value={form.country_code}
             onChange={(e) => updateField("country_code", e.target.value)}
             style={inputStyle}
@@ -648,7 +648,7 @@ function TaxSchemeStep({ form, updateField }) {
         <label style={labelStyle}>Registration name</label>
         <input
           type="text"
-          placeholder="cLOUDyyyy Pty Ltd"
+          placeholder="Enter your Company's name"
           value={form.registration_name}
           onChange={(e) => updateField("registration_name", e.target.value)}
           style={inputStyle}
@@ -661,7 +661,7 @@ function TaxSchemeStep({ form, updateField }) {
         <label style={labelStyle}>Company ID</label>
         <input
           type="text"
-          placeholder="COMPANY_1233"
+          placeholder="Company ID"
           value={form.company_id}
           onChange={(e) => updateField("company_id", e.target.value)}
           style={inputStyle}
@@ -747,7 +747,7 @@ function TaxSchemeStep({ form, updateField }) {
             lineHeight: 1.6,
           }}
         >
-          Your tax information is encrypted and used for invoicing and compliance.
+          You can change these settings or logout from the settings page.
         </p>
       </div>
     </div>
@@ -1155,7 +1155,7 @@ function RegisterCard() {
           </label>
           <input
             type="email"
-            placeholder="cloudyuserr@gmail.com"
+            placeholder="yEnter your email address"
             value={form.email}
             onChange={(e) => updateField("email", e.target.value)}
             style={inputStyle}
@@ -1170,7 +1170,7 @@ function RegisterCard() {
           </label>
           <input
             type="text"
-            placeholder="cLOUDyuserr123"
+            placeholder="Enter you username"
             value={form.username}
             onChange={(e) => updateField("username", e.target.value)}
             style={inputStyle}
@@ -1216,7 +1216,7 @@ function RegisterCard() {
           <div style={{ position: "relative" }}>
             <input
               type={showPass ? "text" : "password"}
-              placeholder="123456"
+              placeholder="Enter your password"
               value={form.password}
               onChange={(e) => updateField("password", e.target.value)}
               style={{ ...inputStyle, paddingRight: 42 }}
