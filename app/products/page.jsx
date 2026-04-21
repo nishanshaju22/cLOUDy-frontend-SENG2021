@@ -13,12 +13,16 @@ import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
 import { RippleButton } from "@/src/components/ui/RippleButton";
+import { useRouter } from "next/navigation";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
 
 export default function ProductsPage() {
-    const { theme } = useTheme();
+    const router = useRouter();
+    const [auth, setAuth] = useState(null);
+
+    const { theme } = useTheme(); 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState(null);
@@ -36,29 +40,48 @@ export default function ProductsPage() {
 
     const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
 
+    useEffect(() => {
+        const stored = getAuth();
+
+        if (!stored?.user || !stored?.seller) {
+            router.replace("/login");
+            return;
+        }
+
+        setAuth(stored);
+    }, [router]);
+
+    const currentSellerId = auth?.seller?.seller_id || auth?.user?.seller_id || SELLER_ID;
+
     const fetchProducts = useCallback(async () => {
+        if (!currentSellerId) return;
         try {
-            const data = await getProductsBySeller(SELLER_ID);
+            const data = await getProductsBySeller(currentSellerId);
             setProducts(data.products || []);
         } catch {
             addToast("Failed to load products", "error");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentSellerId, addToast]);
 
     const fetchCart = useCallback(async () => {
+        if (!currentSellerId) return;
         try {
-            const data = await getCart(SELLER_ID);
+            const data = await getCart(currentSellerId);
             setCart(data);
         } catch {}
-    }, []);
+    }, [currentSellerId]);
 
-    useEffect(() => { fetchProducts(); fetchCart(); }, [fetchProducts, fetchCart]);
+    useEffect(() => {
+        if (!auth) return;
+        fetchProducts();
+        fetchCart();
+    }, [auth, fetchProducts, fetchCart]);
 
     const handleAddToCart = async (productId) => {
         try {
-            await addToCart(SELLER_ID, { product_id: productId, quantity: 1 });
+            await addToCart(currentSellerId, { product_id: productId, quantity: 1 });
             await fetchCart();
             await fetchProducts();
             addToast("Added to cart", "success");
@@ -75,7 +98,7 @@ export default function ProductsPage() {
 
     const handleUpdateQty = async (productId, quantity) => {
         try {
-            await updateCartItem(SELLER_ID, productId, { quantity });
+            await updateCartItem(currentSellerId, productId, { quantity });
             await fetchCart();
             await fetchProducts();
         } catch (err) {
@@ -89,7 +112,7 @@ export default function ProductsPage() {
     };
 
     const handleCreate = async (data) => {
-        const res = await createProduct(SELLER_ID, data);
+        const res = await createProduct(currentSellerId, data);
         addToast("Catalogue created", "success");
         return res;
     };
@@ -100,7 +123,7 @@ export default function ProductsPage() {
     };
 
     const handleUpdate = async (data) => {
-        const res = await updateProduct(SELLER_ID, editProduct.productId, data);
+        const res = await updateProduct(currentSellerId, editProduct.productId, data);
         addToast("Catalogue updated", "success");
         return res;
     };
@@ -111,7 +134,7 @@ export default function ProductsPage() {
 
     const handleDelete = async (productId) => {
         try {
-            await deleteProduct(SELLER_ID, productId);
+            await deleteProduct(currentSellerId, productId);
             await fetchProducts();
             addToast("Catalogue deleted", "success");
         } catch (err) {
@@ -123,10 +146,10 @@ export default function ProductsPage() {
         if (!aiText.trim()) return;
         setAiProcessing(true);
         try {
-            const result = await extractText(aiText, SELLER_ID);
+            const result = await extractText(aiText, currentSellerId);
             if (result?.product_id?.length) {
                 for (const [productId, quantity] of result.product_id) {
-                    try { await addToCart(SELLER_ID, { product_id: productId, quantity: parseInt(quantity) || 1 }); }
+                    try { await addToCart(currentSellerId, { product_id: productId, quantity: parseInt(quantity) || 1 }); }
                     catch {}
                 }
                 await fetchCart();
@@ -142,6 +165,8 @@ export default function ProductsPage() {
             setAiProcessing(false);
         }
     };
+
+    if (!auth) return null;
 
     const cartItemCount = cart?.itemCount || 0;
     const filtered = products.filter(p =>
@@ -358,7 +383,7 @@ export default function ProductsPage() {
 
             {showForm && (
                 <ProductFormModal
-                    sellerId={SELLER_ID}
+                    sellerId={currentSellerId}
                     product={editProduct}
                     onClose={() => { setShowForm(false); setEditProduct(null); }}
                     onSave={editProduct ? handleUpdate : handleCreate}
@@ -373,7 +398,7 @@ export default function ProductsPage() {
                     onClose={() => { setCartOpen(false); setAiPrefill(null); }}
                     onToast={addToast}
                     onRefresh={fetchCart}
-                    sellerId={SELLER_ID}
+                    sellerId={currentSellerId}
                     prefill={aiPrefill}
                 />
             )}
