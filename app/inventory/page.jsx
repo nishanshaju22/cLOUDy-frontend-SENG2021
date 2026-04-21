@@ -5,6 +5,7 @@ import { getInventory, createInventoryItem, updateInventoryItem, deleteInventory
 import { InventoryFormModal } from "../../src/components/inventory/InventoryFormModal";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
@@ -25,7 +26,9 @@ export default function InventoryPage() {
     const [search, setSearch] = useState("");
     const { toasts, addToast } = useToast();
 
-    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+    const hasMistBg = theme === "cloudy";
+    const hasNightSkyBg = theme === "nightsky";
+    const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
 
     const fetchInventory = useCallback(async () => {
         if (!currentSellerId) return;
@@ -104,13 +107,19 @@ export default function InventoryPage() {
                         backdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
                         WebkitBackdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
                         border: hasAtmosphericBg
-                            ? "1px solid rgba(255,255,255,0.3)"
+                            ? hasNightSkyBg
+                                ? "1px solid rgba(255,255,255,0.12)"
+                                : "1px solid rgba(255,255,255,0.3)"
                             : "1px solid var(--border)",
                         background: hasAtmosphericBg
-                            ? "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
+                            ? hasNightSkyBg
+                                ? "linear-gradient(to bottom right, rgba(200,220,255,0.22), rgba(180,200,255,0.12))"
+                                : "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
                             : "var(--surface)",
                         boxShadow: hasAtmosphericBg
-                            ? "0 8px 30px rgba(0,0,0,0.08)"
+                            ? hasNightSkyBg
+                                ? "0 20px 80px rgba(0,0,0,0.35)"
+                                : "0 8px 30px rgba(0,0,0,0.08)"
                             : "none",
                         transition: "all 0.2s ease",
                     }}
@@ -128,8 +137,26 @@ export default function InventoryPage() {
 
     return (
         <>
-            {hasAtmosphericBg && <MistBackground />}
+            {hasMistBg && <MistBackground />}
 
+            {hasNightSkyBg && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 0,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <NightSkyBackground
+                        cloudIntensity={1}
+                        starDensity="full"
+                        showTopo={true}
+                        showRings={true}
+                        vignetteStrength={0.52}
+                    />
+                </div>
+            )}
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
@@ -146,27 +173,60 @@ export default function InventoryPage() {
                 background: hasAtmosphericBg ? "transparent" : "var(--page-bg)",
                 fontFamily: "var(--font-sans)",
             }}>
-                <nav style={{ ...styles.nav, background: "var(--nav-bg)", borderBottom: `1px solid var(--nav-border)` }}>
+                <nav style={{ ...styles.nav, background: hasNightSkyBg ? "rgba(10,12,35,0.72)" : "var(--nav-bg)", borderBottom: hasNightSkyBg ? "1px solid rgba(255,255,255,0.08)" : `1px solid var(--nav-border)`, }}>
                     <div style={styles.navLeft}>
-                        <span style={{ ...styles.logo, color: "var(--text-primary)" }}>Inventory</span>
+                        <span
+                            style={{
+                                ...styles.logo,
+                                color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                            }}
+                        >
+                            Inventory
+                        </span>
                     </div>
                     <div style={styles.navRight}>
-                        <div style={{ ...styles.searchWrap, background: "var(--search-bg)" }}>
-                            <SearchIcon />
+                        <div
+                            style={{
+                                ...styles.searchWrap,
+                                background: hasNightSkyBg ? "rgba(20,25,60,0.55)" : "var(--search-bg)",
+                                border: hasNightSkyBg ? "1px solid rgba(255,255,255,0.12)" : "none",
+                            }}
+                        >
+                            <div style={{ color: hasNightSkyBg ? "rgb(220 230 255)" : "inherit", display: "flex" }}>
+                                <SearchIcon />
+                            </div>
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search inventory..."
-                                style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
+                                style={{
+                                    ...styles.searchInput,
+                                    color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--search-text)",
+                                    fontFamily: "var(--font-sans)",
+                                }}
                             />
                         </div>
                         <RippleButton
                             onClick={() => setIsManaging(m => !m)}
                             style={{
                                 ...styles.navBtn,
-                                background: isManaging ? "var(--btn-primary-bg)" : "var(--btn-ghost-bg)",
-                                color: isManaging ? "var(--btn-primary-text)" : "var(--btn-ghost-text)",
-                                border: `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}`,
+                                background: hasNightSkyBg
+                                    ? isManaging
+                                        ? "#ffffff"
+                                        : "rgba(20,25,60,0.55)"
+                                    : isManaging
+                                        ? "var(--btn-primary-bg)"
+                                        : "var(--btn-ghost-bg)",
+                                color: hasNightSkyBg
+                                    ? isManaging
+                                        ? "#000000"
+                                        : "rgb(220 230 255)"
+                                    : isManaging
+                                        ? "var(--btn-primary-text)"
+                                        : "var(--btn-ghost-text)",
+                                border: hasNightSkyBg
+                                    ? `1px solid ${isManaging ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"}`
+                                    : `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}`,
                                 fontFamily: "var(--font-sans)",
                             }}
                         >
@@ -174,7 +234,13 @@ export default function InventoryPage() {
                         </RippleButton>
                         <RippleButton
                             onClick={() => { setEditItem(null); setShowForm(true); }}
-                            style={{ ...styles.addBtn, background: "var(--surface)", color: "var(--btn-ghost-text)", border: `1px solid var(--btn-ghost-border)`, fontFamily: "var(--font-sans)" }}
+                            style={{
+                                ...styles.addBtn,
+                                background: hasNightSkyBg ? "#ffffff" : "var(--surface)",
+                                color: hasNightSkyBg ? "#000000" : "var(--btn-ghost-text)",
+                                border: hasNightSkyBg ? "1px solid rgba(0,0,0,0.12)" : `1px solid var(--btn-ghost-border)`,
+                                fontFamily: "var(--font-sans)",
+                            }}
                         >
                             <PlusIcon /> New Inventory Item
                         </RippleButton>
@@ -184,11 +250,25 @@ export default function InventoryPage() {
                 <main style={styles.main}>
                     <div style={styles.pageHeader}>
                         <div>
-                            <h1 style={{ ...styles.pageTitle, color: "var(--text-primary)" }}>
+                            <h1
+                                style={{
+                                    ...styles.pageTitle,
+                                    color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                                }}
+                            >
                                 {search ? `Results for "${search}"` : "All Inventory"}
                             </h1>
                             {!loading && (
-                                <p style={{ ...styles.pageSubtitle, color: "var(--text-secondary)" }}>
+                                <p
+                                    style={{
+                                        ...styles.pageSubtitle,
+                                        color: hasMistBg
+                                            ? "rgb(0 0 0)"
+                                            : hasNightSkyBg
+                                                ? "rgb(180 200 255)"
+                                                : "var(--text-secondary)",
+                                    }}
+                                >
                                     {filtered.length} {filtered.length === 1 ? "item" : "items"}
                                 </p>
                             )}
@@ -202,10 +282,21 @@ export default function InventoryPage() {
                     ) : filtered.length === 0 ? (
                         <div style={styles.emptyState}>
                             <div style={{ color: "var(--border-strong)", marginBottom: 4 }}><EmptyIcon /></div>
-                            <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>
+                            <div
+                                style={{
+                                    fontSize: 18,
+                                    fontWeight: 600,
+                                    color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                                }}
+                            >
                                 {search ? "No items match your search" : "No inventory yet"}
                             </div>
-                            <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: hasNightSkyBg ? "rgb(180 200 255)" : "var(--text-secondary)",
+                                }}
+                            >
                                 {search ? "Try a different search term" : "Click New Inventory Item to get started"}
                             </div>
                         </div>
@@ -229,6 +320,8 @@ export default function InventoryPage() {
 }
 
 function InventoryCard({ item, isManaging, onEdit, onDelete }) {
+    const { theme } = useTheme();
+    const isNightSky = theme === "nightsky";
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = async () => {
@@ -240,13 +333,18 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", cursor: "default", fontFamily: "var(--font-sans)" }}>
             <div style={{
-                position: "relative", background: "var(--surface-raised)",
-                borderTopLeftRadius: 24, borderTopRightRadius: 24,
-                borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
-                aspectRatio: "1 / 1", overflow: "hidden", marginBottom: 12,
-                border: "1px solid var(--border)",
+                position: "relative",
+                background: isNightSky ? "rgba(20,25,60,0.55)" : "var(--surface-raised)",
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16,
+                aspectRatio: "1 / 1",
+                overflow: "hidden",
+                marginBottom: 12,
+                border: isNightSky ? "1px solid rgba(255,255,255,0.12)" : "1px solid var(--border)",
             }}>
-                {item.imageUrl ? (
+                            {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.itemName}
                         style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
                 ) : (
@@ -259,14 +357,14 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
                         <RippleButton
                             onClick={() => onEdit(item)}
-                            style={cardStyles.iconBtn}
+                            style={cardStyles.iconBtn(isNightSky)}
                         >
                             <EditIcon />
                         </RippleButton>
                         <RippleButton
                         onClick={handleDelete}
                         disabled={deleting}
-                        style={{ ...cardStyles.iconBtn, color: "var(--error)" }} title="Delete">
+                        style={{ ...cardStyles.iconBtn(isNightSky), color: "var(--error)" }} title="Delete">
                             {deleting
                                 ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                                 : <TrashIcon />
@@ -276,21 +374,33 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
                 )}
 
                 <div style={{
-                    position: "absolute", bottom: 8, left: 8,
-                    fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
-                    color: "var(--text-primary)", background: "var(--surface-overlay)",
-                    borderRadius: 3, padding: "3px 7px", backdropFilter: "blur(4px)",
+                    position: "absolute",
+                    bottom: 8,
+                    left: 8,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: isNightSky ? "rgb(240 245 255)" : "var(--text-primary)",
+                    background: isNightSky ? "rgba(20,25,60,0.72)" : "var(--surface-overlay)",
+                    borderRadius: 3,
+                    padding: "3px 7px",
+                    backdropFilter: "blur(4px)",
                 }}>
                     Qty: {item.quantity}
                 </div>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)", lineHeight: 1.3 }}>{item.itemName}</div>
+                <div style={{ fontSize: 15, fontWeight: 500, color: isNightSky ? "rgb(240 245 255)" : "var(--text-primary)", lineHeight: 1.3 }}>
+                    {item.itemName}
+                </div>
                 {item.itemDescription && (
-                    <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.4 }}>{item.itemDescription}</div>
+                    <div style={{ fontSize: 13, color: isNightSky ? "rgb(180 200 255)" : "var(--text-secondary)", lineHeight: 1.4 }}>
+                        {item.itemDescription}
+                    </div>
                 )}
-                <div style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)", marginTop: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 500, color: isNightSky ? "rgb(230 235 255)" : "var(--text-primary)", marginTop: 4 }}>
                     ${parseFloat(item.purchasePrice).toFixed(2)}
                 </div>
             </div>
@@ -327,7 +437,20 @@ const styles = {
 };
 
 const cardStyles = {
-    iconBtn: { width: 32, height: 32, borderRadius: "50%", border: "none", background: "rgba(255,255,255,0.92)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#1a1a1a", backdropFilter: "blur(4px)", boxShadow: "0 1px 4px rgba(0,0,0,0.12)" },
+    iconBtn: (isNightSky) => ({
+        width: 32,
+        height: 32,
+        borderRadius: "50%",
+        border: "none",
+        background: isNightSky ? "rgba(20,25,60,0.85)" : "rgba(255,255,255,0.92)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        color: isNightSky ? "rgb(220 230 255)" : "#1a1a1a",
+        backdropFilter: "blur(4px)",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+    }),
 };
 
 function SearchIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>; }
