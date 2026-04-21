@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { RippleButton } from "../ui/RippleButton";
+
 export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging, cart, onUpdateQty }) {
     const [adding, setAdding] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -46,8 +48,23 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
             setDeleting(false);
         }
     };
-
+    
     return (
+        <>
+            <style>{`
+                .ripple-btn {
+                    transition: transform 0.15s ease, filter 0.15s ease;
+                }
+
+                .ripple-btn:hover {
+                    transform: translateY(-1px);
+                    filter: brightness(1.05);
+                }
+
+                .ripple-btn:active {
+                    transform: translateY(0px) scale(0.98);
+                }
+            `}</style>
         <div style={styles.card}>
             <div style={styles.imageArea}>
                 <div style={styles.imageWrapper}>
@@ -113,16 +130,18 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
                 <div style={styles.bottomArea}>
                     {isManaging ? (
                         <div style={styles.manageBtnRow}>
-                            <button
+                            <RippleButton
                                 onClick={() => onEdit(product)}
+                                className="ripple-btn"
                                 style={styles.editBtn}
                             >
                                 <EditIcon /> Edit
-                            </button>
+                            </RippleButton>
 
-                            <button
+                            <RippleButton
                                 onClick={handleDelete}
                                 disabled={deleting}
+                                className="ripple-btn"
                                 style={styles.deleteBtn}
                             >
                                 {deleting ? (
@@ -132,37 +151,44 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
                                         <TrashIcon /> Delete
                                     </>
                                 )}
-                            </button>
+                            </RippleButton>
                         </div>
                     ) : inCart ? (
                         <div style={styles.qtyControl}>
-                            <button
+                            <RippleButton
                                 onClick={() => handleUpdateQty(product.productId, quantity - 1)}
                                 disabled={updatingQty || quantity <= 1}
+                                className="ripple-btn"
                                 style={styles.qtyBtn}
                             >
                                 −
-                            </button>
+                            </RippleButton>
 
                             <div style={styles.qtyValue}>
                                 {updatingQty ? <SpinnerIcon size={12} color="#111" /> : quantity}
                             </div>
 
-                            <button
+                            <RippleButton
                                 onClick={() => handleUpdateQty(product.productId, quantity + 1)}
                                 disabled={updatingQty || outOfStock}
+                                className="ripple-btn"
                                 style={{
                                     ...styles.qtyBtn,
-                                    ...(outOfStock ? { background: "#e5e5e5", color: "#999", cursor: "not-allowed" } : {}),
+                                    ...(outOfStock ? {
+                                        background: "#e5e5e5",
+                                        color: "#999",
+                                        cursor: "not-allowed"
+                                    } : {}),
                                 }}
                             >
                                 +
-                            </button>
+                            </RippleButton>
                         </div>
                     ) : (
-                        <button
+                        <RippleButton
                             onClick={handleAddToCart}
                             disabled={adding || outOfStock}
+                            className="ripple-btn"
                             style={{
                                 ...styles.addBtn,
                                 ...(added ? styles.addBtnAdded : {}),
@@ -178,10 +204,11 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
                             ) : (
                                 "Add to Cart"
                             )}
-                        </button>
+                        </RippleButton>
                     )}
                 </div>
-        </div>
+            </div>
+        </>
     );
 }
 
