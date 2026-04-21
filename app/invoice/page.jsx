@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getInvoices, getInvoiceSummary, getInvoiceById, deleteInvoice, updateInvoice, getInvoicePdf } from "../../src/api/invoice";
 import { ToastContainer, useToast } from "../../src/components/ui/Toast";
 import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
 
@@ -13,6 +14,30 @@ const STATUS_COLORS = {
     PAID:   { bg: "#f0fdf4", color: "#15803d", border: "#bbf7d0" },
     ISSUED: { bg: "#f5f3ff", color: "#6d28d9", border: "#ddd6fe" },
 };
+
+const NIGHTSKY_STATUS_COLORS = {
+    DRAFT: {
+        bg: "#1e293b",
+        color: "#facc15",
+        border: "#334155",
+    },
+    FINAL: {
+        bg: "#0f172a",
+        color: "#60a5fa",
+        border: "#1e3a8a",
+    },
+    PAID: {
+        bg: "#022c22",
+        color: "#34d399",
+        border: "#065f46",
+    },
+    ISSUED: {
+        bg: "#2e1065",
+        color: "#c084fc",
+        border: "#5b21b6",
+    },
+};
+
 const STATUS_OPTIONS = ["DRAFT", "FINAL", "PAID", "ISSUED"];
 function normalizeStatus(s) { return s ? s.toUpperCase() : "DRAFT"; }
 function formatMoney(val) {
@@ -35,7 +60,9 @@ export default function InvoicesPage() {
     const { toasts, addToast } = useToast();
 
     const isProfessional   = theme === "professional";
-    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+    const hasMistBg = theme === "cloudy";
+    const hasNightSkyBg = theme === "nightsky";
+    const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
 
     const fetchInvoices = useCallback(async () => {
         setLoading(true);
@@ -99,18 +126,109 @@ export default function InvoicesPage() {
     /* ── Shared nav ── */
     function Nav() {
         return (
-            <nav style={{ position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", height: 60, gap: 20, background: "var(--nav-bg)", borderBottom: "1px solid var(--nav-border)", backdropFilter: "blur(8px)" }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Invoices</span>
+            <nav
+                style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 100,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "0 40px",
+                    height: 60,
+                    gap: 20,
+                    background: hasNightSkyBg ? "rgba(10,12,35,0.72)" : "var(--nav-bg)",
+                    borderBottom: hasNightSkyBg ? "1px solid rgba(255,255,255,0.08)" : "1px solid var(--nav-border)",
+                    backdropFilter: "blur(8px)",
+                }}
+            >
+                <span
+                    style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                        letterSpacing: "-0.02em",
+                    }}
+                >
+                    Invoices
+                </span>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--search-bg)", borderRadius: 30, padding: "0 14px", height: 38 }}>
-                        <SearchIcon />
-                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search invoices..." style={{ border: "none", background: "transparent", outline: "none", fontSize: 13, color: "var(--search-text)", width: 180, fontFamily: "var(--font-sans)" }} />
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            background: hasNightSkyBg ? "rgba(20,25,60,0.55)" : "var(--search-bg)",
+                            border: hasNightSkyBg ? "1px solid rgba(255,255,255,0.12)" : "none",
+                            borderRadius: 30,
+                            padding: "0 14px",
+                            height: 38,
+                        }}
+                    >
+                        <div style={{ color: hasNightSkyBg ? "rgb(220 230 255)" : "inherit" }}>
+                            <SearchIcon />
+                        </div>
+                        <input
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Search invoices..."
+                            style={{
+                                border: "none",
+                                background: "transparent",
+                                outline: "none",
+                                fontSize: 13,
+                                color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--search-text)",
+                                width: 180,
+                                fontFamily: "var(--font-sans)",
+                            }}
+                        />
                     </div>
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ padding: "7px 12px", borderRadius: 30, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 13, fontWeight: 500, color: "var(--text-primary)", cursor: "pointer", fontFamily: "var(--font-sans)" }}>
+                    <select
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                        style={{
+                            padding: "7px 12px",
+                            borderRadius: 30,
+                            border: hasNightSkyBg ? "1px solid rgba(255,255,255,0.12)" : "1px solid var(--border)",
+                            background: hasNightSkyBg ? "rgba(20,25,60,0.55)" : "var(--surface)",
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--text-primary)",
+                            cursor: "pointer",
+                            fontFamily: "var(--font-sans)",
+                        }}
+                    >
                         <option value="">All Statuses</option>
                         {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <button onClick={() => setIsManaging(m => !m)} style={{ padding: "7px 16px", borderRadius: 30, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-sans)", background: isManaging ? "var(--btn-primary-bg)" : "var(--btn-ghost-bg)", color: isManaging ? "var(--btn-primary-text)" : "var(--btn-ghost-text)", border: `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}` }}>
+                    <button
+                        onClick={() => setIsManaging(m => !m)}
+                        style={{
+                            padding: "7px 16px",
+                            borderRadius: 30,
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            fontFamily: "var(--font-sans)",
+                            background: hasNightSkyBg
+                                ? isManaging
+                                    ? "#ffffff"
+                                    : "rgba(20,25,60,0.55)"
+                                : isManaging
+                                    ? "var(--btn-primary-bg)"
+                                    : "var(--btn-ghost-bg)",
+                            color: hasNightSkyBg
+                                ? isManaging
+                                    ? "#000000"
+                                    : "rgb(220 230 255)"
+                                : isManaging
+                                    ? "var(--btn-primary-text)"
+                                    : "var(--btn-ghost-text)",
+                            border: hasNightSkyBg
+                                ? `1px solid ${isManaging ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"}`
+                                : `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}`,
+                        }}
+                    >
                         {isManaging ? "Done" : "Manage"}
                     </button>
                 </div>
@@ -124,17 +242,47 @@ export default function InvoicesPage() {
             <>
                 {summary && (
                     <div style={{ display: "flex", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
-                        <SummaryCard label="Total Invoices" value={summary.totalInvoices?.toLocaleString()} />
-                        <SummaryCard label="Total Amount" value={formatMoney(summary.totalAmount)} />
-                        <SummaryCard label="Average Amount" value={formatMoney(summary.averageInvoiceAmount)} />
-                        {summary.statusBreakdown && Object.entries(summary.statusBreakdown).map(([k, v]) => <SummaryCard key={k} label={normalizeStatus(k)} value={v} />)}
+                        <SummaryCard label="Total Invoices" value={summary.totalInvoices?.toLocaleString()} hasNightSkyBg={hasNightSkyBg} />
+                        <SummaryCard label="Total Amount" value={formatMoney(summary.totalAmount)} hasNightSkyBg={hasNightSkyBg} />
+                        <SummaryCard label="Average Amount" value={formatMoney(summary.averageInvoiceAmount)} hasNightSkyBg={hasNightSkyBg} />
+                        {summary.statusBreakdown &&
+                            Object.entries(summary.statusBreakdown).map(([k, v]) => (
+                                <SummaryCard
+                                    key={k}
+                                    label={normalizeStatus(k)}
+                                    value={v}
+                                    hasNightSkyBg={hasNightSkyBg}
+                                />
+                            ))}
                     </div>
                 )}
                 <div style={{ marginBottom: 24 }}>
-                    <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
+                    <h1
+                        style={{
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                            margin: 0,
+                            letterSpacing: "-0.02em",
+                        }}
+                    >
                         {search ? `Results for "${search}"` : "All Invoices"}
                     </h1>
-                    {!loading && <p style={{ fontSize: 13, color: hasAtmosphericBg ? "rgb(0 0 0)" : "var(--text-secondary)", margin: "6px 0 0" }}>{filtered.length} {filtered.length === 1 ? "invoice" : "invoices"}</p>}
+                    {!loading && (
+                        <p
+                            style={{
+                                fontSize: 13,
+                                color: hasMistBg
+                                    ? "rgb(0 0 0)"
+                                    : hasNightSkyBg
+                                        ? "rgb(180 200 255)"
+                                        : "var(--text-secondary)",
+                                margin: "6px 0 0",
+                            }}
+                        >
+                            {filtered.length} {filtered.length === 1 ? "invoice" : "invoices"}
+                        </p>
+                    )}
                 </div>
                 {loading ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -143,8 +291,23 @@ export default function InvoicesPage() {
                 ) : filtered.length === 0 ? (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 300 }}>
                         <div style={{ color: "var(--border-strong)", marginBottom: 4 }}><EmptyIcon /></div>
-                        <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>{search ? "No invoices match your search" : "No invoices yet"}</div>
-                        <div style={{ fontSize: 14, color: "var(--text-secondary)" }}>{search ? "Try a different search term" : "Invoices will appear here once orders are created"}</div>
+                        <div
+                            style={{
+                                fontSize: 18,
+                                fontWeight: 600,
+                                color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)",
+                            }}
+                        >
+                            {search ? "No invoices match your search" : "No invoices yet"}
+                        </div>
+                        <div
+                            style={{
+                                fontSize: 14,
+                                color: hasNightSkyBg ? "rgb(180 200 255)" : "var(--text-secondary)",
+                            }}
+                        >
+                            {search ? "Try a different search term" : "Invoices will appear here once orders are created"}
+                        </div>
                     </div>
                 ) : (
                     <div style={{ overflowX: "auto" }}>
@@ -152,21 +315,44 @@ export default function InvoicesPage() {
                             <thead>
                                 <tr>
                                     {["Invoice ID", "Description", "Issue Date", "Status", "Amount", ""].map(h => (
-                                        <th key={h} style={{ textAlign: "left", padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>{h}</th>
+                                        <th
+                                            key={h}
+                                            style={{
+                                                textAlign: "left",
+                                                padding: "10px 16px",
+                                                fontSize: 11,
+                                                fontWeight: 700,
+                                                color: hasNightSkyBg ? "rgb(180 200 255)" : "var(--text-secondary)",
+                                                letterSpacing: "0.05em",
+                                                textTransform: "uppercase",
+                                                borderBottom: "1px solid var(--border)",
+                                            }}
+                                        >
+                                            {h}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {filtered.map(inv => {
                                     const status = normalizeStatus(inv.status);
-                                    const sc = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
+                                    const sc = hasNightSkyBg
+                                        ? (NIGHTSKY_STATUS_COLORS[status] || NIGHTSKY_STATUS_COLORS.DRAFT)
+                                        : (STATUS_COLORS[status] || STATUS_COLORS.DRAFT);
                                     const invId = inv.invoiceId || inv.id;
                                     return (
                                         <tr key={invId} style={{ cursor: "pointer" }} onClick={() => handleRowClick(inv)}>
-                                            <td style={td}><span style={{ fontWeight: 600 }}>{invId}</span></td>
-                                            <td style={{ ...td, color: "var(--text-secondary)" }}>{inv.description || "—"}</td>
-                                            <td style={td}>{inv.issueDate ? new Date(inv.issueDate).toLocaleDateString("en-AU") : "—"}</td>
-                                            <td style={td}>
+                                            <td style={td(hasNightSkyBg)}><span style={{ fontWeight: 600 }}>{invId}</span></td>
+                                           <td
+                                                style={{
+                                                    ...td(hasNightSkyBg),
+                                                    color: hasNightSkyBg ? "rgb(180 200 255)" : "var(--text-secondary)",
+                                                }}
+                                            >
+                                                {inv.description || "—"}
+                                            </td>
+                                            <td style={td(hasNightSkyBg)}>{inv.issueDate ? new Date(inv.issueDate).toLocaleDateString("en-AU") : "—"}</td>
+                                            <td style={td(hasNightSkyBg)}>
                                                 {isManaging ? (
                                                     <select value={status} onClick={e => e.stopPropagation()} onChange={e => handleStatusUpdate(invId, e.target.value)} style={{ display: "inline-block", fontSize: 11, fontWeight: 700, borderRadius: 4, padding: "3px 8px", cursor: "pointer", ...sc, border: `1px solid ${sc.border}` }}>
                                                         {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -175,8 +361,8 @@ export default function InvoicesPage() {
                                                     <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, borderRadius: 4, padding: "3px 8px", letterSpacing: "0.04em", ...sc }}>{status}</span>
                                                 )}
                                             </td>
-                                            <td style={td}>{formatMoney(inv.totalAmount)}</td>
-                                            <td style={{ ...td, textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                                            <td style={td(hasNightSkyBg)}>{formatMoney(inv.totalAmount)}</td>
+                                            <td style={{ ...td(hasNightSkyBg), textAlign: "right" }} onClick={e => e.stopPropagation()}>
                                                 <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
                                                     <button onClick={() => handlePdf(invId)} disabled={pdfLoading === invId} style={{ padding: "5px 8px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-primary)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600 }} title="Download PDF">
                                                         {pdfLoading === invId ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> : <PdfIcon />}
@@ -202,7 +388,26 @@ export default function InvoicesPage() {
     return (
         <>
             <Sidebar />
-            {hasAtmosphericBg && <MistBackground />}
+            {hasMistBg && <MistBackground />}
+
+            {hasNightSkyBg && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 0,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <NightSkyBackground
+                        cloudIntensity={1}
+                        starDensity="full"
+                        showTopo={true}
+                        showRings={true}
+                        vignetteStrength={0.52}
+                    />
+                </div>
+            )}
 
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
@@ -210,7 +415,32 @@ export default function InvoicesPage() {
                 * { box-sizing: border-box; }
                 body { margin: 0; background: transparent; font-family: var(--font-sans); }
                 button:disabled { opacity: 0.6; cursor: not-allowed !important; }
-                tr:hover td { background: var(--surface-raised) !important; }
+                tr:hover td {
+                    background: rgba(255,255,255,0.06) !important;
+                }
+                .nightsky-glass input,
+                .nightsky-glass select,
+                .nightsky-glass option,
+                .nightsky-glass label,
+                .nightsky-glass p {
+                    color: rgb(220, 230, 255) !important;
+                }
+
+                .nightsky-glass input,
+                .nightsky-glass select {
+                    background: rgba(20, 25, 60, 0.55) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                }
+
+                .nightsky-glass input::placeholder {
+                    color: rgba(180, 200, 255, 0.5) !important;
+                }
+
+                .nightsky-glass select,
+                .nightsky-glass select * {
+                    color: rgb(220, 230, 255) !important;
+                    -webkit-text-fill-color: rgb(220, 230, 255) !important;
+                }
             `}</style>
 
             {/* ── CLOUDY / STORMY — glass card ── */}
@@ -219,34 +449,48 @@ export default function InvoicesPage() {
                     <Nav />
                     <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 40px 80px", position: "relative", zIndex: 1 }}>
                         <div
-                            className="
+                            className={`
+                                ${hasNightSkyBg ? "nightsky-glass" : ""}
                                 relative w-full
                                 max-w-400 mx-auto
                                 rounded-3xl p-10
                                 overflow-hidden
                                 backdrop-blur-[20px]
-                                border border-white/30
-                                shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-                                bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
-                            "
+                                border
+                                ${hasNightSkyBg ? "border-white/10" : "border-white/30"}
+                                ${hasNightSkyBg
+                                    ? "shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+                                    : "shadow-[0_16px_70px_rgba(0,0,0,0.12)]"
+                                }
+                                ${hasNightSkyBg
+                                    ? "bg-[linear-gradient(to_bottom_right,rgba(20,25,60,0.55),rgba(10,12,35,0.55))]"
+                                    : "bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]"
+                                }
+                            `}
+                            style={{
+                                color: hasNightSkyBg ? "rgb(220 230 255)" : undefined,
+                            }}
                         >
                             {/* Top glass highlight */}
                             <div
-                                className="
+                                className={`
                                     pointer-events-none absolute inset-0
                                     rounded-3xl
-                                    bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
+                                    ${hasNightSkyBg
+                                        ? "bg-[linear-gradient(to_bottom,rgba(120,160,255,0.12),rgba(0,0,0,0))]"
+                                        : "bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]"
+                                    }
                                     opacity-60
-                                "
+                                `}
                             />
 
                             {/* Frost diffusion layer */}
                             <div
-                                className="
+                                className={`
                                     pointer-events-none absolute inset-0
-                                    rounded-3xl
-                                    bg-white/20 blur-2xl opacity-40
-                                "
+                                    rounded-3xl blur-2xl
+                                    ${hasNightSkyBg ? "bg-blue-950/20 opacity-20" : "bg-white/20 opacity-40"}
+                                `}
                             />
                             <div style={{ position: "relative" }}>
                                 <TableContent />
@@ -269,14 +513,21 @@ export default function InvoicesPage() {
             )}
 
             {selectedInvoice && (
-                <InvoiceDetailDrawer invoice={selectedInvoice} loading={drawerLoading} onClose={() => setSelectedInvoice(null)} onPdf={handlePdf} pdfLoading={pdfLoading} />
+                <InvoiceDetailDrawer
+                    invoice={selectedInvoice}
+                    loading={drawerLoading}
+                    onClose={() => setSelectedInvoice(null)}
+                    onPdf={handlePdf}
+                    pdfLoading={pdfLoading}
+                    theme={theme}
+                />
             )}
             <ToastContainer toasts={toasts} />
         </>
     );
 }
 
-function SummaryCard({ label, value }) {
+function SummaryCard({ label, value, hasNightSkyBg }) {
     return (
         <div style={{ flex: "1 1 140px", background: "#f5f5f5", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>{value}</div>
@@ -285,10 +536,12 @@ function SummaryCard({ label, value }) {
     );
 }
 
-function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
+function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading, theme }) {
     const id = invoice.invoiceId || invoice.id;
     const status = (invoice.status || "").toUpperCase();
-    const sc = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
+    const sc = hasNightSkyBg
+        ? (NIGHTSKY_STATUS_COLORS[status] || NIGHTSKY_STATUS_COLORS.DRAFT)
+        : (STATUS_COLORS[status] || STATUS_COLORS.DRAFT);
     const xml = invoice.invoiceUBLXML || invoice.invoiceXML || invoice.orderDocumentXML;
     return (
         <>
@@ -332,7 +585,12 @@ function SkeletonRow() {
     );
 }
 
-const td = { padding: "14px 16px", borderBottom: "1px solid var(--border)", color: "var(--text-primary)", verticalAlign: "middle" };
+const td = (hasNightSkyBg) => ({
+    padding: "14px 16px",
+    borderBottom: "1px solid var(--border)",
+    color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--text-primary)",
+    verticalAlign: "middle",
+});
 const styles = {
     page: { minHeight: "100vh", background: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
     nav: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", height: 60, background: "rgba(255,255,255,0.96)", borderBottom: "1px solid #f0f0f0", backdropFilter: "blur(8px)", gap: 20 },
