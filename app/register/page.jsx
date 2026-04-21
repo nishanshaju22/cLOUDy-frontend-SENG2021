@@ -1155,7 +1155,7 @@ function RegisterCard() {
           </label>
           <input
             type="email"
-            placeholder="yEnter your email address"
+            placeholder="Enter your email address"
             value={form.email}
             onChange={(e) => updateField("email", e.target.value)}
             style={inputStyle}
