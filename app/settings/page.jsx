@@ -11,10 +11,55 @@ import {
   Save,
   LogOut,
   Check,
+  Palette,
 } from "lucide-react";
 import { getAuth, setAuth, clearAuth, isLoggedIn } from "../../src/lib/auth";
 import { updateSellerSettings } from "../../src/api/seller";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { useTheme } from "../context/ThemeContext";
+import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
+
+const THEME_PREVIEWS = {
+  nightsky: "linear-gradient(180deg, #000000 0%, #050010 30%, #0a0025 60%, #1a0060 85%, #3a00aa 100%)",
+  cloudy: "linear-gradient(180deg, #42aee8 0%, #55bbf0 30%, #6ec8f5 60%, #85d0f7 80%, #a8dff9 100%)",
+  professional: "#ffffff",
+};
+
+function getInputStyle(hasMistBg) {
+  return {
+    width: "100%",
+    background: hasMistBg ? "rgba(255,255,255,0.45)" : "rgba(10,10,28,0.55)",
+    border: hasMistBg ? "1px solid rgba(100,160,220,0.35)" : "1px solid rgba(80,100,200,0.2)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 13,
+    color: hasMistBg ? "rgb(20,40,80)" : "#d1d5db",
+    outline: "none",
+    transition: "border-color 0.2s",
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    backdropFilter: "blur(4px)",
+  };
+}
+
+function getLabelStyle(hasMistBg) {
+  return {
+    display: "block",
+    fontSize: 11,
+    letterSpacing: "0.04em",
+    color: hasMistBg ? "rgba(20,60,120,0.7)" : "rgba(150,175,230,0.5)",
+    marginBottom: 5,
+    textTransform: "uppercase",
+    fontFamily: "system-ui, sans-serif",
+  };
+}
+
+function makeFocusHandlers(hasMistBg) {
+  return {
+    onFocus: (e) => { e.currentTarget.style.borderColor = hasMistBg ? "rgba(50,120,220,0.6)" : "rgba(100,140,255,0.55)"; },
+    onBlur:  (e) => { e.currentTarget.style.borderColor = hasMistBg ? "rgba(100,160,220,0.35)" : "rgba(80,100,200,0.2)"; },
+  };
+}
 
 // ─── Full-page background canvas ─────────────────────────────────────────────
 function CloudyBackground() {
@@ -254,20 +299,6 @@ function CloudyBackground() {
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" style={{ zIndex: 0 }} />;
 }
 
-const inputStyle = {
-  width: "100%",
-  background: "rgba(10,10,28,0.55)",
-  border: "1px solid rgba(80,100,200,0.2)",
-  borderRadius: 8,
-  padding: "10px 14px",
-  fontSize: 13,
-  color: "#d1d5db",
-  outline: "none",
-  transition: "border-color 0.2s",
-  fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-  backdropFilter: "blur(4px)",
-};
-
 const labelStyle = {
   display: "block",
   fontSize: 11,
@@ -286,12 +317,20 @@ function focusOut(e) {
   e.currentTarget.style.borderColor = "rgba(80,100,200,0.2)";
 }
 
-function Section({ icon, title, children }) {
+function Section({ icon, title, children, hasMistBg, hasNightSkyBg }) {
   return (
     <div
       style={{
-        background: "rgba(6,5,20,0.65)",
-        border: "1px solid rgba(80,110,220,0.16)",
+        background: hasNightSkyBg
+          ? "linear-gradient(to bottom right, rgba(20,25,60,0.55), rgba(10,12,35,0.55))"
+          : hasMistBg
+          ? "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
+          : "rgba(6,5,20,0.65)",
+        border: hasNightSkyBg
+          ? "1px solid rgba(255,255,255,0.1)"
+          : hasMistBg
+          ? "1px solid rgba(255,255,255,0.3)"
+          : "1px solid rgba(80,110,220,0.16)",
         borderRadius: 14,
         backdropFilter: "blur(18px)",
         overflow: "hidden",
@@ -313,12 +352,12 @@ function Section({ icon, title, children }) {
             height: 30,
             borderRadius: 8,
             flexShrink: 0,
-            background: "rgba(55,80,200,0.18)",
-            border: "1px solid rgba(90,120,220,0.2)",
+            background: hasMistBg ? "rgba(100,150,220,0.3)" : "rgba(55,80,200,0.18)",
+            border: hasMistBg ? "1px solid rgba(80,130,210,0.5)" : "1px solid rgba(90,120,220,0.2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "rgba(140,175,255,0.65)",
+            color: hasMistBg ? "rgba(20,60,150,0.9)" : "rgba(140,175,255,0.65)",
           }}
         >
           {icon}
@@ -328,7 +367,7 @@ function Section({ icon, title, children }) {
             fontFamily: "system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 600,
-            color: "rgba(200,215,255,0.8)",
+            color: hasMistBg ? "rgb(15,45,110)" : "rgba(200,215,255,0.8)",
             letterSpacing: "0.01em",
           }}
         >
@@ -340,10 +379,20 @@ function Section({ icon, title, children }) {
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, children, hasMistBg }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={labelStyle}>{label}</label>
+      <label style={{
+        display: "block",
+        fontSize: 11,
+        letterSpacing: "0.04em",
+        color: hasMistBg ? "rgba(20,60,120,0.7)" : "rgba(150,175,230,0.5)",
+        marginBottom: 5,
+        textTransform: "uppercase",
+        fontFamily: "system-ui, sans-serif",
+      }}>
+        {label}
+      </label>
       {children}
     </div>
   );
@@ -408,6 +457,25 @@ export default function SettingsPage() {
 
   const [authData, setAuthData] = useState(null);
   const [sellerId, setSellerId] = useState("");
+  const { theme, setTheme, themes } = useTheme();
+  const isProfessional = theme === "professional";
+  const hasMistBg = theme === "cloudy";
+  const hasNightSkyBg = theme === "nightsky";
+  const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
+
+  const inputStyle = {
+    width: "100%",
+    background: hasMistBg ? "rgba(255,255,255,0.45)" : "rgba(10,10,28,0.55)",
+    border: hasMistBg ? "1px solid rgba(100,160,220,0.35)" : "1px solid rgba(80,100,200,0.2)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 13,
+    color: hasMistBg ? "rgb(20,40,80)" : "#d1d5db",
+    outline: "none",
+    transition: "border-color 0.2s",
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    backdropFilter: "blur(4px)",
+  };
 
   const [form, setForm] = useState({
     party_name: "",
@@ -478,6 +546,15 @@ export default function SettingsPage() {
   async function handleSave() {
     if (!sellerId) {
       setError("Seller ID not found in local storage");
+      return;
+    }
+    if (!form.party_name.trim()) {
+      setError("Company name is required");
+      return;
+    }
+
+    if (!form.customer_assigned_account_id.trim()) {
+      setError("Customer assigned account ID is required");
       return;
     }
 
@@ -580,11 +657,23 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style = {{ display: "flex", minHeight: "100vh"}}>
+    <div style={{ display: "flex", minHeight: "100vh", background: hasAtmosphericBg ? "transparent" : "var(--page-bg)" }}>
         <Sidebar />
     
-        <div className="relative min-h-screen overflow-x-hidden" style={{ flex: 1 }}>
-        <CloudyBackground />
+        <div className="relative min-h-screen overflow-x-hidden" style={{ flex: 1, background: "transparent" }}>
+        {hasMistBg && <MistBackground />}
+
+        {hasNightSkyBg && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+            <NightSkyBackground
+              cloudIntensity={1}
+              starDensity="full"
+              showTopo={true}
+              showRings={true}
+              vignetteStrength={0.52}
+            />
+          </div>
+        )}
 
         {["tl", "tr", "bl", "br"].map((pos) => (
             <div
@@ -624,7 +713,7 @@ export default function SettingsPage() {
                     fontSize: 28,
                     fontWeight: 700,
                     letterSpacing: "-0.02em",
-                    color: "#f1f5f9",
+                    color: hasNightSkyBg ? "rgb(240,245,255)" : "var(--text-primary)",
                     marginBottom: 6,
                 }}
                 >
@@ -634,7 +723,7 @@ export default function SettingsPage() {
                 style={{
                     fontFamily: "system-ui, sans-serif",
                     fontSize: 13,
-                    color: "rgba(150,170,220,0.5)",
+                    color: hasMistBg ? "rgb(0,0,0)" : hasNightSkyBg ? "rgba(150,170,220,0.5)" : "var(--text-secondary)",
                 }}
                 >
                 View your account info and update your seller details.
@@ -650,8 +739,8 @@ export default function SettingsPage() {
                 }}
             >
                 <div>
-                <Section icon={<User size={15} />} title="Account">
-                    <Field label="Username">
+                <Section icon={<User size={15} />} title="Account" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
+                    <Field label="Username" hasMistBg={hasMistBg}>
                     <input
                         type="text"
                         value={authData?.user?.username || ""}
@@ -660,7 +749,7 @@ export default function SettingsPage() {
                     />
                     </Field>
 
-                    <Field label="Email">
+                    <Field label="Email" hasMistBg={hasMistBg}>
                     <input
                         type="email"
                         value={authData?.user?.email || ""}
@@ -673,11 +762,11 @@ export default function SettingsPage() {
                     style={{
                         padding: "10px 12px",
                         borderRadius: 8,
-                        background: "rgba(55,80,200,0.08)",
-                        border: "1px solid rgba(80,110,220,0.14)",
+                        background: hasMistBg ? "rgba(180,210,255,0.35)" : "rgba(55,80,200,0.08)",
+                        border: hasMistBg ? "1px solid rgba(100,160,230,0.25)" : "1px solid rgba(80,110,220,0.14)",
                         fontFamily: "system-ui, sans-serif",
                         fontSize: 12,
-                        color: "rgba(140,165,230,0.55)",
+                        color: hasMistBg ? "rgba(20,50,110,0.75)" : "rgba(140,165,230,0.55)",
                         lineHeight: 1.6,
                     }}
                     >
@@ -685,7 +774,7 @@ export default function SettingsPage() {
                     </div>
                 </Section>
 
-                <Section icon={<LogOut size={15} />} title="Session">
+                <Section icon={<LogOut size={15} />} title="Session" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
                     <button
                     onClick={handleLogout}
                     style={{
@@ -694,14 +783,14 @@ export default function SettingsPage() {
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 8,
-                        background: "rgba(180,40,40,0.12)",
-                        border: "1px solid rgba(200,80,80,0.22)",
+                        background: hasMistBg ? "rgba(220,60,60,0.1)" : "rgba(180,40,40,0.12)",
+                        border: hasMistBg ? "1px solid rgba(200,60,60,0.35)" : "1px solid rgba(200,80,80,0.22)",
                         borderRadius: 9,
                         padding: "10px 18px",
                         fontFamily: "system-ui, sans-serif",
                         fontSize: 13,
                         fontWeight: 500,
-                        color: "rgba(220,130,130,0.75)",
+                        color: hasMistBg ? "rgba(180,40,40,0.9)" : "rgba(220,130,130,0.75)",
                         cursor: "pointer",
                     }}
                     >
@@ -711,9 +800,9 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                <Section icon={<Building2 size={15} />} title="Seller Information">
+                <Section icon={<Building2 size={15} />} title="Seller Information" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <Field label="Company name">
+                    <Field label="Company name" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.party_name}
@@ -721,10 +810,11 @@ export default function SettingsPage() {
                         style={inputStyle}
                         onFocus={focusIn}
                         onBlur={focusOut}
+                        required
                         />
                     </Field>
 
-                    <Field label="Customer assigned account ID">
+                    <Field label="Customer assigned account ID" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.customer_assigned_account_id}
@@ -732,25 +822,26 @@ export default function SettingsPage() {
                         style={inputStyle}
                         onFocus={focusIn}
                         onBlur={focusOut}
+                        required
                         />
                     </Field>
                     </div>
                 </Section>
 
-                <Section icon={<User size={15} />} title="Contact">
+                <Section icon={<User size={15} />} title="Contact" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-                    <Field label="Name">
+                    <Field label="Name" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.contact_name}
                         onChange={(e) => updateField("contact_name", e.target.value)}
                         style={inputStyle}
                         onFocus={focusIn}
-                        onBlur={focusOut}
+
                         />
                     </Field>
 
-                    <Field label="Email">
+                    <Field label="Email" hasMistBg={hasMistBg}>
                         <input
                         type="email"
                         value={form.contact_email}
@@ -761,7 +852,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="Telephone">
+                    <Field label="Telephone" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.contact_telephone}
@@ -774,8 +865,8 @@ export default function SettingsPage() {
                     </div>
                 </Section>
 
-                <Section icon={<MapPin size={15} />} title="Address">
-                    <Field label="Street">
+                <Section icon={<MapPin size={15} />} title="Address" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
+                    <Field label="Street" hasMistBg={hasMistBg}>
                     <input
                         type="text"
                         value={form.street}
@@ -787,7 +878,7 @@ export default function SettingsPage() {
                     </Field>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-                    <Field label="City">
+                    <Field label="City" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.city}
@@ -798,7 +889,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="State">
+                    <Field label="State" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.state}
@@ -809,7 +900,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="Postal code">
+                    <Field label="Postal code" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.postal_code}
@@ -820,7 +911,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="Country code">
+                    <Field label="Country code" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.country_code}
@@ -833,9 +924,9 @@ export default function SettingsPage() {
                     </div>
                 </Section>
 
-                <Section icon={<Receipt size={15} />} title="Tax Scheme">
+                <Section icon={<Receipt size={15} />} title="Tax Scheme" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <Field label="Registration name">
+                    <Field label="Registration name" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.registration_name}
@@ -846,7 +937,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="Company ID">
+                    <Field label="Company ID" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.company_id}
@@ -858,7 +949,7 @@ export default function SettingsPage() {
                     </Field>
                     </div>
 
-                    <Field label="Exemption reason">
+                    <Field label="Exemption reason" hasMistBg={hasMistBg}>
                     <input
                         type="text"
                         value={form.exemption_reason}
@@ -870,7 +961,7 @@ export default function SettingsPage() {
                     </Field>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <Field label="Scheme ID">
+                    <Field label="Scheme ID" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.scheme_id}
@@ -881,7 +972,7 @@ export default function SettingsPage() {
                         />
                     </Field>
 
-                    <Field label="Tax type code">
+                    <Field label="Tax type code" hasMistBg={hasMistBg}>
                         <input
                         type="text"
                         value={form.tax_type_code}
@@ -907,6 +998,47 @@ export default function SettingsPage() {
                     {error}
                     </p>
                 ) : null}
+
+                <Section icon={<Palette size={15} />} title="Appearance" hasMistBg={hasMistBg} hasNightSkyBg={hasNightSkyBg}>
+                    <p style={{ fontSize: 12, color: "rgba(140,165,220,0.5)", marginBottom: 14 }}>
+                      Choose a theme for your dashboard experience.
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                      {themes.map((t) => (
+                        <div
+                          key={t}
+                          onClick={() => setTheme(t)}
+                          style={{
+                            borderRadius: 10,
+                            border: theme === t
+                              ? "1.5px solid rgba(100,140,255,0.7)"
+                              : "1.5px solid rgba(80,100,200,0.2)",
+                            cursor: "pointer",
+                            overflow: "hidden",
+                            transition: "border-color 0.2s, transform 0.15s",
+                            transform: theme === t ? "translateY(-2px)" : "none",
+                            boxShadow: theme === t ? "0 0 0 1px rgba(100,140,255,0.2)" : "none",
+                          }}
+                        >
+                          <div style={{ height: 120, background: THEME_PREVIEWS[t] }} />
+                          <div style={{
+                            padding: "9px 12px",
+                            background: "rgba(8,6,24,0.7)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(200,215,255,0.75)", textTransform: "capitalize" }}>
+                              {t}
+                            </span>
+                            {theme === t && (
+                              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#5b7ff5" }} />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
 
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 40 }}>
                     <button
