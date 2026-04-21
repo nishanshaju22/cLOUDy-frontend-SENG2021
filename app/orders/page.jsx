@@ -198,7 +198,7 @@ export default function OrdersPage() {
                                 rounded-3xl p-10
                                 overflow-hidden
                                 backdrop-blur-[20px]
-                                border border-s-8
+                                border
                                 ${hasNightSkyBg ? "border-white/10" : "border-white/30"}
                                 ${hasNightSkyBg 
                                     ? "bg-[linear-gradient(to_bottom_right,rgba(20,25,60,0.55),rgba(10,12,35,0.55))]"
