@@ -221,7 +221,7 @@ export default function OrdersPage() {
     const [showCreate, setShowCreate] = useState(false);
     const [toast, setToast] = useState(null);
 
-    // 🔐 Auth check
+    // Auth check
     useEffect(() => {
         const stored = getAuth();
 
@@ -292,6 +292,28 @@ export default function OrdersPage() {
                 select:focus, input:focus {
                     outline: none;
                     border-color: var(--border-strong) !important;
+                }
+                .nightsky-glass input,
+                .nightsky-glass select,
+                .nightsky-glass label,
+                .nightsky-glass p,
+                .nightsky-glass option {
+                    color: rgb(220, 230, 255) !important;
+                }
+
+                .nightsky-glass input,
+                .nightsky-glass select {
+                    background: rgba(20, 25, 60, 0.55) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                }
+
+                .nightsky-glass input::placeholder {
+                    color: rgba(180, 200, 255, 0.5) !important;
+                }
+                .nightsky-glass select,
+                .nightsky-glass select * {
+                    color: rgb(220, 230, 255) !important;
+                    -webkit-text-fill-color: rgb(220, 230, 255) !important;
                 }
             `}</style>
 
@@ -365,16 +387,27 @@ export default function OrdersPage() {
                     {/* ── CLOUDY / STORMY GLASS GRID WRAPPER ── */}
                     {hasAtmosphericBg && (
                         <div
-                            className="
+                            className={`
+                                ${hasNightSkyBg ? "nightsky-glass" : ""}
                                 relative w-full
                                 max-w-400 mx-auto
                                 rounded-3xl p-10
                                 overflow-hidden
                                 backdrop-blur-[20px]
-                                border border-white/30 border-s-8
-                                shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-                                bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
-                            "
+                                border border-s-8
+                                ${hasNightSkyBg ? "border-white/10" : "border-white/30"}
+                                ${hasNightSkyBg 
+                                    ? "bg-[linear-gradient(to_bottom_right,rgba(20,25,60,0.55),rgba(10,12,35,0.55))]"
+                                    : "bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]"
+                                }
+                                ${hasNightSkyBg
+                                    ? "shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+                                    : "shadow-[0_16px_70px_rgba(0,0,0,0.12)]"
+                                }
+                            `}
+                            style={{
+                                color: hasNightSkyBg ? "rgb(220 230 255)" : undefined,
+                            }}
                         >
                             {/* Top glass highlight */}
                             <div
@@ -388,11 +421,11 @@ export default function OrdersPage() {
 
                             {/* Frost diffusion layer */}
                             <div
-                                className="
+                                className={`
                                     pointer-events-none absolute inset-0
-                                    rounded-3xl
-                                    bg-white/20 blur-2xl opacity-40
-                                "
+                                    rounded-3xl blur-2xl
+                                    ${hasNightSkyBg ? "bg-blue-950/20 opacity-20" : "bg-white/20 opacity-40"}
+                                `}
                             />
                             {/* Content */}
                             <div style={{ position: "relative" }}>
@@ -401,6 +434,7 @@ export default function OrdersPage() {
                                     buyerEmail={buyerEmail}
                                     onToast={showToast}
                                     activeTab={activeTab}
+                                    theme={theme}
                                 />
                             </div>
                         </div>
@@ -422,6 +456,7 @@ export default function OrdersPage() {
                                 buyerEmail={buyerEmail}
                                 onToast={showToast}
                                 activeTab={activeTab}
+                                theme={theme}
                             />
                         </div>
                     )}
