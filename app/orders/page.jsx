@@ -208,6 +208,7 @@ import { getAuth } from "../../src/lib/auth";
 import Sidebar from "../../src/components/ui/Sidebar";
 import { useTheme } from "../context/ThemeContext";
 import { MistBackground } from "../../src/components/ui/MistBackground";
+import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 
 export default function OrdersPage() {
     const router = useRouter();
@@ -241,11 +242,32 @@ export default function OrdersPage() {
     const sellerId = auth.seller?.seller_id;
 
     const isProfessional = theme === "professional";
-    const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
+    const hasMistBg = theme === "cloudy";
+    const hasNightSkyBg = theme === "nightsky";
+    const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
 
     return (
         <>
-            {hasAtmosphericBg && <MistBackground />}
+            {hasMistBg && <MistBackground />}
+
+            {hasNightSkyBg && (
+                <div
+                    style={{
+                    position: "fixed",
+                    inset: 0,
+                    zIndex: 0,
+                    pointerEvents: "none",
+                }}
+            >
+                <NightSkyBackground
+                    cloudIntensity={1}
+                    starDensity="full"
+                    showTopo={true}
+                    showRings={true}
+                    vignetteStrength={0.52}
+                />
+            </div>
+        )}
 
             <style>{`
                 @keyframes slideUp {
@@ -318,7 +340,9 @@ export default function OrdersPage() {
                                 fontSize: 28,
                                 fontWeight: 800,
                                 letterSpacing: "-0.03em",
-                                color: "var(--text-primary)",
+                                color: hasNightSkyBg
+                                    ? "rgb(240 245 255)"
+                                    : "var(--text-primary)",
                             }}
                         >
                             My Orders
@@ -327,9 +351,11 @@ export default function OrdersPage() {
                             style={{
                                 margin: "4px 0 0",
                                 fontSize: 13,
-                                color: hasAtmosphericBg
+                                color: hasMistBg
                                     ? "rgb(0 0 0)"
-                                    : "var(--text-secondary)",
+                                    : hasNightSkyBg
+                                        ? "rgb(180 200 255)"
+                                        : "var(--text-secondary)",
                             }}
                         >
                             Browse and manage all orders for this buyer.
