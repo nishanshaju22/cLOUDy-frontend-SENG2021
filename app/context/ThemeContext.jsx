@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const THEMES = ["professional", "cloudy", "nightsky"];
 
 const ThemeContext = createContext({
-    theme: "cloudy",
+    theme: "nightsky",
     setTheme: () => {},
     themes: THEMES,
 });
