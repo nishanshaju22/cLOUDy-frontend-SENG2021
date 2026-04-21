@@ -8,6 +8,7 @@ import { MistBackground } from "../../src/components/ui/MistBackground";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { RippleButton } from "@/src/components/ui/RippleButton";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
@@ -80,6 +81,18 @@ export default function InventoryPage() {
             {filtered.map(item => (
                 <div
                     key={item.inventoryId}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-4px)";
+                        e.currentTarget.style.boxShadow = hasAtmosphericBg
+                            ? "0 14px 40px rgba(0,0,0,0.12)"
+                            : "0 10px 20px rgba(0,0,0,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0px)";
+                        e.currentTarget.style.boxShadow = hasAtmosphericBg
+                            ? "0 8px 30px rgba(0,0,0,0.08)"
+                            : "none";
+                    }}
                     style={{
                         padding: 10,
                         borderRadius: 20,
@@ -94,6 +107,7 @@ export default function InventoryPage() {
                         boxShadow: hasAtmosphericBg
                             ? "0 8px 30px rgba(0,0,0,0.08)"
                             : "none",
+                        transition: "all 0.2s ease",
                     }}
                 >
                     <InventoryCard
@@ -141,7 +155,7 @@ export default function InventoryPage() {
                                 style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
                             />
                         </div>
-                        <button
+                        <RippleButton
                             onClick={() => setIsManaging(m => !m)}
                             style={{
                                 ...styles.navBtn,
@@ -152,13 +166,13 @@ export default function InventoryPage() {
                             }}
                         >
                             {isManaging ? "Done" : "Manage"}
-                        </button>
-                        <button
+                        </RippleButton>
+                        <RippleButton
                             onClick={() => { setEditItem(null); setShowForm(true); }}
                             style={{ ...styles.addBtn, background: "var(--surface)", color: "var(--btn-ghost-text)", border: `1px solid var(--btn-ghost-border)`, fontFamily: "var(--font-sans)" }}
                         >
                             <PlusIcon /> New Inventory Item
-                        </button>
+                        </RippleButton>
                     </div>
                 </nav>
 
@@ -238,13 +252,21 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
 
                 {isManaging && (
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
-                        <button onClick={() => onEdit(item)} style={cardStyles.iconBtn} title="Edit"><EditIcon /></button>
-                        <button onClick={handleDelete} disabled={deleting} style={{ ...cardStyles.iconBtn, color: "var(--error)" }} title="Delete">
+                        <RippleButton
+                            onClick={() => onEdit(item)}
+                            style={cardStyles.iconBtn}
+                        >
+                            <EditIcon />
+                        </RippleButton>
+                        <RippleButton
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        style={{ ...cardStyles.iconBtn, color: "var(--error)" }} title="Delete">
                             {deleting
                                 ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                                 : <TrashIcon />
                             }
-                        </button>
+                        </RippleButton>
                     </div>
                 )}
 

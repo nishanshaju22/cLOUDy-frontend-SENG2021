@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { updateCartItem, removeFromCart, buyerSellerLink } from "../../api/order";
 import { getBuyers, createBuyer, checkout } from "../../api/order";
 import { SpinnerIcon } from "../products/ProductCard";
+import { RippleButton } from "../ui/RippleButton";
 
 // ─── Shared primitives matching CreateOrderForm style ─────────────────────────
 
@@ -672,9 +673,12 @@ function CheckoutForm({ cart, onToast, onClose, onSuccess, sellerId, prefill }) 
                     </div>
                 ))}
 
-                <button onClick={onClose} style={{ ...btnStyles.primary, marginTop: 8 }}>
+                <RippleButton
+                    onClick={onClose}
+                    style={{ ...btnStyles.primary, marginTop: 8 }}
+                >
                     Done
-                </button>
+                </RippleButton>
             </div>
         );
     }
@@ -891,6 +895,20 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
 
     return createPortal(
         <>
+            <style>{`
+                .ripple-btn {
+                    transition: transform 0.15s ease, filter 0.15s ease;
+                }
+
+                .ripple-btn:hover {
+                    transform: translateY(-1px);
+                    filter: brightness(1.05);
+                }
+
+                .ripple-btn:active {
+                    transform: translateY(0px) scale(0.98);
+                }
+            `}</style>
             <div onClick={onClose} style={backdropStyle} />
             <div style={drawerStyle}>
 
@@ -898,12 +916,19 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
                 <div style={headerStyle}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         {view === "checkout" && (
-                            <button
+                            <RippleButton
                                 onClick={() => setView("cart")}
-                                style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", padding: 0, display: "flex", marginRight: 2 }}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: "#94a3b8",
+                                    padding: 0,
+                                    display: "flex",
+                                    marginRight: 2,
+                                }}
                             >
                                 <ChevronLeftIcon />
-                            </button>
+                            </RippleButton>
                         )}
                         <CartIcon />
                         <span style={headerTitle}>
@@ -913,7 +938,9 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
                             <span style={badgeStyle}>{cart.itemCount}</span>
                         )}
                     </div>
-                    <button onClick={onClose} style={closeBtnStyle}><XIcon /></button>
+                    <RippleButton onClick={onClose} style={closeBtnStyle}>
+                        <XIcon />
+                    </RippleButton>
                 </div>
 
                 {/* Body */}
@@ -947,12 +974,12 @@ export function CartDrawer({ cart, onClose, onToast, onRefresh, sellerId, prefil
                                         ${parseFloat(cart.grandTotal).toFixed(2)} {cart.currencyCode}
                                     </span>
                                 </div>
-                                <button
+                                <RippleButton
                                     onClick={() => setView("checkout")}
                                     style={btnStyles.primary}
                                 >
                                     Proceed to Order Creation
-                                </button>
+                                </RippleButton>
                             </div>
                         )}
                     </>
