@@ -30,7 +30,7 @@ export function RippleButton({
     };
 
     return (
-        <div
+        <button
             ref={btnRef}
             onClick={handleClick}
             disabled={disabled}
@@ -72,6 +72,6 @@ export function RippleButton({
                     100% { transform: scale(1); opacity: 0; }
                 }
             `}</style>
-        </div>
+        </button>
     );
 }
