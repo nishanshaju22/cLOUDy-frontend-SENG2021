@@ -1041,12 +1041,32 @@ function CartItem({ item, sellerId, onToast, onRefresh }) {
 
     return (
         <div style={{ display: "flex", gap: 14, padding: "12px 24px", alignItems: "flex-start" }}>
-            <div style={{ width: 72, height: 72, background: "#f5f5f5", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" strokeWidth="1">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21,15 16,10 5,21"/>
-                </svg>
+            <div style={{
+                width: 72, height: 72,
+                background: "#f5f5f5",
+                borderRadius: 6,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+                overflow: "hidden",
+            }}>
+                {item.imageUrl ? (
+                    <img
+                        src={item.imageUrl}
+                        alt={item.productName}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            borderRadius: 6,
+                        }}
+                    />
+                ) : (
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" strokeWidth="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                )}
             </div>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
                 <div style={{ fontSize: 14, fontWeight: 500, color: "#111" }}>{item.productName}</div>

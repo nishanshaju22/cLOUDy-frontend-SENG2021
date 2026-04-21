@@ -89,7 +89,7 @@ function GlassSelect({ theme, style, children, ...props }) {
     );
 }
 
-export function OrdersList({ buyerId, buyerEmail, onToast, theme }) {
+export function OrdersList({ buyerId, buyerEmail, onToast, theme, sellerId }) {
     const isNightSky = theme === "nightsky";
     const labelStyle = {
         ...labelBaseStyle,
@@ -294,6 +294,7 @@ export function OrdersList({ buyerId, buyerEmail, onToast, theme }) {
                             buyerId={buyerId}
                             onClick={() => setSelected(order)}
                             onToast={onToast}
+                            sellerId={sellerId}
                         />
                     ))}
                 </div>

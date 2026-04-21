@@ -11,18 +11,18 @@ export function UpdateModal({ order, buyerId, onClose, onToast, onRefresh }) {
         delivery_date: "",
         currency_code: "",
         address: { street: "", city: "", state: "", postal_code: "", country_code: "" },
-        item: { product_id: "", item_name: "", item_description: "", quantity: "", unit_price: "" },
     });
 
     const [loading, setLoading] = useState(false);
 
-    const setAddr = (k, v) => setForm(f => ({ ...f, address: { ...f.address, [k]: v } }));
-    const setItem = (k, v) => setForm(f => ({ ...f, item: { ...f.item, [k]: v } }));
+    const setAddr = (k, v) =>
+        setForm(f => ({ ...f, address: { ...f.address, [k]: v } }));
 
     const handleUpdate = async () => {
         setLoading(true);
         try {
             const payload = {};
+
             if (form.order_date) payload.order_date = form.order_date;
             if (form.delivery_date) payload.delivery_date = form.delivery_date;
             if (form.currency_code) payload.currency_code = form.currency_code;
@@ -30,16 +30,8 @@ export function UpdateModal({ order, buyerId, onClose, onToast, onRefresh }) {
             const hasAddr = Object.values(form.address).some(v => v);
             if (hasAddr) payload.address = form.address;
 
-            const hasItem = Object.values(form.item).some(v => v);
-            if (hasItem) {
-                payload.item = {
-                    ...form.item,
-                    quantity: form.item.quantity ? parseInt(form.item.quantity) : undefined,
-                    unit_price: form.item.unit_price ? parseFloat(form.item.unit_price) : undefined,
-                };
-            }
-
             await updateOrder(buyerId, order.orderId, payload);
+
             onToast("Order updated!", "success");
             onRefresh();
             onClose();
@@ -148,52 +140,6 @@ export function UpdateModal({ order, buyerId, onClose, onToast, onRefresh }) {
                                     />
                                 </Field>
                             ))}
-                        </div>
-                    </div>
-
-                    {/* Item */}
-                    <div>
-                        <SectionLabel>Item (optional)</SectionLabel>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                            <Field label="Product ID (UUID)">
-                                <Input
-                                    value={form.item.product_id}
-                                    placeholder="2acd6acf-…"
-                                    onChange={e => setItem("product_id", e.target.value)}
-                                />
-                            </Field>
-                            <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr 1fr", gap: 10 }}>
-                                <Field label="Item Name">
-                                    <Input
-                                        value={form.item.item_name}
-                                        placeholder="Widget"
-                                        onChange={e => setItem("item_name", e.target.value)}
-                                    />
-                                </Field>
-                                <Field label="Description">
-                                    <Input
-                                        value={form.item.item_description}
-                                        placeholder="Industrial widget"
-                                        onChange={e => setItem("item_description", e.target.value)}
-                                    />
-                                </Field>
-                                <Field label="Quantity">
-                                    <Input
-                                        type="number"
-                                        value={form.item.quantity}
-                                        placeholder="15"
-                                        onChange={e => setItem("quantity", e.target.value)}
-                                    />
-                                </Field>
-                                <Field label="Unit Price">
-                                    <Input
-                                        type="number"
-                                        value={form.item.unit_price}
-                                        placeholder="50"
-                                        onChange={e => setItem("unit_price", e.target.value)}
-                                    />
-                                </Field>
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -2,18 +2,26 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Icon } from "../ui/icons";
-import { DespatchDrawer } from "./DespatchDrawer";
-import { listDespatch } from "../../api/despatch";
+import { listDespatch, getSellerAdviceIds } from "../../api/despatch";
 
-export function DespatchList({ onToast, onSelect }) {
+export function DespatchList({ onToast, onSelect, sellerId }) {
     const [despatches, setDespatches] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const fetchDespatches = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await listDespatch();
-            setDespatches(data.results || []);
+            const [allData, sellerAdviceIds] = await Promise.all([
+                listDespatch(),
+                getSellerAdviceIds(sellerId),
+            ]);
+
+            const sellerSet = new Set(sellerAdviceIds);
+            const filtered = (allData.results || []).filter(d =>
+                sellerSet.has(d["advice-id"])
+            );
+
+            setDespatches(filtered);
         } catch (err) {
             onToast(err?.error || "Failed to load despatches", "error");
             setDespatches([]);

@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Icon } from "../ui/icons";
 import { StatusBadge } from "../ui/ui";
-import { createDespatch, retrieveDespatch } from "../../api/despatch";
+import { createDespatch, linkDespatchToSeller, retrieveDespatch } from "../../api/despatch";
 import { getOrderById } from "../../api/order";
 import { sendEmail } from "../../api/email";
 
-export function OrderCard({ order, buyerId, buyerEmail, onClick, onToast, onDespatchCreated }) {
+export function OrderCard({ order, buyerId, buyerEmail, onClick, onToast, onDespatchCreated, sellerId }) {
     const [despatching, setDespatching] = useState(false);
     const [despatchData, setDespatchData] = useState(null);
     const [autoDespatched, setAutoDespatched] = useState(false);
@@ -112,6 +112,10 @@ Dispatch Team`
                 setDespatching(true);
 
                 const result = await createDespatch(d.xml);
+                const adviceId = result.adviceIds?.[0];
+                if (adviceId && sellerId) {
+                    await linkDespatchToSeller(sellerId, adviceId, order.orderId);
+                }
 
                 if (!cancelled) {
                     setAutoDespatched(true);
@@ -172,6 +176,10 @@ Dispatch Team`
             setDespatching(true);
 
             const result = await createDespatch(d.xml);
+            const adviceId = result.adviceIds?.[0];
+            if (adviceId && sellerId) {
+                await linkDespatchToSeller(sellerId, adviceId, order.orderId);
+            }
             onToast?.(`Despatch created — ID: ${result.adviceIds?.[0]}`, "success");
             onDespatchCreated?.();
 
