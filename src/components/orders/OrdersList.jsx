@@ -272,7 +272,12 @@ export function OrdersList({ buyerId, buyerEmail, onToast, theme }) {
                     Loading orders…
                 </div>
             ) : !buyerId ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#342E37", fontSize: 14 }}>
+                <div style={{
+                    textAlign: "center",
+                    padding: "60px 0",
+                    color: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                    fontSize: 14
+                }}>
                     Enter a Buyer ID above to load orders
                 </div>
             ) : orders.length === 0 ? (
