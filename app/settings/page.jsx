@@ -480,6 +480,15 @@ export default function SettingsPage() {
       setError("Seller ID not found in local storage");
       return;
     }
+    if (!form.party_name.trim()) {
+      setError("Company name is required");
+      return;
+    }
+
+    if (!form.customer_assigned_account_id.trim()) {
+      setError("Customer assigned account ID is required");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -721,6 +730,7 @@ export default function SettingsPage() {
                         style={inputStyle}
                         onFocus={focusIn}
                         onBlur={focusOut}
+                        required
                         />
                     </Field>
 
@@ -732,6 +742,7 @@ export default function SettingsPage() {
                         style={inputStyle}
                         onFocus={focusIn}
                         onBlur={focusOut}
+                        required
                         />
                     </Field>
                     </div>

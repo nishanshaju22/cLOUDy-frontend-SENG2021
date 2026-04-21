@@ -9,12 +9,14 @@ import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
 import { DespatchDrawer } from "../../src/components/despatch/DespatchDrawer";
 import { getAuth } from "../../src/lib/auth";
+import { useRequireAuth } from "../../src/hooks/useRequireAuth";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
 
 export default function DespatchPage() {
     const { theme } = useTheme();
+    const { sellerId: currentSellerId, checkingAuth } = useRequireAuth();
     const [activeTab, setActiveTab] = useState("despatch");
     const [toast, setToast] = useState(null);
     const [selected, setSelected] = useState(null);
@@ -26,6 +28,8 @@ export default function DespatchPage() {
     const hasMistBg = theme === "cloudy";
     const hasNightSkyBg = theme === "nightsky";
     const hasAtmosphericBg = hasMistBg || hasNightSkyBg;
+
+    if (checkingAuth || !currentSellerId) return null;
 
     return (
         <>
@@ -140,7 +144,7 @@ export default function DespatchPage() {
                                 <DespatchList 
                                     onToast={showToast} 
                                     onSelect={setSelected}
-                                    sellerId={SELLER_ID}
+                                    sellerId={currentSellerId}
                                 />
                             </div>
                         </div>
@@ -155,7 +159,7 @@ export default function DespatchPage() {
                             <DespatchList 
                                 onToast={showToast}
                                 onSelect={setSelected}
-                                sellerId={SELLER_ID}
+                                sellerId={currentSellerId}
                             />
                         </div>
                     )}
@@ -172,7 +176,7 @@ export default function DespatchPage() {
                     onClose={() => setSelected(null)}
                     onToast={showToast}
                     onRefresh={() => {}}
-                    sellerId={SELLER_ID}
+                    sellerId={currentSellerId}
                 />
             )}
         </>

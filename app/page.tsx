@@ -273,7 +273,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoggedIn()) {
-      router.replace("/orders");
+      router.replace("/analytics");
     }
   }, [router]);
 

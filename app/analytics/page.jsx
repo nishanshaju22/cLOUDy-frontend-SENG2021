@@ -22,6 +22,7 @@ import { MistBackground } from "../../src/components/ui/MistBackground";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { useRequireAuth } from "../../src/hooks/useRequireAuth";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.seller?.seller_id || parsed?.user?.seller_id;
@@ -33,6 +34,7 @@ const GREEN_BAR = "#34c759";
 
 export default function AnalyticsPage() {
   const { theme } = useTheme();
+  const { sellerId: currentSellerId, checkingAuth } = useRequireAuth();
   const { toasts, addToast } = useToast();
 
   const [analytics, setAnalytics] = useState(null);
@@ -42,7 +44,7 @@ export default function AnalyticsPage() {
   const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
 
   const fetchAnalytics = useCallback(async () => {
-    if (!SELLER_ID) {
+    if (!currentSellerId) {
       addToast("Seller not found. Please log in again.", "error");
       setLoading(false);
       return;
@@ -50,7 +52,7 @@ export default function AnalyticsPage() {
 
     try {
       setLoading(true);
-      const data = await getSellerAnalyticsDashboard(SELLER_ID);
+      const data = await getSellerAnalyticsDashboard(currentSellerId);
       setAnalytics(data);
     } catch (err) {
       addToast(
@@ -60,11 +62,14 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [addToast]);
+  }, [currentSellerId, addToast]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    if (checkingAuth) return;
+        fetchAnalytics();
+  }, [checkingAuth, fetchAnalytics]);
+
+  if (checkingAuth || !currentSellerId) return null;
 
   const ordersByDate = analytics?.ordersByDate || [];
   const filteredOrdersByDate = filterOrdersByDate(ordersByDate, range);

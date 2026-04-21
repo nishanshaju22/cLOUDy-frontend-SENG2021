@@ -7,6 +7,7 @@ import { MistBackground } from "../../src/components/ui/MistBackground";
 import { NightSkyBackground } from "../../src/components/ui/NightSkyBackground";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { useRequireAuth } from "../../src/hooks/useRequireAuth";
 
 const STATUS_COLORS = {
     DRAFT:  { bg: "#fefce8", color: "#854d0e", border: "#fde68a" },
@@ -47,6 +48,7 @@ function formatMoney(val) {
 
 export default function InvoicesPage() {
     const { theme } = useTheme();
+    const { checkingAuth } = useRequireAuth();
     const [invoices, setInvoices] = useState([]);
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -116,6 +118,8 @@ export default function InvoicesPage() {
         } catch { addToast("Failed to generate PDF", "error"); }
         finally { setPdfLoading(null); }
     };
+
+    if (checkingAuth) return null;
 
     const filtered = invoices.filter(inv => {
         if (!search.trim()) return true;
