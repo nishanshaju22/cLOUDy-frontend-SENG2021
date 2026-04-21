@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { RippleButton } from "../ui/RippleButton";
+import { useTheme } from "../../../app/context/ThemeContext";
 
 export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging, cart, onUpdateQty }) {
+    const { theme } = useTheme();
+    const isNightSky = theme === "nightsky";
     const [adding, setAdding] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [added, setAdded] = useState(false);
@@ -97,11 +100,11 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
             </div>
 
             <div style={styles.info}>
-                <div style={styles.name}>{product.productName}</div>
+                <div style={styles.name(isNightSky)}>{product.productName}</div>
                 {product.productDescription && (
-                    <div style={styles.description}>{product.productDescription}</div>
+                    <div style={styles.description(isNightSky)}>{product.productDescription}</div>
                 )}
-                <div style={styles.price}>${parseFloat(product.unitPrice).toFixed(2)}</div>
+                <div style={styles.price(isNightSky)}>${parseFloat(product.unitPrice).toFixed(2)}</div>
 
                 {/* Inventory items pills */}
                 {hasInventory && (
@@ -164,7 +167,7 @@ export function ProductCard({ product, onAddToCart, onEdit, onDelete, isManaging
                                 −
                             </RippleButton>
 
-                            <div style={styles.qtyValue}>
+                            <div style={styles.qtyValue(isNightSky)}>
                                 {updatingQty ? <SpinnerIcon size={12} color="#111" /> : quantity}
                             </div>
 
@@ -253,9 +256,23 @@ const styles = {
         padding: "3px 7px", backdropFilter: "blur(4px)",
     },
     info: { display: "flex", flexDirection: "column", gap: 3, marginBottom: 12, flex: 1 },
-    name: { fontSize: 15, fontWeight: 500, color: "#111", lineHeight: 1.3 },
-    description: { fontSize: 13, color: "#757575", lineHeight: 1.4 },
-    price: { fontSize: 15, fontWeight: 500, color: "#111", marginTop: 4 },
+    name: (isNightSky) => ({
+        fontSize: 15,
+        fontWeight: 500,
+        color: isNightSky ? "rgb(240 245 255)" : "#111",
+        lineHeight: 1.3,
+    }),
+    description: (isNightSky) => ({
+        fontSize: 13,
+        color: isNightSky ? "rgb(180 200 255)" : "#757575",
+        lineHeight: 1.4,
+    }),
+    price: (isNightSky) => ({
+        fontSize: 15,
+        fontWeight: 500,
+        color: isNightSky ? "rgb(230 235 255)" : "#111",
+        marginTop: 4,
+    }),
     inventoryPills: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 },
     pill: {
         fontSize: 10, fontWeight: 600, borderRadius: 4,
@@ -329,7 +346,7 @@ const styles = {
         padding: "20px",
         borderRadius: 20,
     },
-    qtyValue: {
+    qtyValue: (isNightSky) => ({
         flex: 1,
         textAlign: "center",
         fontSize: 14,
@@ -337,7 +354,8 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-    },
+        color: isNightSky ? "rgb(230 235 255)" : "#111",
+    }),
     imageWrapper: {
         width: "100%",
         aspectRatio: "1 / 1",
