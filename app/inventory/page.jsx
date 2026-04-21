@@ -9,12 +9,14 @@ import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
 import { RippleButton } from "@/src/components/ui/RippleButton";
+import { useRequireAuth } from "../../src/hooks/useRequireAuth";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
 
 export default function InventoryPage() {
     const { theme } = useTheme();
+    const { sellerId: currentSellerId, checkingAuth } = useRequireAuth();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -26,20 +28,21 @@ export default function InventoryPage() {
     const hasAtmosphericBg = theme === "cloudy" || theme === "stormy";
 
     const fetchInventory = useCallback(async () => {
+        if (!currentSellerId) return;
         try {
-            const data = await getInventory(SELLER_ID);
+            const data = await getInventory(currentSellerId);
             setItems(data.items || []);
         } catch {
             addToast("Failed to load inventory", "error");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentSellerId, addToast]);
 
     useEffect(() => { fetchInventory(); }, [fetchInventory]);
 
     const handleCreate = async (data) => {
-        const res = await createInventoryItem(SELLER_ID, data);
+        const res = await createInventoryItem(currentSellerId, data);
         addToast("Inventory item created", "success");
         return res;
     };
@@ -50,7 +53,7 @@ export default function InventoryPage() {
     };
 
     const handleUpdate = async (data) => {
-        const res = await updateInventoryItem(SELLER_ID, editItem.inventoryId, data);
+        const res = await updateInventoryItem(currentSellerId, editItem.inventoryId, data);
         addToast("Inventory item updated", "success");
         return res;
     };
@@ -62,13 +65,15 @@ export default function InventoryPage() {
     const handleDelete = async (inventoryId, itemName) => {
         if (!confirm(`Delete "${itemName}"?`)) return;
         try {
-            await deleteInventoryItem(SELLER_ID, inventoryId);
+            await deleteInventoryItem(currentSellerId, inventoryId);
             await fetchInventory();
             addToast("Inventory item deleted", "success");
         } catch (err) {
             addToast(err?.error || "Failed to delete item", "error");
         }
     };
+
+    if (checkingAuth || !currentSellerId) return null;
 
     const filtered = items.filter(i =>
         !search.trim() ||
