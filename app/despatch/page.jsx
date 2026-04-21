@@ -6,11 +6,13 @@ import { MistBackground } from "../../src/components/ui/MistBackground";
 import { Toast } from "../../src/components/ui/ui";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { DespatchDrawer } from "../../src/components/despatch/DespatchDrawer";
 
 export default function DespatchPage() {
     const { theme } = useTheme();
     const [activeTab, setActiveTab] = useState("despatch");
     const [toast, setToast] = useState(null);
+    const [selected, setSelected] = useState(null);
 
     const showToast = useCallback((msg, type = "success") => {
         setToast({ msg, type });
@@ -92,7 +94,10 @@ export default function DespatchPage() {
                                 "
                             />
                             <div style={{ position: "relative" }}>
-                                <DespatchList onToast={showToast} />
+                                <DespatchList 
+                                    onToast={showToast} 
+                                    onSelect={setSelected}
+                                />
                             </div>
                         </div>
                     ) : (
@@ -103,7 +108,10 @@ export default function DespatchPage() {
                             padding: "28px 32px",
                             boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
                         }}>
-                            <DespatchList onToast={showToast} />
+                            <DespatchList 
+                                onToast={showToast}
+                                onSelect={setSelected}
+                            />
                         </div>
                     )}
                 </main>
@@ -111,6 +119,15 @@ export default function DespatchPage() {
 
             {toast && (
                 <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />
+            )}
+
+            {selected && (
+                <DespatchDrawer
+                    despatch={selected}
+                    onClose={() => setSelected(null)}
+                    onToast={showToast}
+                    onRefresh={() => {}}
+                />
             )}
         </>
     );

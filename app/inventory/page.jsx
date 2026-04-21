@@ -38,9 +38,9 @@ export default function InventoryPage() {
     useEffect(() => { fetchInventory(); }, [fetchInventory]);
 
     const handleCreate = async (data) => {
-        await createInventoryItem(SELLER_ID, data);
-        await fetchInventory();
+        const res = await createInventoryItem(SELLER_ID, data);
         addToast("Inventory item created", "success");
+        return res;
     };
 
     const handleEdit = (item) => {
@@ -49,9 +49,13 @@ export default function InventoryPage() {
     };
 
     const handleUpdate = async (data) => {
-        await updateInventoryItem(SELLER_ID, editItem.inventoryId, data);
-        await fetchInventory();
+        const res = await updateInventoryItem(SELLER_ID, editItem.inventoryId, data);
         addToast("Inventory item updated", "success");
+        return res;
+    };
+
+    const handleSaveDone = async () => {
+        await fetchInventory();
     };
 
     const handleDelete = async (inventoryId, itemName) => {
@@ -69,6 +73,38 @@ export default function InventoryPage() {
         !search.trim() ||
         i.itemName?.toLowerCase().includes(search.toLowerCase()) ||
         i.itemDescription?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const cardGrid = (
+        <div style={styles.grid}>
+            {filtered.map(item => (
+                <div
+                    key={item.inventoryId}
+                    style={{
+                        padding: 10,
+                        borderRadius: 20,
+                        backdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
+                        WebkitBackdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
+                        border: hasAtmosphericBg
+                            ? "1px solid rgba(255,255,255,0.3)"
+                            : "1px solid var(--border)",
+                        background: hasAtmosphericBg
+                            ? "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
+                            : "var(--surface)",
+                        boxShadow: hasAtmosphericBg
+                            ? "0 8px 30px rgba(0,0,0,0.08)"
+                            : "none",
+                    }}
+                >
+                    <InventoryCard
+                        item={item}
+                        isManaging={isManaging}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                </div>
+            ))}
+        </div>
     );
 
     return (
@@ -91,12 +127,7 @@ export default function InventoryPage() {
                 background: hasAtmosphericBg ? "transparent" : "var(--page-bg)",
                 fontFamily: "var(--font-sans)",
             }}>
-                {/* Nav */}
-                <nav style={{
-                    ...styles.nav,
-                    background: "var(--nav-bg)",
-                    borderBottom: `1px solid var(--nav-border)`,
-                }}>
+                <nav style={{ ...styles.nav, background: "var(--nav-bg)", borderBottom: `1px solid var(--nav-border)` }}>
                     <div style={styles.navLeft}>
                         <span style={{ ...styles.logo, color: "var(--text-primary)" }}>Inventory</span>
                     </div>
@@ -107,11 +138,7 @@ export default function InventoryPage() {
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Search inventory..."
-                                style={{
-                                    ...styles.searchInput,
-                                    color: "var(--search-text)",
-                                    fontFamily: "var(--font-sans)",
-                                }}
+                                style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
                             />
                         </div>
                         <button
@@ -128,13 +155,7 @@ export default function InventoryPage() {
                         </button>
                         <button
                             onClick={() => { setEditItem(null); setShowForm(true); }}
-                            style={{
-                                ...styles.addBtn,
-                                background: "var(--surface)",
-                                color: "var(--btn-ghost-text)",
-                                border: `1px solid var(--btn-ghost-border)`,
-                                fontFamily: "var(--font-sans)",
-                            }}
+                            style={{ ...styles.addBtn, background: "var(--surface)", color: "var(--btn-ghost-text)", border: `1px solid var(--btn-ghost-border)`, fontFamily: "var(--font-sans)" }}
                         >
                             <PlusIcon /> New Inventory Item
                         </button>
@@ -169,72 +190,7 @@ export default function InventoryPage() {
                                 {search ? "Try a different search term" : "Click New Inventory Item to get started"}
                             </div>
                         </div>
-                    ) : (
-                        <div style={styles.grid}>
-                            {/* ── CLOUDY / STORMY GLASS GRID WRAPPER ── */}
-                            {hasAtmosphericBg ? (
-                                <div
-                                    className="
-                                        relative w-full
-                                        max-w-400 mx-auto
-                                        rounded-3xl p-2
-                                        overflow-hidden
-                                        backdrop-blur-[20px]
-                                        border border-white/30
-                                        shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-                                        bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
-                                    "
-                                >
-                                    {/* Top glass highlight */}
-                                    <div
-                                        className="
-                                            pointer-events-none absolute inset-0
-                                            rounded-3xl
-                                            bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
-                                            opacity-60
-                                        "
-                                    />
-
-                                    {/* Frost diffusion */}
-                                    <div
-                                        className="
-                                            pointer-events-none absolute inset-0
-                                            rounded-3xl
-                                            bg-white/20 blur-2xl opacity-40
-                                        "
-                                    />
-
-                                    {/* GRID */}
-                                    <div
-                                        style={styles.grid}
-                                        className="relative z-10 w-full"
-                                    >
-                                        {filtered.map(item => (
-                                            <InventoryCard
-                                                key={item.inventoryId}
-                                                item={item}
-                                                isManaging={isManaging}
-                                                onEdit={handleEdit}
-                                                onDelete={handleDelete}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div style={styles.grid}>
-                                    {filtered.map(item => (
-                                        <InventoryCard
-                                            key={item.inventoryId}
-                                            item={item}
-                                            isManaging={isManaging}
-                                            onEdit={handleEdit}
-                                            onDelete={handleDelete}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    ) : cardGrid}
                 </main>
             </div>
 
@@ -243,6 +199,7 @@ export default function InventoryPage() {
                     item={editItem}
                     onClose={() => { setShowForm(false); setEditItem(null); }}
                     onSave={editItem ? handleUpdate : handleCreate}
+                    onSaveDone={handleSaveDone}
                     onToast={addToast}
                 />
             )}
@@ -264,32 +221,25 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", cursor: "default", fontFamily: "var(--font-sans)" }}>
             <div style={{
-                position: "relative",
-                background: "var(--surface-raised)",
-                borderRadius: 4,
-                aspectRatio: "1 / 1",
-                overflow: "hidden",
-                marginBottom: 12,
+                position: "relative", background: "var(--surface-raised)",
+                borderTopLeftRadius: 24, borderTopRightRadius: 24,
+                borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
+                aspectRatio: "1 / 1", overflow: "hidden", marginBottom: 12,
                 border: "1px solid var(--border)",
-                borderTopRightRadius: 24,
-                borderTopLeftRadius: 24,
-                borderBottomLeftRadius: 16,
-                borderBottomRightRadius: 16,
             }}>
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <BoxIcon />
-                </div>
+                {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.itemName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
+                ) : (
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <BoxIcon />
+                    </div>
+                )}
+
                 {isManaging && (
                     <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
-                        <button onClick={() => onEdit(item)} style={cardStyles.iconBtn} title="Edit">
-                            <EditIcon />
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            style={{ ...cardStyles.iconBtn, color: "var(--error)" }}
-                            title="Delete"
-                        >
+                        <button onClick={() => onEdit(item)} style={cardStyles.iconBtn} title="Edit"><EditIcon /></button>
+                        <button onClick={handleDelete} disabled={deleting} style={{ ...cardStyles.iconBtn, color: "var(--error)" }} title="Delete">
                             {deleting
                                 ? <svg style={{ animation: "spin 0.7s linear infinite" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                                 : <TrashIcon />
@@ -297,6 +247,7 @@ function InventoryCard({ item, isManaging, onEdit, onDelete }) {
                         </button>
                     </div>
                 )}
+
                 <div style={{
                     position: "absolute", bottom: 8, left: 8,
                     fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
@@ -344,7 +295,7 @@ const styles = {
     pageHeader: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 32 },
     pageTitle: { fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: "-0.02em" },
     pageSubtitle: { fontSize: 13, margin: "6px 0 0" },
-    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "40px 24px" },
+    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" },
     emptyState: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 360 },
 };
 

@@ -119,6 +119,28 @@ async function getSellers() {
     }
 }
 
+//image upload
+async function uploadImage({ file, product_id, inventory_id }) {
+    try {
+        const formData = new FormData();
+
+        formData.append("file", file);
+
+        if (product_id) formData.append("product_id", product_id);
+        if (inventory_id) formData.append("inventory_id", inventory_id);
+
+        const response = await order_api.post("/v1/upload-image", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 // Products
 
 async function getProductsBySeller(sellerId) {
@@ -165,6 +187,54 @@ async function deleteProduct(sellerId, productId) {
         throw error.response?.data || { error: "Something went wrong" };
     }
 };
+
+//Inventory
+
+async function getInventoryBySeller(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getInventory(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function createInventoryItem(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/inventory`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function updateInventoryItem(sellerId, inventoryId, data) {
+    try {
+        const response = await order_api.put(`/v2/seller/${sellerId}/inventory/${inventoryId}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function deleteInventoryItem(sellerId, inventoryId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/inventory/${inventoryId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
 
 // Cart
 
@@ -222,52 +292,6 @@ async function checkout(sellerId, data) {
     }
 };
 
-async function getInventoryBySeller(sellerId) {
-    try {
-        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
-        console.log(response)
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
-async function getInventory(sellerId) {
-    try {
-        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
-async function createInventoryItem(sellerId, data) {
-    try {
-        const response = await order_api.post(`/v2/seller/${sellerId}/inventory`, data);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
-async function updateInventoryItem(sellerId, inventoryId, data) {
-    try {
-        const response = await order_api.put(`/v2/seller/${sellerId}/inventory/${inventoryId}`, data);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
-async function deleteInventoryItem(sellerId, inventoryId) {
-    try {
-        const response = await order_api.delete(`/v2/seller/${sellerId}/inventory/${inventoryId}`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { error: "Something went wrong" };
-    }
-}
-
 export { 
     createOrder, 
     updateOrder, 
@@ -281,6 +305,7 @@ export {
     getBuyers, 
     getSellers, 
     createSeller, 
+    uploadImage,
     getProductsBySeller, 
     getProductById,
     createProduct,

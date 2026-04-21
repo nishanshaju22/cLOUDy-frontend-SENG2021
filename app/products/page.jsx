@@ -74,24 +74,24 @@ export default function ProductsPage() {
     };
 
     const handleUpdateQty = async (productId, quantity) => {
-    try {
-        await updateCartItem(SELLER_ID, productId, { quantity });
-        await fetchCart();
-        await fetchProducts();
-    } catch (err) {
-        if (err?.items) {
-            const itemList = err.items.map(i => `${i.itemName} (need ${i.required}, have ${i.available})`).join(", ");
-            addToast(`Not enough stock: ${itemList}`, "error");
-        } else {
-            addToast(err?.error || "Failed to update quantity", "error");
+        try {
+            await updateCartItem(SELLER_ID, productId, { quantity });
+            await fetchCart();
+            await fetchProducts();
+        } catch (err) {
+            if (err?.items) {
+                const itemList = err.items.map(i => `${i.itemName} (need ${i.required}, have ${i.available})`).join(", ");
+                addToast(`Not enough stock: ${itemList}`, "error");
+            } else {
+                addToast(err?.error || "Failed to update quantity", "error");
+            }
         }
-    }
-};
+    };
 
     const handleCreate = async (data) => {
-        await createProduct(SELLER_ID, data);
-        await fetchProducts();
+        const res = await createProduct(SELLER_ID, data);
         addToast("Catalogue created", "success");
+        return res;
     };
 
     const handleEdit = (product) => {
@@ -100,9 +100,13 @@ export default function ProductsPage() {
     };
 
     const handleUpdate = async (data) => {
-        await updateProduct(SELLER_ID, editProduct.productId, data);
-        await fetchProducts();
+        const res = await updateProduct(SELLER_ID, editProduct.productId, data);
         addToast("Catalogue updated", "success");
+        return res;
+    };
+
+    const handleSaveDone = async () => {
+        await fetchProducts();
     };
 
     const handleDelete = async (productId) => {
@@ -144,6 +148,39 @@ export default function ProductsPage() {
         !search.trim() ||
         p.productName?.toLowerCase().includes(search.toLowerCase()) ||
         p.productDescription?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const cardGrid = (
+        <div style={styles.grid}>
+            {filtered.map(product => (
+                <div
+                    key={product.productId}
+                    style={{
+                        padding: 10,
+                        borderRadius: 20,
+                        backdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
+                        WebkitBackdropFilter: hasAtmosphericBg ? "blur(20px)" : "none",
+                        border: hasAtmosphericBg ? "1px solid rgba(255,255,255,0.3)" : "none",
+                        background: hasAtmosphericBg
+                            ? "linear-gradient(to bottom right, rgba(250,255,253,0.6), rgba(250,255,253,0.6))"
+                            : "transparent",
+                        boxShadow: hasAtmosphericBg
+                            ? "0 8px 30px rgba(0,0,0,0.08)"
+                            : "none",
+                    }}
+                >
+                    <ProductCard
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        isManaging={isManaging}
+                        cart={cart}
+                        onUpdateQty={handleUpdateQty}
+                    />
+                </div>
+            ))}
+        </div>
     );
 
     return (
@@ -189,7 +226,6 @@ export default function ProductsPage() {
                                 style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
                             />
                         </div>
-                        {/* AI Extract */}
                         <button
                             onClick={() => setShowAiModal(true)}
                             style={{
@@ -204,7 +240,6 @@ export default function ProductsPage() {
                         >
                             ✦ AI Extract
                         </button>
-                        {/* Manage */}
                         <button
                             onClick={() => setIsManaging(m => !m)}
                             style={{
@@ -217,7 +252,6 @@ export default function ProductsPage() {
                         >
                             {isManaging ? "Done" : "Manage"}
                         </button>
-                        {/* New Catalogue */}
                         <button
                             onClick={() => { setEditProduct(null); setShowForm(true); }}
                             style={{
@@ -230,7 +264,6 @@ export default function ProductsPage() {
                         >
                             <Icon.PlusIcon /> New Catalogue
                         </button>
-                        {/* Cart */}
                         <button
                             onClick={() => setCartOpen(true)}
                             style={{
@@ -255,7 +288,6 @@ export default function ProductsPage() {
                     </div>
                 </nav>
 
-                {/* Main */}
                 <main style={{ ...styles.main, position: "relative", zIndex: 1 }}>
                     <div style={styles.pageHeader}>
                         <div>
@@ -284,66 +316,7 @@ export default function ProductsPage() {
                                 {search ? "Try a different search term" : "Click New Catalogue to add your first one"}
                             </div>
                         </div>
-                    ) : (
-                        <div style={styles.grid}>
-                            {/* ── CLOUDY / STORMY GLASS GRID WRAPPER ── */}
-                            {hasAtmosphericBg && (
-                                <div
-                                    className="
-                                        relative w-full
-                                        max-w-400 mx-auto
-                                        rounded-3xl p-2
-                                        overflow-hidden
-                                        backdrop-blur-[20px]
-                                        border border-white/30
-                                        shadow-[0_16px_70px_rgba(0,0,0,0.12)]
-                                        bg-[linear-gradient(to_bottom_right,rgba(250,255,253,0.6),rgba(250,255,253,0.6))]
-                                    "
-                                >
-                                    {/* Top glass highlight */}
-                                    <div
-                                        className="
-                                            pointer-events-none absolute inset-0
-                                            rounded-3xl
-                                            bg-[linear-gradient(to_bottom,rgba(255,255,255,0.35),rgba(255,255,255,0.06))]
-                                            opacity-60
-                                        "
-                                    />
-
-                                    {/* Frost diffusion layer */}
-                                    <div
-                                        className="
-                                            pointer-events-none absolute inset-0
-                                            rounded-3xl
-                                            bg-white/20 blur-2xl opacity-40
-                                        "
-                                    />
-
-                                    {/* Content */}
-                                    <div
-                                        style={styles.grid}
-                                        className="
-                                            relative z-10
-                                            w-full
-                                        "
-                                    >
-                                        {filtered.map(product => (
-                                            <ProductCard
-                                                key={product.productId}
-                                                product={product}
-                                                onAddToCart={handleAddToCart}
-                                                onEdit={handleEdit}
-                                                onDelete={handleDelete}
-                                                isManaging={isManaging}
-                                                cart={cart}
-                                                onUpdateQty={handleUpdateQty}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    ) : cardGrid}
                 </main>
             </div>
 
@@ -353,6 +326,7 @@ export default function ProductsPage() {
                     product={editProduct}
                     onClose={() => { setShowForm(false); setEditProduct(null); }}
                     onSave={editProduct ? handleUpdate : handleCreate}
+                    onSaveDone={handleSaveDone}
                     onToast={addToast}
                 />
             )}
@@ -368,7 +342,6 @@ export default function ProductsPage() {
                 />
             )}
 
-            {/* AI Extract Modal */}
             {showAiModal && (
                 <div style={{
                     position: "fixed", inset: 0, zIndex: 500,
@@ -471,6 +444,6 @@ const styles = {
     pageHeader: { display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 32 },
     pageTitle: { fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: "-0.02em" },
     pageSubtitle: { fontSize: 13, margin: "6px 0 0" },
-    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "40px 24px" },
+    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" },
     emptyState: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, minHeight: 360 },
 };
