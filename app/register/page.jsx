@@ -934,7 +934,7 @@ function RegisterCard() {
 
   useEffect(() => {
     if (isLoggedIn()) {
-      router.replace("/orders");
+      router.replace("/analytics");
     }
   }, [router]);
 
@@ -1014,7 +1014,7 @@ function RegisterCard() {
         seller: data.seller,
       });
 
-      router.push("/orders");
+      router.push("/analytics");
     } catch (err) {
       setError(err?.error || "Registration failed");
     } finally {

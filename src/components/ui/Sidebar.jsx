@@ -50,14 +50,14 @@ export default function Sidebar() {
           pointer-events: none;
           transform: translateX(-50%) translateY(100%);
           opacity: 0;
-          transition: transform 0.2s ease-in, opacity 0.15s ease-in;
+          transition: transform 0.4s ease-in, opacity 0.3s ease-in-out 0.1s;
         }
 
         .dock-wrap.visible {
           pointer-events: all;
           transform: translateX(-50%) translateY(0);
           opacity: 1;
-          transition: transform 0.28s cubic-bezier(0.34, 1.26, 0.64, 1);
+          transition: transform 0.3s cubic-bezier(0.34, 1.26, 0.64, 1);
         }
         .dock-inner {
           position: relative;
