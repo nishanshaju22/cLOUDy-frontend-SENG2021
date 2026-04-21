@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Field, Input, SectionLabel } from "../ui/ui";
 import { buyerSellerLink, createBuyer } from "../../api/order";
+import { RippleButton } from "../ui/RippleButton";
 
 const emptyForm = () => ({
     customer_assigned_account_id: "",
@@ -68,10 +69,13 @@ export function AddBuyerButton({ onToast, onSuccess, sellerId }) {
 
     return (
         <>
-            <button
+            <RippleButton
                 onClick={open ? handleClose : handleOpen}
+                rippleColor="rgba(60,145,230,0.25)"
                 title={open ? "Close" : "Add Buyer"}
                 style={{
+                    position: "relative",
+                    zIndex: 1000,
                     width: 36,
                     height: 36,
                     borderRadius: "50%",
@@ -86,10 +90,14 @@ export function AddBuyerButton({ onToast, onSuccess, sellerId }) {
                     boxShadow: open
                         ? "0 4px 14px rgba(0,0,0,0.18)"
                         : "0 1px 4px rgba(0,0,0,0.06)",
-                    transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
-                    position: "relative",
-                    zIndex: open ? 702 : 1,
-                }}
+                    transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                    }}
             >
                 <svg
                     width="16"
@@ -107,7 +115,7 @@ export function AddBuyerButton({ onToast, onSuccess, sellerId }) {
                 >
                     <path d="M12 5v14M5 12h14" />
                 </svg>
-            </button>
+            </RippleButton>
 
             {open && (
                 <div
@@ -403,8 +411,9 @@ function FormPanel({
                             justifyContent: "flex-end",
                         }}
                     >
-                        <button
+                        <RippleButton
                             onClick={onClose}
+                            rippleColor="rgba(148,163,184,0.25)"
                             style={{
                                 padding: "9px 20px",
                                 borderRadius: 8,
@@ -412,34 +421,61 @@ function FormPanel({
                                 background: "#fff",
                                 fontSize: 13,
                                 fontWeight: 600,
-                                cursor: "pointer",
                                 color: "#475569",
+                                transition: "all 0.1s ease",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "#f8fafc";
+                                e.currentTarget.style.transform = "scale(1.05)";
+                                e.currentTarget.style.boxShadow =
+                                    "0 6px 16px rgba(0,0,0,0.12)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "#fff";
+                                e.currentTarget.style.transform = "scale(1)";
+                                e.currentTarget.style.boxShadow =
+                                    "0 1px 4px rgba(0,0,0,0.06)";
                             }}
                         >
                             Cancel
-                        </button>
+                        </RippleButton>
 
-                        <button
+                        <RippleButton
                             onClick={onSubmit}
                             disabled={loading}
+                            rippleColor="rgba(255,255,255,0.35)"
                             style={{
                                 padding: "9px 24px",
                                 borderRadius: 8,
                                 border: "none",
-                                background: loading
-                                    ? "#94a3b8"
-                                    : "#0f172a",
+                                background: loading ? "#94a3b8" : "#0f172a",
                                 color: "#fff",
                                 fontSize: 13,
                                 fontWeight: 700,
-                                cursor: loading
-                                    ? "not-allowed"
-                                    : "pointer",
-                                transition: "background 0.15s",
+                                cursor: loading ? "not-allowed" : "pointer",
+                                transition: "all 0.1s ease",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.background = "#1e293b";
+                                    e.currentTarget.style.transform = "scale(1.05)";
+                                    e.currentTarget.style.boxShadow =
+                                        "0 8px 20px rgba(0,0,0,0.18)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.background = "#0f172a";
+                                    e.currentTarget.style.transform = "scale(1)";
+                                    e.currentTarget.style.boxShadow =
+                                        "0 1px 4px rgba(0,0,0,0.12)";
+                                }
                             }}
                         >
                             {loading ? "Creating…" : "Create Buyer"}
-                        </button>
+                        </RippleButton>
                     </div>
                 </div>
             </div>

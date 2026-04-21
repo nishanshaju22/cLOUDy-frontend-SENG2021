@@ -12,6 +12,7 @@ import { extractText } from "../../src/api/ai";
 import { getAuth } from "../../src/lib/auth";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
+import { RippleButton } from "@/src/components/ui/RippleButton";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
@@ -226,44 +227,80 @@ export default function ProductsPage() {
                                 style={{ ...styles.searchInput, color: "var(--search-text)", fontFamily: "var(--font-sans)" }}
                             />
                         </div>
-                        <button
+                        <RippleButton
                             onClick={() => setShowAiModal(true)}
                             style={{
-                                display: "flex", alignItems: "center", gap: 6,
-                                padding: "7px 16px", borderRadius: 30,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "7px 16px",
+                                borderRadius: 30,
                                 border: "1px solid var(--btn-primary-border)",
                                 background: "var(--btn-primary-bg)",
-                                fontSize: 13, fontWeight: 600, cursor: "pointer",
+                                fontSize: 13,
+                                fontWeight: 600,
                                 color: "var(--btn-primary-text)",
-                                fontFamily: "var(--font-sans)", flexShrink: 0,
+                                fontFamily: "var(--font-sans)",
+                                transition: "all 0.2s ease",
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = "translateY(-1px)";
+                                e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = "translateY(0px)";
+                                e.currentTarget.style.boxShadow = "none";
                             }}
                         >
                             ✦ AI Extract
-                        </button>
-                        <button
+                        </RippleButton>
+                        <RippleButton
                             onClick={() => setIsManaging(m => !m)}
                             style={{
-                                ...styles.navBtn,
+                                padding: "7px 16px",
+                                borderRadius: 30,
+                                fontSize: 13,
+                                fontWeight: 600,
                                 background: isManaging ? "var(--btn-primary-bg)" : "var(--btn-ghost-bg)",
                                 color: isManaging ? "var(--btn-primary-text)" : "var(--btn-ghost-text)",
                                 border: `1px solid ${isManaging ? "var(--btn-primary-border)" : "var(--btn-ghost-border)"}`,
-                                fontFamily: "var(--font-sans)",
+                                transition: "all 0.2s ease",
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = "translateY(-1px)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = "translateY(0px)";
                             }}
                         >
                             {isManaging ? "Done" : "Manage"}
-                        </button>
-                        <button
+                        </RippleButton>
+                        <RippleButton
                             onClick={() => { setEditProduct(null); setShowForm(true); }}
                             style={{
-                                ...styles.addProductBtn,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "7px 16px",
+                                borderRadius: 30,
+                                fontSize: 13,
+                                fontWeight: 600,
                                 background: "var(--surface)",
                                 color: "var(--btn-ghost-text)",
-                                border: `1px solid var(--btn-ghost-border)`,
-                                fontFamily: "var(--font-sans)",
+                                border: "1px solid var(--btn-ghost-border)",
+                                transition: "all 0.2s ease",
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = "translateY(-1px)";
+                                e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.08)";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = "translateY(0px)";
+                                e.currentTarget.style.boxShadow = "none";
                             }}
                         >
                             <Icon.PlusIcon /> New Catalogue
-                        </button>
+                        </RippleButton>
                         <button
                             onClick={() => setCartOpen(true)}
                             style={{

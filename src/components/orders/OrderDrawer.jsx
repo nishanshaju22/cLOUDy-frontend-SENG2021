@@ -380,109 +380,193 @@ export function OrderDrawer({ order, buyerId, onClose, onToast, onRefresh }) {
                 </div>
 
                 {/* Action bar */}
-                <div style={{
-                    padding: "16px 24px",
-                    borderTop: "1px solid #f1f5f9",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 12
-                }}>
-                    <div style={{ display: "flex", gap: 8 }}>
-                        <RippleButton
-                            onClick={() => setShowUpdate(true)}
-                            style={{
-                                flex: 1, display: "flex", alignItems: "center",
-                                justifyContent: "center", gap: 6, padding: "9px 0",
-                                borderRadius: 8, border: "1px solid #e2e8f0",
-                                background: "#FAFFFD", fontSize: 13, fontWeight: 600,
-                                cursor: "pointer", color: "#475569"
-                            }}
-                        >
-                            <Icon.Edit /> Edit
-                        </RippleButton>
+                    <div style={{
+                        padding: "16px 24px",
+                        borderTop: "1px solid #f1f5f9",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 12
+                    }}>
 
-                        {canCancel && (
+                        <div style={{ display: "flex", gap: 8 }}>
+
+                            {/* EDIT */}
                             <RippleButton
-                                onClick={handleCancel}
-                                disabled={actionLoading === "cancel"}
+                                onClick={() => setShowUpdate(true)}
                                 style={{
-                                    flex: 1, display: "flex", alignItems: "center",
-                                    justifyContent: "center", gap: 6, padding: "9px 5px",
-                                    borderRadius: 8, border: "1px solid #fecdd3",
-                                    background: "#fff1f2", fontSize: 13, fontWeight: 600,
-                                    cursor: "pointer", color: "#be123c"
+                                    flex: 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 6,
+                                    padding: "9px 0",
+                                    borderRadius: 8,
+                                    border: "1px solid #e2e8f0",
+                                    background: "#FAFFFD",
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    color: "#475569",
+                                    transition: "all 0.2s ease",
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                    e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.08)";
+                                    e.currentTarget.style.background = "#f8fafc";
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                    e.currentTarget.style.background = "#FAFFFD";
                                 }}
                             >
-                                <Icon.Ban />
-                                {actionLoading === "cancel"
-                                    ? "Cancelling…"
-                                    : adviceId ? "Cancel Order & Despatch" : "Cancel"}
+                                <Icon.Edit /> Edit
                             </RippleButton>
-                        )}
 
-                        {order.status === "CANCELED" && (
-                            <RippleButton
-                                onClick={handleDelete}
-                                disabled={actionLoading === "delete"}
-                                style={{
-                                    flex: 1, display: "flex", alignItems: "center",
-                                    justifyContent: "center", gap: 6, padding: "9px 0",
-                                    borderRadius: 8, border: "1px solid #fecdd3",
-                                    background: "#fff1f2", fontSize: 13, fontWeight: 600,
-                                    cursor: "pointer", color: "#be123c"
-                                }}
-                            >
-                                <Icon.Trash />
-                                {actionLoading === "delete" ? "Deleting…" : "Delete"}
-                            </RippleButton>
-                        )}
-                        
-                    </div>
-
-                    {/* Create Invoice button */}
-                    {canInvoice && !invoice && (
-                        <RippleButton
-                            onClick={handleCreateInvoice}
-                            disabled={invoiceLoading}
-                            style={{
-                                flex: 1, display: "flex", alignItems: "center",
-                                justifyContent: "center", gap: 6, padding: "9px 0",
-                                borderRadius: 8, border: "1px solid #bbf7d0",
-                                background: invoiceLoading ? "#f0fdf4" : "#dcfce7",
-                                fontSize: 13, fontWeight: 600,
-                                cursor: invoiceLoading ? "not-allowed" : "pointer",
-                                color: "#15803d",
-                                opacity: invoiceLoading ? 0.8 : 1,
-                                transition: "background 0.15s",
-                            }}
-                        >
-                            {invoiceLoading ? (
-                                <>
-                                    <InlineSpinner color="#15803d" />
-                                    Generating…
-                                </>
-                            ) : (
-                                <>
-                                    <InvoiceIcon />
-                                    Create Invoice
-                                </>
+                            {/* CANCEL */}
+                            {canCancel && (
+                                <RippleButton
+                                    onClick={handleCancel}
+                                    disabled={actionLoading === "cancel"}
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 6,
+                                        padding: "9px 5px",
+                                        borderRadius: 8,
+                                        border: "1px solid #fecdd3",
+                                        background: "#fff1f2",
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        color: "#be123c",
+                                        transition: "all 0.2s ease",
+                                    }}
+                                    onMouseEnter={e => {
+                                        if (actionLoading === "cancel") return;
+                                        e.currentTarget.style.transform = "translateY(-1px)";
+                                        e.currentTarget.style.boxShadow = "0 6px 18px rgba(244,63,94,0.15)";
+                                        e.currentTarget.style.background = "#ffe4e6";
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                        e.currentTarget.style.background = "#fff1f2";
+                                    }}
+                                >
+                                    <Icon.Ban />
+                                    {actionLoading === "cancel"
+                                        ? "Cancelling…"
+                                        : adviceId ? "Cancel Order & Despatch" : "Cancel"}
+                                </RippleButton>
                             )}
-                        </RippleButton>
-                    )}
 
-                    {/* Already invoiced — disabled state */}
-                    {invoice && (
-                        <div style={{
-                            flex: 1, display: "flex", alignItems: "center",
-                            justifyContent: "center", gap: 6, padding: "9px 0",
-                            borderRadius: 8, border: "1px solid #bbf7d0",
-                            background: "#f0fdf4", fontSize: 13, fontWeight: 600,
-                            color: "#15803d", userSelect: "none",
-                        }}>
-                            <CheckIcon /> Invoice Created
+                            {/* DELETE */}
+                            {order.status === "CANCELED" && (
+                                <RippleButton
+                                    onClick={handleDelete}
+                                    disabled={actionLoading === "delete"}
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 6,
+                                        padding: "9px 0",
+                                        borderRadius: 8,
+                                        border: "1px solid #fecdd3",
+                                        background: "#fff1f2",
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        color: "#be123c",
+                                        transition: "all 0.2s ease",
+                                    }}
+                                    onMouseEnter={e => {
+                                        if (actionLoading === "delete") return;
+                                        e.currentTarget.style.transform = "translateY(-1px)";
+                                        e.currentTarget.style.boxShadow = "0 6px 18px rgba(244,63,94,0.15)";
+                                        e.currentTarget.style.background = "#ffe4e6";
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                        e.currentTarget.style.background = "#fff1f2";
+                                    }}
+                                >
+                                    <Icon.Trash />
+                                    {actionLoading === "delete" ? "Deleting…" : "Delete"}
+                                </RippleButton>
+                            )}
+
                         </div>
-                    )}
-                </div>
+
+                        {/* INVOICE */}
+                        {canInvoice && !invoice && (
+                            <RippleButton
+                                onClick={handleCreateInvoice}
+                                disabled={invoiceLoading}
+                                style={{
+                                    width: "100%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 6,
+                                    padding: "10px 0",
+                                    borderRadius: 8,
+                                    border: "1px solid #bbf7d0",
+                                    background: "#dcfce7",
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    color: "#15803d",
+                                    transition: "all 0.2s ease",
+                                }}
+                                onMouseEnter={e => {
+                                    if (invoiceLoading) return;
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                    e.currentTarget.style.boxShadow = "0 6px 18px rgba(34,197,94,0.15)";
+                                    e.currentTarget.style.background = "#bbf7d0";
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                    e.currentTarget.style.background = "#dcfce7";
+                                }}
+                            >
+                                {invoiceLoading ? (
+                                    <>
+                                        <InlineSpinner color="#15803d" />
+                                        Generating…
+                                    </>
+                                ) : (
+                                    <>
+                                        <InvoiceIcon />
+                                        Create Invoice
+                                    </>
+                                )}
+                            </RippleButton>
+                        )}
+
+                        {/* INVOICE CREATED STATE */}
+                        {invoice && (
+                            <div style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 6,
+                                padding: "10px 0",
+                                borderRadius: 8,
+                                border: "1px solid #bbf7d0",
+                                background: "#f0fdf4",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: "#15803d",
+                                userSelect: "none",
+                            }}>
+                                <CheckIcon /> Invoice Created
+                            </div>
+                        )}
+                    </div>
             </div>
 
             {showUpdate && (
