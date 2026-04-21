@@ -349,7 +349,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isLoggedIn()) {
-      router.replace("/orders");
+      router.push("/analytics");
     }
   }, [router]);
 
@@ -369,7 +369,7 @@ export default function LoginPage() {
         user: data.user,
         seller: data.seller,
       });
-      router.push("/orders");
+      router.replace("/analytics");
     } catch (err) {
       setError(err?.error || "Login failed");
     } finally {
