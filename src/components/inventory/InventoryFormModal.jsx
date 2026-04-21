@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SpinnerIcon } from "../products/ProductCard";
 import { uploadImage } from "../../api/order";
+import { RippleButton } from "../ui/RippleButton";
 
 export function InventoryFormModal({ item, onClose, onSave, onSaveDone, onToast }) {
     const isEdit = !!item;
@@ -184,13 +185,46 @@ export function InventoryFormModal({ item, onClose, onSave, onSaveDone, onToast 
                 </div>
 
                 <div style={styles.footer}>
-                    <button onClick={onClose} style={styles.cancelBtn}>Cancel</button>
-                    <button onClick={handleSubmit} disabled={saving} style={styles.saveBtn}>
+                    <RippleButton
+                        onClick={onClose}
+                        style={{
+                            ...styles.cancelBtn,
+                            transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.08)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0px)";
+                            e.currentTarget.style.boxShadow = "none";
+                        }}
+                    >
+                        Cancel
+                    </RippleButton>
+
+                    <RippleButton
+                        onClick={handleSubmit}
+                        disabled={saving}
+                        style={{
+                            ...styles.saveBtn,
+                            transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                            if (saving) return;
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0px)";
+                            e.currentTarget.style.boxShadow = "none";
+                        }}
+                    >
                         {saving
                             ? <><SpinnerIcon size={13} color="#fff" /> {savingLabel}</>
                             : isEdit ? "Save Changes" : "Create Item"
                         }
-                    </button>
+                    </RippleButton>
                 </div>
             </div>
         </>,
