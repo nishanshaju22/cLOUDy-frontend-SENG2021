@@ -89,7 +89,7 @@ function GlassSelect({ theme, style, children, ...props }) {
     );
 }
 
-export function OrdersList({ buyerId, buyerEmail, onToast, sellerId, theme, sellerId }) {
+export function OrdersList({ buyerId, buyerEmail, onToast, theme, sellerId }) {
     const isNightSky = theme === "nightsky";
     const labelStyle = {
         ...labelBaseStyle,
