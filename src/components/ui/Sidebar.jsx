@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 const NAV_ITEMS = [
-  { path: "/",          label: "Home",       icon: "/icons/home.png", scale: 2.5 },
+  { path: "/analytics",          label: "Home",       icon: "/icons/home.png", scale: 2.5 },
   { path: "/orders",    label: "Orders",     icon: "/icons/orders.png", scale: 1.3 },
   { path: "/products",  label: "Catalogues", icon: "/icons/catalogues.png", scale: 1.2 },
   { path: "/inventory", label: "Inventory",  icon: "/icons/inventory.png", scale: 1.1},
