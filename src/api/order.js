@@ -292,6 +292,52 @@ async function checkout(sellerId, data) {
     }
 };
 
+async function getInventoryBySeller(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        console.log(response)
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getInventory(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/inventory`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function createInventoryItem(sellerId, data) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/inventory`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function updateInventoryItem(sellerId, inventoryId, data) {
+    try {
+        const response = await order_api.put(`/v2/seller/${sellerId}/inventory/${inventoryId}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function deleteInventoryItem(sellerId, inventoryId) {
+    try {
+        const response = await order_api.delete(`/v2/seller/${sellerId}/inventory/${inventoryId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 async function getSellerAnalyticsDashboard(sellerId) {
     try {
         const response = await order_api.get(`/v1/seller/${sellerId}/analytics/dashboard`);
