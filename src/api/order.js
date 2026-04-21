@@ -292,6 +292,15 @@ async function checkout(sellerId, data) {
     }
 };
 
+async function getSellerAnalyticsDashboard(sellerId) {
+    try {
+        const response = await order_api.get(`/v1/seller/${sellerId}/analytics/dashboard`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
 export { 
     createOrder, 
     updateOrder, 
@@ -321,5 +330,6 @@ export {
     getInventory,
     createInventoryItem,
     updateInventoryItem,
-    deleteInventoryItem
+    deleteInventoryItem,
+    getSellerAnalyticsDashboard
 }
