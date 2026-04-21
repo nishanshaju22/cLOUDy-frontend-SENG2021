@@ -240,7 +240,7 @@ async function deleteInventoryItem(sellerId, inventoryId) {
 
 async function getCart(sellerId) {
     try {
-        const response = await order_api.get(`v2/seller/${sellerId}/cart`);
+        const response = await order_api.get(`/v2/seller/${sellerId}/cart`);
         return response.data;
     } catch (error) {
         throw error.response?.data || { error: "Something went wrong" };
