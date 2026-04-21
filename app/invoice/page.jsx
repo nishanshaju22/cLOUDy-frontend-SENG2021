@@ -529,8 +529,8 @@ export default function InvoicesPage() {
 
 function SummaryCard({ label, value, hasNightSkyBg }) {
     return (
-        <div style={{ flex: "1 1 140px", background: "#f5f5f5", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>{value}</div>
+        <div style={{ flex: "1 1 140px", background: hasNightSkyBg ? "rgba(20,25,60,0.55)" : "#f5f5f5", border: hasNightSkyBg ? "1px solid rgba(255,255,255,0.20)" : "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: hasNightSkyBg ? "rgb(240 245 255)" : "var(--text-primary)", letterSpacing: "-0.02em" }}>{value}</div>
             <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</div>
         </div>
     );
@@ -539,7 +539,9 @@ function SummaryCard({ label, value, hasNightSkyBg }) {
 function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading, theme }) {
     const id = invoice.invoiceId || invoice.id;
     const status = (invoice.status || "").toUpperCase();
-    const sc = hasNightSkyBg
+    const isNightSky = theme === "nightsky";
+
+    const sc = isNightSky
         ? (NIGHTSKY_STATUS_COLORS[status] || NIGHTSKY_STATUS_COLORS.DRAFT)
         : (STATUS_COLORS[status] || STATUS_COLORS.DRAFT);
     const xml = invoice.invoiceUBLXML || invoice.invoiceXML || invoice.orderDocumentXML;
@@ -587,7 +589,9 @@ function SkeletonRow() {
 
 const td = (hasNightSkyBg) => ({
     padding: "14px 16px",
-    borderBottom: "1px solid var(--border)",
+    borderBottom: hasNightSkyBg
+        ? "1px solid rgba(255,255,255,0.20)"
+        : "1px solid var(--border)",
     color: hasNightSkyBg ? "rgb(220 230 255)" : "var(--text-primary)",
     verticalAlign: "middle",
 });
