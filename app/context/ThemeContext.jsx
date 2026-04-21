@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 // Add new theme names here as you build them out
-const THEMES = ["professional", "cloudy", "stormy"];
+const THEMES = ["professional", "cloudy", "nightsky"];
 
 const ThemeContext = createContext({
     theme: "cloudy",
@@ -12,7 +12,7 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-    const [theme, setThemeState] = useState("cloudy");
+    const [theme, setThemeState] = useState("nightsky");
 
     const setTheme = (t) => {
         setThemeState(t);
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }) {
         if (saved && THEMES.includes(saved)) {
             setTheme(saved);
         } else {
-            document.documentElement.setAttribute("data-theme", "cloudy");
+            document.documentElement.setAttribute("data-theme", "nightsky");
         }
     }, []);
 

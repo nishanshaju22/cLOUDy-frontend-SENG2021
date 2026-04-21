@@ -7,12 +7,11 @@ import { OrderCard } from "./OrderCard";
 import { OrderDrawer } from "./OrderDrawer";
 import { RippleButton } from "../ui/RippleButton";
 
-const glassInputStyle = {
+const glassInputBaseStyle = {
     padding: "9px 12px",
     border: "1px solid rgba(255,255,255,0.15)",
     borderRadius: 10,
     fontSize: 13,
-    color: "#342E37",
     background: "rgba(255,255,255,0.07)",
     backdropFilter: "blur(12px)",
     outline: "none",
@@ -20,37 +19,67 @@ const glassInputStyle = {
     transition: "border-color 0.15s",
     width: "100%",
     boxSizing: "border-box",
-    WebkitTextFillColor: "#342E37",
 };
 
-const labelStyle = {
+const labelBaseStyle = {
     fontSize: 10,
     fontWeight: 700,
     letterSpacing: "0.1em",
     textTransform: "uppercase",
-    color: "#342E37",
     marginBottom: 6,
     display: "block",
 };
 
-function GlassInput({ style, ...props }) {
+function GlassInput({ theme, type, style, ...props }) {
+    const isNightSky = theme === "nightsky";
+
     return (
         <input
-            style={{ ...glassInputStyle, ...style }}
-            onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.35)"}
-            onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
+            type={type}
+            style={{
+                ...glassInputBaseStyle,
+                color: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                WebkitTextFillColor: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                ...(isNightSky
+                    ? {
+                          background: "rgba(20,25,60,0.55)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                      }
+                    : {}),
+                ...style,
+            }}
+            onFocus={e => {
+                e.target.style.borderColor = isNightSky
+                    ? "rgba(255,255,255,0.28)"
+                    : "rgba(255,255,255,0.35)";
+            }}
+            onBlur={e => {
+                e.target.style.borderColor = isNightSky
+                    ? "rgba(255,255,255,0.12)"
+                    : "rgba(255,255,255,0.15)";
+            }}
             {...props}
         />
     );
 }
 
-function GlassSelect({ style, children, ...props }) {
+function GlassSelect({ theme, style, children, ...props }) {
+    const isNightSky = theme === "nightsky";
+
     return (
         <select
             style={{
-                ...glassInputStyle,
+                ...glassInputBaseStyle,
                 cursor: "pointer",
                 appearance: "auto",
+                color: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                WebkitTextFillColor: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                ...(isNightSky
+                    ? {
+                          background: "rgba(20,25,60,0.55)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                      }
+                    : {}),
                 ...style,
             }}
             {...props}
@@ -60,7 +89,12 @@ function GlassSelect({ style, children, ...props }) {
     );
 }
 
-export function OrdersList({ buyerId, buyerEmail, onToast }) {
+export function OrdersList({ buyerId, buyerEmail, onToast, theme }) {
+    const isNightSky = theme === "nightsky";
+    const labelStyle = {
+        ...labelBaseStyle,
+        color: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+    };
     const [orders,      setOrders]      = useState([]);
     const [loading,     setLoading]     = useState(false);
     const [selected,    setSelected]    = useState(null);
@@ -123,6 +157,7 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                     <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>Status</label>
                         <GlassSelect
+                            theme={theme}
                             value={filters.status}
                             onChange={e => setFilters(f => ({ ...f, status: e.target.value, offset: 0 }))}
                             style={{ width: 140, height: 38 }}
@@ -137,6 +172,7 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                     <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>From</label>
                         <GlassInput
+                            theme={theme}
                             type="date"
                             value={filters.fromDate}
                             style={{ width: 150 }}
@@ -147,6 +183,7 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                     <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>To</label>
                         <GlassInput
+                             theme={theme}
                             type="date"
                             value={filters.toDate}
                             style={{ width: 150 }}
@@ -157,6 +194,7 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                     <div style={{ display: "flex", flexDirection: "column", height: 58, justifyContent: "space-between" }}>
                         <label style={labelStyle}>Per Page</label>
                         <GlassSelect
+                            theme={theme}
                             value={filters.limit}
                             onChange={e => setFilters(f => ({ ...f, limit: parseInt(e.target.value), offset: 0 }))}
                             style={{ width: 90, height: 38 }}
@@ -193,31 +231,37 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                 <div style={{ alignSelf: "flex-start" }}>
                     <RippleButton
                         onClick={fetchOrders}
-                        rippleColor="rgba(255,255,255,0.3)"
+                        rippleColor="rgba(255,255,255,0.2)"
                         style={{
                             padding: "10px 28px",
                             borderRadius: 100,
-                            border: "1px solid rgba(255,255,255,0.6)",
-                            background: "#41EAD4",
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            background: "#000000",
                             backdropFilter: "blur(8px)",
-                            color: "#242124",
-                            borderColor: "#242124",
                             fontSize: 13,
                             fontWeight: 600,
                             transition: "all 0.2s",
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.background = "#242124";
-                            e.currentTarget.style.color = "#41EAD4";
-                            e.currentTarget.style.borderColor = "#41EAD4";
+                            e.currentTarget.style.background = "#ffffff";
+                            e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)";
                         }}
                         onMouseLeave={e => {
-                            e.currentTarget.style.background = "#41EAD4";
-                            e.currentTarget.style.color = "#242124";
-                            e.currentTarget.style.borderColor = "#242124";
+                            e.currentTarget.style.background = "#000000";
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
                         }}
                     >
-                        Refresh
+                        <div
+                            style={{ color: "#ffffff" }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.color = "#000000";
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.color = "#ffffff";
+                            }}
+                        >
+                            Refresh
+                        </div>
                     </RippleButton>
                 </div>
             </div>
@@ -228,7 +272,12 @@ export function OrdersList({ buyerId, buyerEmail, onToast }) {
                     Loading orders…
                 </div>
             ) : !buyerId ? (
-                <div style={{ textAlign: "center", padding: "60px 0", color: "#342E37", fontSize: 14 }}>
+                <div style={{
+                    textAlign: "center",
+                    padding: "60px 0",
+                    color: isNightSky ? "rgb(220, 230, 255)" : "#342E37",
+                    fontSize: 14
+                }}>
                     Enter a Buyer ID above to load orders
                 </div>
             ) : orders.length === 0 ? (
