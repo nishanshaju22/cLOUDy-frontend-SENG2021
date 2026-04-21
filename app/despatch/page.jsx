@@ -7,6 +7,10 @@ import { Toast } from "../../src/components/ui/ui";
 import { useTheme } from "../context/ThemeContext";
 import Sidebar from "../../src/components/ui/Sidebar";
 import { DespatchDrawer } from "../../src/components/despatch/DespatchDrawer";
+import { getAuth } from "../../src/lib/auth";
+
+const parsed = getAuth();
+const SELLER_ID = parsed?.user?.seller_id;
 
 export default function DespatchPage() {
     const { theme } = useTheme();
@@ -97,6 +101,7 @@ export default function DespatchPage() {
                                 <DespatchList 
                                     onToast={showToast} 
                                     onSelect={setSelected}
+                                    sellerId={SELLER_ID}
                                 />
                             </div>
                         </div>
@@ -111,6 +116,7 @@ export default function DespatchPage() {
                             <DespatchList 
                                 onToast={showToast}
                                 onSelect={setSelected}
+                                sellerId={SELLER_ID}
                             />
                         </div>
                     )}
@@ -127,6 +133,7 @@ export default function DespatchPage() {
                     onClose={() => setSelected(null)}
                     onToast={showToast}
                     onRefresh={() => {}}
+                    sellerId={SELLER_ID}
                 />
             )}
         </>

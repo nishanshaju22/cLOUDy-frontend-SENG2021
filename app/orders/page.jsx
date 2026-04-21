@@ -375,6 +375,7 @@ export default function OrdersPage() {
                                     buyerEmail={buyerEmail}
                                     onToast={showToast}
                                     activeTab={activeTab}
+                                    sellerId={sellerId}
                                 />
                             </div>
                         </div>
@@ -396,6 +397,7 @@ export default function OrdersPage() {
                                 buyerEmail={buyerEmail}
                                 onToast={showToast}
                                 activeTab={activeTab}
+                                sellerId={sellerId}
                             />
                         </div>
                     )}

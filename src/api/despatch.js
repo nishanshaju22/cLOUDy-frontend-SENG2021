@@ -96,4 +96,36 @@ async function cancelDespatchFulfilment(adviceId, reason) {
     }
 }
 
-export { createDespatch, listDespatch, retrieveDespatch, cancelDespatchOrder, cancelDespatchFulfilment };
+async function linkDespatchToSeller(sellerId, adviceId, orderId = null) {
+    try {
+        const response = await order_api.post(`/v2/seller/${sellerId}/despatch`, {
+            advice_id: adviceId,
+            order_id:  orderId,
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getSellerAdviceIds(sellerId) {
+    try {
+        const response = await order_api.get(`/v2/seller/${sellerId}/despatch`);
+        return response.data.adviceIds || [];
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+async function getOrderForDespatch(sellerId, adviceId) {
+    try {
+        const response = await order_api.get(
+            `/v2/seller/${sellerId}/despatch/${adviceId}/order`
+        );
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { error: "Something went wrong" };
+    }
+}
+
+export { createDespatch, listDespatch, retrieveDespatch, cancelDespatchOrder, cancelDespatchFulfilment, linkDespatchToSeller, getSellerAdviceIds, getOrderForDespatch };

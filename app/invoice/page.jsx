@@ -278,7 +278,7 @@ export default function InvoicesPage() {
 
 function SummaryCard({ label, value }) {
     return (
-        <div style={{ flex: "1 1 140px", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ flex: "1 1 140px", background: "#f5f5f5", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>{value}</div>
             <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 500 }}>{label}</div>
         </div>
@@ -293,7 +293,7 @@ function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
     return (
         <>
             <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200, backdropFilter: "blur(2px)" }} />
-            <div style={{ position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "var(--surface)", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)", borderRadius: "20px 0 0 20px", fontFamily: "var(--font-sans)" }}>
+            <div style={{ position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "#ffffff", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)", borderRadius: "20px 0 0 20px", fontFamily: "var(--font-sans)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid var(--border)" }}>
                     <span style={{ fontSize: 17, fontWeight: 600, color: "var(--text-primary)" }}>Invoice Detail</span>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -305,7 +305,7 @@ function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
                 </div>
                 <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
                     {loading ? (
-                        Array.from({ length: 6 }).map((_, i) => <div key={i} style={{ height: 14, background: "var(--surface-raised)", borderRadius: 4, animation: "shimmer 1.4s infinite", width: i % 2 === 0 ? "60%" : "90%" }} />)
+                        Array.from({ length: 6 }).map((_, i) => <div key={i} style={{ height: 14, background: "#f5f5f5", borderRadius: 4, animation: "shimmer 1.4s infinite", width: i % 2 === 0 ? "60%" : "90%" }} />)
                     ) : (
                         <>
                             <div><span style={{ display: "inline-block", fontSize: 12, fontWeight: 700, borderRadius: 4, padding: "4px 10px", letterSpacing: "0.04em", ...sc }}>{status}</span></div>
@@ -315,7 +315,7 @@ function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
                                     <span style={{ fontSize: 14, color: "var(--text-primary)" }}>{value}</span>
                                 </div>
                             ))}
-                            {xml && <div><div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Invoice XML</div><pre style={{ fontSize: 11, background: "var(--surface-raised)", borderRadius: 6, padding: 12, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", color: "var(--text-secondary)", marginTop: 8, maxHeight: 300, overflowY: "auto" }}>{xml}</pre></div>}
+                            {xml && <div><div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Invoice XML</div><pre style={{ fontSize: 11, background: "#f5f5f5", borderRadius: 6, padding: 12, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", color: "var(--text-secondary)", marginTop: 8, maxHeight: 300, overflowY: "auto" }}>{xml}</pre></div>}
                         </>
                     )}
                 </div>
@@ -327,7 +327,7 @@ function InvoiceDetailDrawer({ invoice, loading, onClose, onPdf, pdfLoading }) {
 function SkeletonRow() {
     return (
         <div style={{ display: "flex", gap: 16, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-            {[120, 200, 80, 70, 60].map((w, i) => <div key={i} style={{ height: 14, width: w, background: "var(--surface-raised)", borderRadius: 4, animation: "shimmer 1.4s infinite" }} />)}
+            {[120, 200, 80, 70, 60].map((w, i) => <div key={i} style={{ height: 14, width: w, background: "#f5f5f5", borderRadius: 4, animation: "shimmer 1.4s infinite" }} />)}
         </div>
     );
 }
@@ -366,7 +366,7 @@ const styles = {
     emptyIcon: { color: "#ddd", marginBottom: 4 },
     emptyText: { fontSize: 18, fontWeight: 600, color: "#111" },
     emptySub: { fontSize: 14, color: "#757575" },
-    backdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 200, backdropFilter: "blur(2px)" },
+    backdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200, backdropFilter: "none" },
     drawer: { position: "fixed", top: 0, right: 0, width: "min(520px, 100vw)", height: "100vh", background: "#fff", zIndex: 201, display: "flex", flexDirection: "column", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)", borderRadius: "20px 0px 0px 20px" },
     drawerHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid #f0f0f0" },
     drawerTitle: { fontSize: 17, fontWeight: 600, color: "#111" },

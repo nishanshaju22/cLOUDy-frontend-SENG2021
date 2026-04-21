@@ -15,7 +15,6 @@ import Sidebar from "../../src/components/ui/Sidebar";
 
 const parsed = getAuth();
 const SELLER_ID = parsed?.user?.seller_id;
-const API_KEY = process.env.NEXT_PUBLIC_ORDER_API_KEY;
 
 export default function ProductsPage() {
     const { theme } = useTheme();
@@ -349,12 +348,17 @@ export default function ProductsPage() {
                     display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
                 }}>
                     <div style={{
-                        background: "var(--surface)", borderRadius: 16, padding: 28,
-                        width: "100%", maxWidth: 540,
+                        background: "#ffffff",
+                        borderRadius: 16,
+                        padding: 28,
+                        width: "100%",
+                        maxWidth: 540,
                         boxShadow: "0 24px 64px rgba(0,0,0,0.16)",
                         fontFamily: "var(--font-sans)",
-                        display: "flex", flexDirection: "column", gap: 16,
-                        border: "1px solid var(--border)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                        border: "1px solid #e2e8f0",
                     }}>
                         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                             <div>
