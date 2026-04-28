@@ -8,11 +8,4 @@ const order_api = axios.create({
 	}
 });
 
-order_api.interceptors.response.use(response => {
-	return response;
-}, error => {
-	console.error(`❌ [API Error] ${error.response?.status}:`, error.message);
-	return Promise.reject(error);
-});
-
 export { order_api }
