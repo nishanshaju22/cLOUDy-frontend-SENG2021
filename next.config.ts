@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
         // When your code calls /api-proxy/v1/buyer...
         source: '/api-proxy/:path*',
         // ...Vercel fetches it from your actual HTTP backend
-        destination: 'http://cloudy-1170052404.us-east-1.elb.amazonaws.com/api/:path*', 
+        destination: 'https://cloudy-backend-seng2021-production.up.railway.app/api/:path*', 
       },
     ]
   },
